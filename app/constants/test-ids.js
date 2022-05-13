@@ -61,3 +61,5 @@ export const RPC_VIEW_CONTAINER_ID = 'new-rpc-screen';
 export const NEW_NETWORK_ADDED_CLOSE_BUTTON_ID = 'close-network-button';
 export const NEW_NETWORK_ADDED_SWITCH_TO_NETWORK_BUTTON_ID =
   'switch-to-network-button';
+
+export const LOGIN_WITH_BIOMETRICS_SWITCH = 'login-with-biometrics-switch';

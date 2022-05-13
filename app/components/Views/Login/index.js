@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Switch,
   Alert,
   ActivityIndicator,
   Text,
@@ -19,7 +18,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import Button from 'react-native-button';
 import Engine from '../../../core/Engine';
 import StyledButton from '../../UI/StyledButton';
-import { fontStyles, colors as importedColors } from '../../../styles/common';
+import { fontStyles } from '../../../styles/common';
 import { strings } from '../../../../locales/i18n';
 import SecureKeychain from '../../../core/SecureKeychain';
 import FadeOutOverlay from '../../UI/FadeOutOverlay';
@@ -54,6 +53,7 @@ import {
   LOGIN_PASSWORD_ERROR,
   RESET_WALLET_ID,
 } from '../../../constants/test-ids';
+import { LoginWithBiometricsSwitch } from '../../UI/LoginWithBiometricsSwitch';
 
 const deviceHeight = Device.getDeviceHeight();
 const breakPoint = deviceHeight < 700;
@@ -501,33 +501,9 @@ class Login extends PureComponent {
   };
 
   renderSwitch = () => {
-    const colors = this.context.colors || mockTheme.colors;
-    const styles = createStyles(colors);
-
-    if (this.state.biometryType && !this.state.biometryPreviouslyDisabled) {
-      return (
-        <View style={styles.biometrics}>
-          <Text style={styles.biometryLabel}>
-            {strings(
-              `biometrics.enable_${this.state.biometryType.toLowerCase()}`,
-            )}
-          </Text>
-          <Switch
-            onValueChange={(biometryChoice) =>
-              this.updateBiometryChoice(biometryChoice)
-            } // eslint-disable-line react/jsx-no-bind
-            value={this.state.biometryChoice}
-            style={styles.biometrySwitch}
-            trackColor={{
-              true: colors.primary.default,
-              false: colors.border.muted,
-            }}
-            thumbColor={importedColors.white}
-            ios_backgroundColor={colors.border.muted}
-          />
-        </View>
-      );
-    }
+    this.state.biometryType && !this.state.biometryPreviouslyDisabled ? (
+      <LoginWithBiometricsSwitch biometryType={this.state.biometryType} />
+    ) : null;
   };
 
   setPassword = (val) => this.setState({ password: val });

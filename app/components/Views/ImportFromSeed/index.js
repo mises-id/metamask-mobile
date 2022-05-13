@@ -1,7 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Switch,
   ActivityIndicator,
   Alert,
   TouchableOpacity,
@@ -21,7 +20,7 @@ import { logIn, passwordSet, seedphraseBackedUp } from '../../../actions/user';
 import { setLockTime } from '../../../actions/settings';
 import StyledButton from '../../UI/StyledButton';
 import Engine from '../../../core/Engine';
-import { fontStyles, colors as importedColors } from '../../../styles/common';
+import { fontStyles } from '../../../styles/common';
 import { strings } from '../../../../locales/i18n';
 import SecureKeychain from '../../../core/SecureKeychain';
 import AppConstants from '../../../core/AppConstants';
@@ -62,6 +61,7 @@ import {
   IMPORT_PASSWORD_CONTAINER_ID,
   SECRET_RECOVERY_PHRASE_INPUT_BOX_ID,
 } from '../../../constants/test-ids';
+import { LoginWithBiometricsSwitch } from '../../UI/LoginWithBiometricsSwitch';
 
 const MINIMUM_SUPPORTED_CLIPBOARD_VERSION = 9;
 
@@ -455,31 +455,9 @@ class ImportFromSeed extends PureComponent {
   };
 
   renderSwitch = () => {
-    const colors = this.context.colors || mockTheme.colors;
-    const styles = createStyles(colors);
-
-    if (this.state.biometryType) {
-      return (
-        <View style={styles.biometrics}>
-          <Text style={styles.biometryLabel}>
-            {strings(
-              `biometrics.enable_${this.state.biometryType.toLowerCase()}`,
-            )}
-          </Text>
-          <Switch
-            onValueChange={this.updateBiometryChoice}
-            value={this.state.biometryChoice}
-            style={styles.biometrySwitch}
-            trackColor={{
-              true: colors.primary.default,
-              false: colors.border.muted,
-            }}
-            thumbColor={importedColors.white}
-            ios_backgroundColor={colors.border.muted}
-          />
-        </View>
-      );
-    }
+    this.state.biometryType ? (
+      <LoginWithBiometricsSwitch biometryType={this.state.biometryType} />
+    ) : null;
   };
 
   toggleShowHide = () => {
