@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Switch, Text } from 'react-native';
 import { mockTheme, useAppThemeFromContext } from '../../../util/theme';
 import { strings } from '../../../../locales/i18n';
@@ -10,15 +10,12 @@ import { LOGIN_WITH_BIOMETRICS_SWITCH } from '../../../constants/test-ids';
 
 interface Props {
   biometryType: BIOMETRY_TYPE;
-  biometryEnabled: boolean;
 }
 
-const LoginWithBiometricsSwitch = ({
-  biometryType,
-  biometryEnabled,
-}: Props) => {
+const LoginWithBiometricsSwitch = ({ biometryType }: Props) => {
   const { colors } = useAppThemeFromContext() || mockTheme;
   const styles = createStyles(colors);
+  const [biometryEnabled, setBiometryEnabled] = useState<boolean>(false);
 
   const updateBiometryChoice = useCallback(async () => {
     if (!biometryEnabled) {
@@ -26,6 +23,7 @@ const LoginWithBiometricsSwitch = ({
     } else {
       await AsyncStorage.removeItem(BIOMETRY_CHOICE_DISABLED);
     }
+    setBiometryEnabled(!biometryEnabled);
   }, [biometryEnabled]);
 
   return (
