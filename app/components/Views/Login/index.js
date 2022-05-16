@@ -491,11 +491,10 @@ class Login extends PureComponent {
     if (isTextDelete(deleteText)) this.delete();
   };
 
-  renderSwitch = () => {
+  renderSwitch = () =>
     this.state.biometryType && !this.state.biometryPreviouslyDisabled ? (
       <LoginWithBiometricsSwitch biometryType={this.state.biometryType} />
     ) : null;
-  };
 
   setPassword = (val) => this.setState({ password: val });
 

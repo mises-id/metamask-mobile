@@ -445,11 +445,10 @@ class ImportFromSeed extends PureComponent {
     current && current.focus();
   };
 
-  renderSwitch = () => {
+  renderSwitch = () =>
     this.state.biometryType ? (
       <LoginWithBiometricsSwitch biometryType={this.state.biometryType} />
     ) : null;
-  };
 
   toggleShowHide = () => {
     this.setState({ secureTextEntry: !this.state.secureTextEntry });
