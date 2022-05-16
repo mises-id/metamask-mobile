@@ -2,29 +2,27 @@ import React, { useCallback, useState } from 'react';
 import { View, Switch, Text } from 'react-native';
 import { mockTheme, useAppThemeFromContext } from '../../../util/theme';
 import { strings } from '../../../../locales/i18n';
-import AsyncStorage from '@react-native-community/async-storage';
-import { TRUE, BIOMETRY_CHOICE_DISABLED } from '../../../constants/storage';
 import { BIOMETRY_TYPE } from 'react-native-keychain';
 import { createStyles } from './styles';
 import { LOGIN_WITH_BIOMETRICS_SWITCH } from '../../../constants/test-ids';
 
 interface Props {
   biometryType: BIOMETRY_TYPE;
+  onUpdateBiometryChoice: (biometryEnabled: boolean) => void;
 }
 
-const LoginWithBiometricsSwitch = ({ biometryType }: Props) => {
+const LoginWithBiometricsSwitch = ({
+  biometryType,
+  onUpdateBiometryChoice,
+}: Props) => {
   const { colors } = useAppThemeFromContext() || mockTheme;
   const styles = createStyles(colors);
   const [biometryEnabled, setBiometryEnabled] = useState<boolean>(false);
 
-  const updateBiometryChoice = useCallback(async () => {
-    if (!biometryEnabled) {
-      await AsyncStorage.setItem(BIOMETRY_CHOICE_DISABLED, TRUE);
-    } else {
-      await AsyncStorage.removeItem(BIOMETRY_CHOICE_DISABLED);
-    }
+  const onValueChanged = useCallback(async () => {
+    onUpdateBiometryChoice(biometryEnabled);
     setBiometryEnabled(!biometryEnabled);
-  }, [biometryEnabled]);
+  }, [biometryEnabled, onUpdateBiometryChoice]);
 
   return (
     <View style={styles.biometrics} testID={LOGIN_WITH_BIOMETRICS_SWITCH}>
@@ -32,7 +30,7 @@ const LoginWithBiometricsSwitch = ({ biometryType }: Props) => {
         {strings(`biometrics.enable_${biometryType.toLowerCase()}`)}
       </Text>
       <Switch
-        onValueChange={updateBiometryChoice}
+        onValueChange={onValueChanged}
         value={biometryEnabled}
         style={styles.biometrySwitch}
         trackColor={{

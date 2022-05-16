@@ -35,7 +35,11 @@ import AppConstants from '../../../core/AppConstants';
 import zxcvbn from 'zxcvbn';
 import Logger from '../../../util/Logger';
 import { ONBOARDING, PREVIOUS_SCREEN } from '../../../constants/navigation';
-import { EXISTING_USER, TRUE } from '../../../constants/storage';
+import {
+  EXISTING_USER,
+  TRUE,
+  BIOMETRY_CHOICE_DISABLED,
+} from '../../../constants/storage';
 import {
   getPasswordStrengthWord,
   passwordRequirementsMet,
@@ -526,10 +530,22 @@ class ResetPassword extends PureComponent {
     current && current.focus();
   };
 
+  updateBiometryChoice = async (biometryChoice) => {
+    if (!biometryChoice) {
+      await AsyncStorage.setItem(BIOMETRY_CHOICE_DISABLED, TRUE);
+    } else {
+      await AsyncStorage.removeItem(BIOMETRY_CHOICE_DISABLED);
+    }
+    this.setState({ biometryChoice });
+  };
+
   renderSwitch = () => {
     const { biometryType } = this.state;
     biometryType ? (
-      <LoginWithBiometricsSwitch biometryType={biometryType} />
+      <LoginWithBiometricsSwitch
+        biometryType={biometryType}
+        onUpdateBiometryChoice={this.updateBiometryChoice}
+      />
     ) : null;
   };
 

@@ -491,9 +491,21 @@ class Login extends PureComponent {
     if (isTextDelete(deleteText)) this.delete();
   };
 
+  updateBiometryChoice = async (biometryChoice) => {
+    if (!biometryChoice) {
+      await AsyncStorage.setItem(BIOMETRY_CHOICE_DISABLED, TRUE);
+    } else {
+      await AsyncStorage.removeItem(BIOMETRY_CHOICE_DISABLED);
+    }
+    this.setState({ biometryChoice });
+  };
+
   renderSwitch = () =>
     this.state.biometryType && !this.state.biometryPreviouslyDisabled ? (
-      <LoginWithBiometricsSwitch biometryType={this.state.biometryType} />
+      <LoginWithBiometricsSwitch
+        biometryType={this.state.biometryType}
+        onUpdateBiometryChoice={this.updateBiometryChoice}
+      />
     ) : null;
 
   setPassword = (val) => this.setState({ password: val });

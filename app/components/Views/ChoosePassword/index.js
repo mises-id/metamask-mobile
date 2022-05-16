@@ -567,7 +567,10 @@ class ChoosePassword extends PureComponent {
   renderSwitch = () => {
     const { biometryType } = this.state;
     return biometryType ? (
-      <LoginWithBiometricsSwitch biometryType={biometryType} />
+      <LoginWithBiometricsSwitch
+        biometryType={biometryType}
+        onUpdateBiometryChoice={this.updateBiometryChoice}
+      />
     ) : null;
   };
 
