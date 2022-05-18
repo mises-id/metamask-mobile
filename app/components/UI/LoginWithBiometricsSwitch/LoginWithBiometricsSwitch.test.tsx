@@ -8,7 +8,7 @@ describe('LoginWithBiometricsSwitch', () => {
   it('should render correctly', () => {
     const wrapper = shallow(
       <LoginWithBiometricsSwitch
-        biometryType={BIOMETRY_TYPE.FINGERPRINT}
+        biometryType={BIOMETRY_TYPE.FACE}
         onUpdateBiometryChoice={handleUpdate}
       />,
     );

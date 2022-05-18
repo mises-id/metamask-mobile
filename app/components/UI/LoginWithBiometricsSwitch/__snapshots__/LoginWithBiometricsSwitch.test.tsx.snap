@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoginWithBiometricsSwitch should render correctly 1`] = `
+<View
+  style={
+    Object {
+      "marginBottom": 30,
+      "marginTop": 20,
+      "position": "relative",
+    }
+  }
+  testID="login-with-biometrics-switch"
+>
+  <Text
+    style={
+      Object {
+        "color": "#24272A",
+        "flex": 1,
+        "fontFamily": "EuclidCircularB-Regular",
+        "fontSize": 16,
+        "fontWeight": "400",
+      }
+    }
+  >
+    [missing "en.biometrics.enable_face" translation]
+  </Text>
+  <ForwardRef(Switch)
+    ios_backgroundColor="#D6D9DC"
+    onValueChange={[Function]}
+    style={
+      Object {
+        "position": "absolute",
+        "right": 0,
+        "top": 0,
+      }
+    }
+    trackColor={
+      Object {
+        "false": "#D6D9DC",
+        "true": "#037DD6",
+      }
+    }
+    value={false}
+  />
+</View>
+`;
