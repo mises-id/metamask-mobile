@@ -5,6 +5,7 @@ import { strings } from '../../../../locales/i18n';
 import { BIOMETRY_TYPE } from 'react-native-keychain';
 import { createStyles } from './styles';
 import { LOGIN_WITH_BIOMETRICS_SWITCH } from '../../../constants/test-ids';
+import { useSelector } from 'react-redux';
 
 interface Props {
   biometryType: BIOMETRY_TYPE;
@@ -17,7 +18,12 @@ const LoginWithBiometricsSwitch = ({
 }: Props) => {
   const { colors } = useAppThemeFromContext() || mockTheme;
   const styles = createStyles(colors);
+  const rememberMeEnabled = useSelector(
+    (state: any) => state.security.rememberMeEnabled,
+  );
   const [biometryEnabled, setBiometryEnabled] = useState<boolean>(false);
+
+  console.log('LoginWithBiometricsSwitch', rememberMeEnabled);
 
   const onValueChanged = useCallback(async () => {
     onUpdateBiometryChoice(biometryEnabled);

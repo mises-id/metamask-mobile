@@ -445,10 +445,6 @@ class Settings extends PureComponent {
     });
   };
 
-  onToggleRememberMe = async (enabled) => {
-    console.log('onToggleRememberMe');
-  };
-
   isMainnet = () => this.props.type === MAINNET;
 
   onSignInWithPasscode = async (enabled) => {
@@ -843,8 +839,8 @@ class Settings extends PureComponent {
     <SecurityOptionToggle
       title={strings(`remember_me.enable_remember_me`)}
       description={strings(`remember_me.enable_remember_me_description`)}
-      initialToggleState={this.props.rememberMeEnabled}
-      onOptionUpdated={this.togglePrivacy}
+      value={this.props.rememberMeEnabled}
+      onOptionUpdated={this.toggleRememberMe}
     />
   );
 

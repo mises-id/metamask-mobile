@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { Switch, Text, View } from 'react-native';
 import {
   mockTheme,
@@ -10,32 +10,35 @@ import { colors as importedColors } from '../../../../../../styles/common';
 interface SecurityOptionsToggleProps {
   title: string;
   description?: string;
-  initialToggleState: boolean;
-  onOptionUpdated: () => void;
+  value: boolean;
+  onOptionUpdated: (enabled: boolean) => void;
   testId: string;
 }
 
 const SecurityOptionToggle = ({
   title,
   description,
-  initialToggleState,
+  value,
   testId,
+  onOptionUpdated,
 }: SecurityOptionsToggleProps) => {
   const { colors } = useAppThemeFromContext() || mockTheme;
   const styles = createStyles(colors);
-  const [toggleState, setToggleState] = useState<boolean>(initialToggleState);
 
-  const handleOnValueChange = useCallback(() => {
-    setToggleState(!toggleState);
-  }, [toggleState]);
+  const handleOnValueChange = useCallback(
+    (newValue: boolean) => {
+      onOptionUpdated(newValue);
+    },
+    [onOptionUpdated],
+  );
   return (
     <View style={styles.setting} testID={testId}>
       <Text style={styles.title}>{title}</Text>
       {description ? <Text style={styles.desc}>{description}</Text> : null}
       <View style={styles.switchElement}>
         <Switch
-          value={toggleState}
-          onValueChange={handleOnValueChange}
+          value={value}
+          onValueChange={(newValue: boolean) => handleOnValueChange(newValue)}
           trackColor={{
             true: colors.primary.default,
             false: colors.border.muted,
