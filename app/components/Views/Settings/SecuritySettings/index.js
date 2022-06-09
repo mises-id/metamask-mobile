@@ -27,6 +27,7 @@ import {
   setPrivacyMode,
   setThirdPartyApiMode,
 } from '../../../../actions/privacy';
+import { setRememberMeEnabled } from '../../../../actions/security';
 import {
   fontStyles,
   colors as importedColors,
@@ -67,6 +68,7 @@ import {
   CHANGE_PASSWORD_BUTTON_ID,
   REVEAL_SECRET_RECOVERY_PHRASE_BUTTON_ID,
 } from '../../../../constants/test-ids';
+import { SecurityOptionToggle } from './components';
 
 const isIos = Device.isIos();
 const LEARN_MORE_URL =
@@ -300,6 +302,14 @@ class Settings extends PureComponent {
      * Type of network
      */
     type: PropTypes.string,
+    /**
+     * Indicates whether privacy mode is enabled
+     */
+    rememberMeEnabled: PropTypes.bool,
+    /**
+     * Called to toggle privacy mode
+     */
+    setRememberMeEnabled: PropTypes.func,
   };
 
   state = {
@@ -435,6 +445,10 @@ class Settings extends PureComponent {
     });
   };
 
+  onToggleRememberMe = async (enabled) => {
+    console.log('onToggleRememberMe');
+  };
+
   isMainnet = () => this.props.type === MAINNET;
 
   onSignInWithPasscode = async (enabled) => {
@@ -542,6 +556,10 @@ class Settings extends PureComponent {
 
   togglePrivacy = (value) => {
     this.props.setPrivacyMode(value);
+  };
+
+  toggleRememberMe = (value) => {
+    this.props.setRememberMeEnabled(value);
   };
 
   toggleThirdPartyAPI = (value) => {
@@ -820,6 +838,15 @@ class Settings extends PureComponent {
       </View>
     );
   };
+
+  renderRememberMeOptionSection = () => (
+    <SecurityOptionToggle
+      title={strings(`remember_me.enable_remember_me`)}
+      description={strings(`remember_me.enable_remember_me_description`)}
+      initialToggleState={this.props.rememberMeEnabled}
+      onOptionUpdated={this.togglePrivacy}
+    />
+  );
 
   renderDevicePasscodeSection = () => {
     const { styles, colors } = this.getStyles();
@@ -1193,6 +1220,7 @@ class Settings extends PureComponent {
           {this.renderPasswordSection()}
           {this.renderAutoLockSection()}
           {biometryType && this.renderBiometricOptionsSection()}
+          {this.renderRememberMeOptionSection()}
           {biometryType &&
             !biometryChoice &&
             this.renderDevicePasscodeSection()}
@@ -1235,6 +1263,7 @@ const mapStateToProps = (state) => ({
   passwordHasBeenSet: state.user.passwordSet,
   seedphraseBackedUp: state.user.seedphraseBackedUp,
   type: state.engine.backgroundState.NetworkController.provider.type,
+  rememberMeEnabled: state.security.rememberMeEnabled,
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -1244,6 +1273,7 @@ const mapDispatchToProps = (dispatch) => ({
   setPrivacyMode: (enabled) => dispatch(setPrivacyMode(enabled)),
   setThirdPartyApiMode: (enabled) => dispatch(setThirdPartyApiMode(enabled)),
   passwordSet: () => dispatch(passwordSet()),
+  setRememberMeEnabled: (enabled) => dispatch(setRememberMeEnabled(enabled)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Settings);
