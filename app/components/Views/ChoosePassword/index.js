@@ -566,11 +566,16 @@ class ChoosePassword extends PureComponent {
 
   renderSwitch = () => {
     const { biometryType } = this.state;
-    <LoginOptionsSwitch
-      shouldRenderBiometricOption={biometryType}
-      onUpdateBiometryChoice={this.updateBiometryChoice}
-      onUpdateRememberMKe={(rememberMe) => this.setState({ rememberMe })}
-    />;
+    const handleUpdateRememberMe = (rememberMe) => {
+      this.setState({ rememberMe });
+    };
+    return (
+      <LoginOptionsSwitch
+        shouldRenderBiometricOption={biometryType}
+        onUpdateBiometryChoice={this.updateBiometryChoice}
+        onUpdateRememberMe={handleUpdateRememberMe}
+      />
+    );
   };
 
   onPasswordChange = (val) => {

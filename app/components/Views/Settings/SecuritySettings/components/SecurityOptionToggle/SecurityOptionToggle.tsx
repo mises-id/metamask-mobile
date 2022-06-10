@@ -15,6 +15,10 @@ interface SecurityOptionsToggleProps {
   testId: string;
 }
 
+/**
+ * View that renders the toggle for security options
+ * This component assumes that the parent will manage the state of the toggle. This is because most of the state is global.
+ */
 const SecurityOptionToggle = ({
   title,
   description,
