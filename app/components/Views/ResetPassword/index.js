@@ -56,7 +56,7 @@ import {
   ANDROID_I_UNDERSTAND_BUTTON_ID,
   CONFIRM_CHANGE_PASSWORD_INPUT_BOX_ID,
 } from '../../../constants/test-ids';
-import { LoginWithBiometricsSwitch } from '../../UI/LoginWithBiometricsSwitch';
+import { LoginOptionsSwitch } from '../../UI/LoginOptionsSwitch';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -541,12 +541,16 @@ class ResetPassword extends PureComponent {
 
   renderSwitch = () => {
     const { biometryType } = this.state;
-    biometryType ? (
-      <LoginWithBiometricsSwitch
+    const handleUpdateRememberMe = (rememberMe) => {
+      this.setState({ rememberMe });
+    };
+    return (
+      <LoginOptionsSwitch
         biometryType={biometryType}
         onUpdateBiometryChoice={this.updateBiometryChoice}
+        onUpdateRememberMe={handleUpdateRememberMe}
       />
-    ) : null;
+    );
   };
 
   tryExportSeedPhrase = async (password) => {

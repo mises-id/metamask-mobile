@@ -61,7 +61,7 @@ import {
   IMPORT_PASSWORD_CONTAINER_ID,
   SECRET_RECOVERY_PHRASE_INPUT_BOX_ID,
 } from '../../../constants/test-ids';
-import { LoginWithBiometricsSwitch } from '../../UI/LoginWithBiometricsSwitch';
+import { LoginOptionsSwitch } from '../../UI/LoginOptionsSwitch';
 
 const MINIMUM_SUPPORTED_CLIPBOARD_VERSION = 9;
 
@@ -454,13 +454,18 @@ class ImportFromSeed extends PureComponent {
     this.setState({ biometryChoice });
   };
 
-  renderSwitch = () =>
-    this.state.biometryType ? (
-      <LoginWithBiometricsSwitch
+  renderSwitch = () => {
+    const handleUpdateRememberMe = (rememberMe) => {
+      this.setState({ rememberMe });
+    };
+    return (
+      <LoginOptionsSwitch
         biometryType={this.state.biometryType}
         onUpdateBiometryChoice={this.updateBiometryChoice}
+        onUpdateRememberMe={handleUpdateRememberMe}
       />
-    ) : null;
+    );
+  };
 
   toggleShowHide = () => {
     this.setState({ secureTextEntry: !this.state.secureTextEntry });

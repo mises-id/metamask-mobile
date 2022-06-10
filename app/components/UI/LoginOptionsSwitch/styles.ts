@@ -8,18 +8,18 @@ export const createStyles = (colors: any) =>
       flex: 1,
       backgroundColor: colors.background.default,
     },
-    biometrics: {
+    container: {
       position: 'relative',
       marginTop: 20,
       marginBottom: 30,
     },
-    biometryLabel: {
+    label: {
       flex: 1,
       fontSize: 16,
       color: colors.text.default,
       ...fontStyles.normal,
     },
-    biometrySwitch: {
+    switch: {
       position: 'absolute',
       top: 0,
       right: 0,

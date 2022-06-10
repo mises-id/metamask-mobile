@@ -53,7 +53,7 @@ import {
   LOGIN_PASSWORD_ERROR,
   RESET_WALLET_ID,
 } from '../../../constants/test-ids';
-import { LoginWithBiometricsSwitch } from '../../UI/LoginWithBiometricsSwitch';
+import { LoginOptionsSwitch } from '../../UI/LoginOptionsSwitch';
 
 const deviceHeight = Device.getDeviceHeight();
 const breakPoint = deviceHeight < 700;
@@ -500,13 +500,22 @@ class Login extends PureComponent {
     this.setState({ biometryChoice });
   };
 
-  renderSwitch = () =>
-    this.state.biometryType && !this.state.biometryPreviouslyDisabled ? (
-      <LoginWithBiometricsSwitch
-        biometryType={this.state.biometryType}
+  renderSwitch = () => {
+    const handleUpdateRememberMe = (rememberMe) => {
+      this.setState({ rememberMe });
+    };
+    const shouldRenderBiometricLogin =
+      this.state.biometryType && !this.state.biometryPreviouslyDisabled
+        ? this.state.biometryType
+        : undefined;
+    return (
+      <LoginOptionsSwitch
+        biometryType={shouldRenderBiometricLogin}
         onUpdateBiometryChoice={this.updateBiometryChoice}
+        onUpdateRememberMe={handleUpdateRememberMe}
       />
-    ) : null;
+    );
+  };
 
   setPassword = (val) => this.setState({ password: val });
 

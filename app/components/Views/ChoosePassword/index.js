@@ -60,7 +60,7 @@ import {
   IOS_I_UNDERSTAND_BUTTON_ID,
   ANDROID_I_UNDERSTAND_BUTTON_ID,
 } from '../../../constants/test-ids';
-import { LoginWithBiometricsSwitch } from '../../UI/LoginWithBiometricsSwitch';
+import { LoginOptionsSwitch } from '../../UI/LoginOptionsSwitch';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -566,12 +566,11 @@ class ChoosePassword extends PureComponent {
 
   renderSwitch = () => {
     const { biometryType } = this.state;
-    return biometryType ? (
-      <LoginWithBiometricsSwitch
-        biometryType={biometryType}
-        onUpdateBiometryChoice={this.updateBiometryChoice}
-      />
-    ) : null;
+    <LoginOptionsSwitch
+      biometryType={biometryType}
+      onUpdateBiometryChoice={this.updateBiometryChoice}
+      onUpdateRememberMKe={(rememberMe) => this.setState({ rememberMe })}
+    />;
   };
 
   onPasswordChange = (val) => {
