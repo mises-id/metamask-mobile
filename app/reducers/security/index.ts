@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/default-param-last */
 import { ActionType, Action } from '../../actions/security';
-// import type { Action } from '../../actions/security';
 import { SecuritySettingsState } from '../../actions/security/state';
 const initialState: Readonly<SecuritySettingsState> = {
-  rememberMeEnabled: false,
+  allowLoginWithRememberMe: false,
 };
 
 const securityReducer = (
@@ -11,9 +10,9 @@ const securityReducer = (
   action: Action,
 ): SecuritySettingsState => {
   switch (action.type) {
-    case ActionType.SET_REMEMBER_ME_ENABLED:
+    case ActionType.SET_ALLOW_LOGIN_WITH_REMEMBER_ME:
       return {
-        rememberMeEnabled: action.enabled,
+        allowLoginWithRememberMe: action.enabled,
       };
     default:
       return state;

@@ -546,7 +546,7 @@ class ResetPassword extends PureComponent {
     };
     return (
       <LoginOptionsSwitch
-        biometryType={biometryType}
+        shouldRenderBiometricOption={biometryType}
         onUpdateBiometryChoice={this.updateBiometryChoice}
         onUpdateRememberMe={handleUpdateRememberMe}
       />

@@ -4,45 +4,50 @@ import { mockTheme, useAppThemeFromContext } from '../../../util/theme';
 import { strings } from '../../../../locales/i18n';
 import { BIOMETRY_TYPE } from 'react-native-keychain';
 import { createStyles } from './styles';
-import { LOGIN_WITH_BIOMETRICS_SWITCH } from '../../../constants/test-ids';
+import {
+  LOGIN_WITH_BIOMETRICS_SWITCH,
+  LOGIN_WITH_REMEMBER_ME_SWITCH,
+} from '../../../constants/test-ids';
 import { useSelector } from 'react-redux';
 
 interface Props {
-  biometryType?: BIOMETRY_TYPE;
+  shouldRenderBiometricOption?: BIOMETRY_TYPE;
   onUpdateBiometryChoice: (biometryEnabled: boolean) => void;
   onUpdateRememberMe: (rememberMeEnabled: boolean) => void;
 }
 
 const LoginOptionsSwitch = ({
-  biometryType,
+  shouldRenderBiometricOption,
   onUpdateBiometryChoice,
   onUpdateRememberMe,
 }: Props) => {
   const { colors } = useAppThemeFromContext() || mockTheme;
   const styles = createStyles(colors);
-  const rememberOptionMeEnabled = useSelector(
-    (state: any) => state.security.rememberMeEnabled,
+  const allowLoginWithRememberMe = useSelector(
+    (state: any) => state.security.allowLoginWithRememberMe,
   );
   const [biometryEnabled, setBiometryEnabled] = useState<boolean>(false);
   const [rememberMeEnabled, setRememberMeEnabled] = useState<boolean>(false);
 
   const onBiometryValueChanged = useCallback(async () => {
-    onUpdateBiometryChoice(biometryEnabled);
+    onUpdateBiometryChoice(!biometryEnabled);
     setBiometryEnabled(!biometryEnabled);
   }, [biometryEnabled, onUpdateBiometryChoice]);
 
   const onRememberMeValueChanged = useCallback(async () => {
-    onUpdateRememberMe(rememberMeEnabled);
+    onUpdateRememberMe(!rememberMeEnabled);
     setRememberMeEnabled(!rememberMeEnabled);
   }, [onUpdateRememberMe, rememberMeEnabled]);
 
-  // should only render remember me if biometrics are disabled and rememberOptionMeEnabled is enabled in security settings
+  // should only render remember me option if biometrics are disabled and rememberOptionMeEnabled is enabled in security settings
   // if both are disabled then this component returns null
-  if (biometryType !== undefined) {
+  if (shouldRenderBiometricOption !== undefined) {
     return (
       <View style={styles.container} testID={LOGIN_WITH_BIOMETRICS_SWITCH}>
         <Text style={styles.label}>
-          {strings(`biometrics.enable_${biometryType.toLowerCase()}`)}
+          {strings(
+            `biometrics.enable_${shouldRenderBiometricOption.toLowerCase()}`,
+          )}
         </Text>
         <Switch
           onValueChange={onBiometryValueChanged}
@@ -57,9 +62,12 @@ const LoginOptionsSwitch = ({
         />
       </View>
     );
-  } else if (biometryType === undefined && rememberOptionMeEnabled === true) {
+  } else if (
+    shouldRenderBiometricOption === undefined &&
+    allowLoginWithRememberMe === true
+  ) {
     return (
-      <View style={styles.container}>
+      <View style={styles.container} testID={LOGIN_WITH_REMEMBER_ME_SWITCH}>
         <Text style={styles.label}>
           {strings(`choose_password.remember_me`)}
         </Text>
@@ -73,7 +81,6 @@ const LoginOptionsSwitch = ({
           }}
           thumbColor={colors.white}
           ios_backgroundColor={colors.border.muted}
-          testID={'remember-me-toggle'}
         />
       </View>
     );

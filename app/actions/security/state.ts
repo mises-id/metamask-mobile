@@ -1,3 +1,3 @@
 export interface SecuritySettingsState {
-  rememberMeEnabled: boolean;
+  allowLoginWithRememberMe: boolean;
 }

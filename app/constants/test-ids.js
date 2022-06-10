@@ -63,3 +63,4 @@ export const NEW_NETWORK_ADDED_SWITCH_TO_NETWORK_BUTTON_ID =
   'switch-to-network-button';
 
 export const LOGIN_WITH_BIOMETRICS_SWITCH = 'login-with-biometrics-switch';
+export const LOGIN_WITH_REMEMBER_ME_SWITCH = 'login-with-remember-me-switch';

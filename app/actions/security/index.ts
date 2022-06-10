@@ -2,19 +2,19 @@
 import type { Action } from 'redux';
 
 export enum ActionType {
-  SET_REMEMBER_ME_ENABLED = 'SET_REMEMBER_ME_ENABLED',
+  SET_ALLOW_LOGIN_WITH_REMEMBER_ME = 'SET_ALLOW_LOGIN_WITH_REMEMBER_ME',
 }
 
-export interface RememberMeEnabledUpdated
-  extends Action<ActionType.SET_REMEMBER_ME_ENABLED> {
+export interface AllowLoginWithRememberMeUpdated
+  extends Action<ActionType.SET_ALLOW_LOGIN_WITH_REMEMBER_ME> {
   enabled: boolean;
 }
 
-export type Action = RememberMeEnabledUpdated;
+export type Action = AllowLoginWithRememberMeUpdated;
 
-export const setRememberMeEnabled = (
+export const setAllowLoginWithRememberMe = (
   enabled: boolean,
-): RememberMeEnabledUpdated => ({
-  type: ActionType.SET_REMEMBER_ME_ENABLED,
+): AllowLoginWithRememberMeUpdated => ({
+  type: ActionType.SET_ALLOW_LOGIN_WITH_REMEMBER_ME,
   enabled,
 });
