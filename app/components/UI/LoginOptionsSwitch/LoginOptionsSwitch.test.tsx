@@ -1,6 +1,5 @@
 import React from 'react';
-import { shallow, mount } from 'enzyme';
-import { Text } from 'react-native';
+import { shallow } from 'enzyme';
 import LoginOptionsSwitch from './LoginOptionsSwitch';
 import { BIOMETRY_TYPE } from 'react-native-keychain';
 import { Provider } from 'react-redux';
@@ -34,23 +33,5 @@ describe('LoginWithBiometricsSwitch', () => {
       </Provider>,
     );
     expect(wrapper).toMatchObject({});
-  });
-
-  it('should return remember me object when shouldRenderBiometricOption is undefined and allowLoginWithRememberMe is false in settings', () => {
-    const store = mockStore({
-      security: {
-        allowLoginWithRememberMe: true,
-      },
-    });
-    const wrapper = mount(
-      <Provider store={store}>
-        <LoginOptionsSwitch
-          shouldRenderBiometricOption={BIOMETRY_TYPE.FACE}
-          onUpdateBiometryChoice={handleUpdate}
-          onUpdateRememberMe={handleUpdate}
-        />
-      </Provider>,
-    );
-    expect(wrapper.find(Text).length).toBe(1);
   });
 });
