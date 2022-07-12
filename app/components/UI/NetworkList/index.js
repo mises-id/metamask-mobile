@@ -21,7 +21,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import AnalyticsV2 from '../../../util/analyticsV2';
 import StyledButton from '../StyledButton';
 import { ThemeContext, mockTheme } from '../../../util/theme';
-import { MAINNET, RPC, PRIVATENETWORK } from '../../../constants/network';
+import {
+  MAINNET,
+  RPC,
+  PRIVATENETWORK,
+  MISES,
+} from '../../../constants/network';
 import { ETH } from '../../../util/custom-gas';
 import sanitizeUrl from '../../../util/sanitizeUrl';
 import getImage from '../../../util/getImage';
@@ -168,7 +173,7 @@ export class NetworkList extends PureComponent {
     navigation: PropTypes.object,
   };
 
-  getOtherNetworks = () => getAllNetworks().slice(1);
+  getOtherNetworks = () => getAllNetworks().slice(2);
 
   handleNetworkSelected = (type, ticker, url) => {
     const {
@@ -291,7 +296,6 @@ export class NetworkList extends PureComponent {
   renderOtherNetworks = () => {
     const { provider } = this.props;
     const colors = this.context.colors || mockTheme.colors;
-
     return this.getOtherNetworks().map((network, i) => {
       const { color, name } = Networks[network];
       const isCustomRpc = false;
@@ -365,7 +369,37 @@ export class NetworkList extends PureComponent {
       </View>
     );
   }
+  renderMises() {
+    const { provider } = this.props;
+    const colors = this.context.colors || mockTheme.colors;
+    const styles = this.getStyles();
+    const isMainnet =
+      provider.type === MISES ? (
+        <Icon name="check" size={15} color={colors.icon.default} />
+      ) : null;
+    const { name: misesnetName } = Networks.mises;
 
+    return (
+      <View style={styles.mainnetHeader}>
+        <TouchableOpacity
+          style={[styles.network, styles.mainnet]}
+          key={`network-mises`}
+					onPress={() => this.onNetworkChange(MISES)} // eslint-disable-line
+          testID={'network-name'}
+        >
+          <View style={styles.networkWrapper}>
+            <View style={[styles.selected, styles.mainnetSelected]}>
+              {isMainnet}
+            </View>
+            <ImageIcon image="MISES" style={styles.networkIcon} />
+            <View style={styles.networkInfo}>
+              <Text style={styles.networkLabel}>{misesnetName}</Text>
+            </View>
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  }
   goToNetworkSettings = () => {
     this.props.onClose(false);
     this.props.navigation.navigate('NetworkSettings');
@@ -394,6 +428,7 @@ export class NetworkList extends PureComponent {
           />
         </View>
         <ScrollView style={styles.networksWrapper} testID={NETWORK_SCROLL_ID}>
+          {this.renderMises()}
           {this.renderMainnet()}
           {this.renderRpcNetworks()}
           {this.renderOtherNetworks()}

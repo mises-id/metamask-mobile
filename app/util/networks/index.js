@@ -7,6 +7,7 @@ import {
   RINKEBY,
   GOERLI,
   RPC,
+  MISES,
 } from '../../../app/constants/network';
 import {
   NETWORK_ERROR_MISSING_NETWORK_ID,
@@ -25,6 +26,15 @@ import { fastSplit } from '../../util/number';
  * navbar and the network switcher.
  */
 const NetworkList = {
+  [MISES]: {
+    name: 'Mises Network',
+    shortName: 'Mises',
+    networkId: 46,
+    chainId: 46,
+    hexChainId: '0xa46a',
+    color: '#5c65f6',
+    networkType: 'mises',
+  },
   [MAINNET]: {
     name: 'Ethereum Main Network',
     shortName: 'Ethereum',
@@ -86,7 +96,7 @@ export const getAllNetworks = () =>
   NetworkListKeys.filter((name) => name !== RPC);
 
 export const isMainNet = (network) =>
-  network?.provider?.type === MAINNET || network === String(1);
+  [MAINNET, MISES].includes(network?.provider?.type) || network === String(1);
 
 export const getDecimalChainId = (chainId) => {
   if (!chainId || typeof chainId !== 'string' || !chainId.startsWith('0x')) {

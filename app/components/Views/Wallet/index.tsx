@@ -77,6 +77,9 @@ const Wallet = ({ navigation }: any) => {
     (state: any) =>
       state.engine.backgroundState.AccountTrackerController.accounts,
   );
+  // const misesAccounts = useSelector(
+  //   (state: any) => state.engine.backgroundState.MisesController.accountList,
+  // );
   /**
    * ETH to current currency conversion rate
    */
@@ -153,7 +156,6 @@ const Wallet = ({ navigation }: any) => {
     );
     /* eslint-disable-next-line */
   }, [navigation, themeColors]);
-
   const onRefresh = useCallback(async () => {
     requestAnimationFrame(async () => {
       setRefreshing(true);
@@ -163,6 +165,7 @@ const Wallet = ({ navigation }: any) => {
         AccountTrackerController,
         CurrencyRateController,
         TokenRatesController,
+        MisesController,
       } = Engine.context as any;
       const actions = [
         TokenDetectionController.detectTokens(),
@@ -170,6 +173,7 @@ const Wallet = ({ navigation }: any) => {
         AccountTrackerController.refresh(),
         CurrencyRateController.start(),
         TokenRatesController.poll(),
+        MisesController.getBalanceList(),
       ];
       await Promise.all(actions);
       setRefreshing(false);
@@ -204,7 +208,9 @@ const Wallet = ({ navigation }: any) => {
   const onRef = useCallback((ref) => {
     accountOverviewRef.current = ref;
   }, []);
-
+  useEffect(() => {
+    Engine.context.MisesController.getBalanceList();
+  }, []);
   const renderContent = useCallback(() => {
     let balance: any = 0;
     let assets = tokens;
@@ -233,7 +239,7 @@ const Wallet = ({ navigation }: any) => {
       ...identities[selectedAddress],
       ...accounts[selectedAddress],
     };
-
+    // console.log(misesAccounts, 'xxxxxx');
     return (
       <View style={styles.wrapper}>
         <AccountOverview

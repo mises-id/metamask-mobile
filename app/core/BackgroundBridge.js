@@ -196,9 +196,12 @@ export class BackgroundBridge extends EventEmitter {
     const isInitialNetwork =
       networkType && getAllNetworks().includes(networkType);
     let chainId;
-
     if (isInitialNetwork) {
       chainId = NetworksChainId[networkType];
+      if (networkType === 'mises') {
+        chainId = networkProvider.chainId;
+        network = '1';
+      }
     } else if (networkType === 'rpc') {
       chainId = networkProvider.chainId;
     }
@@ -206,7 +209,6 @@ export class BackgroundBridge extends EventEmitter {
       // Convert to hex
       chainId = `0x${parseInt(chainId, 10).toString(16)}`;
     }
-
     const result = {
       networkVersion: network,
       chainId,

@@ -32,6 +32,20 @@ const METHODS_TO_REDIRECT = {
   wallet_watchAsset: true,
   wallet_addEthereumChain: true,
   wallet_switchEthereumChain: true,
+  // mises
+  mises_requestAccounts: true,
+  mises_getMisesAccount: true,
+  mises_setUserInfo: true,
+  mises_userFollow: true,
+  mises_userUnFollow: true,
+  mises_getActive: true,
+  mises_openRestore: true,
+  mises_openNFTPage: true,
+  mises_connect: true,
+  mises_disconnect: true,
+  mises_getAddressToMisesId: true,
+  mises_getCollectibles: true,
+  mises_stakingPostTx: true,
 };
 
 const persistSessions = async () => {

@@ -9,7 +9,6 @@ import {
   KeyringController,
   PersonalMessageManager,
   MessageManager,
-  NetworkController,
   PhishingController,
   PreferencesController,
   TokenBalancesController,
@@ -42,6 +41,8 @@ import NotificationManager from './NotificationManager';
 import Logger from '../util/Logger';
 import { LAST_INCOMING_TX_BLOCK_INFO } from '../constants/storage';
 import { isZero } from '../util/lodash';
+import NetworkController from './misesNetworkController';
+import MisesController from './misesController';
 
 const NON_EMPTY = 'NON_EMPTY';
 
@@ -205,31 +206,45 @@ class Engine {
         EIP1559APIEndpoint:
           'https://gas-api.metaswap.codefi.network/networks/<chain_id>/suggestedGasFees',
       });
-
       const additionalKeyrings = [QRHardwareKeyring];
-
+      const keyringController = new KeyringController(
+        {
+          removeIdentity: preferencesController.removeIdentity.bind(
+            preferencesController,
+          ),
+          syncIdentities: preferencesController.syncIdentities.bind(
+            preferencesController,
+          ),
+          updateIdentities: preferencesController.updateIdentities.bind(
+            preferencesController,
+          ),
+          setSelectedAddress: preferencesController.setSelectedAddress.bind(
+            preferencesController,
+          ),
+          setAccountLabel: preferencesController.setAccountLabel.bind(
+            preferencesController,
+          ),
+        },
+        { encryptor, keyringTypes: additionalKeyrings },
+        initialState.KeyringController,
+      );
+      const misesController = new MisesController(
+        {
+          getKeyringAccounts:
+            keyringController.getAccounts.bind(keyringController),
+          exportAccount:
+            keyringController.exportAccountPrivate.bind(keyringController),
+          updateIdentities: preferencesController.updateIdentities.bind(
+            preferencesController,
+          ),
+          onPreferencesStateChange: (listener) =>
+            preferencesController.subscribe(listener),
+        },
+        { encryptor, keyringTypes: additionalKeyrings },
+        initialState.KeyringController,
+      );
       const controllers = [
-        new KeyringController(
-          {
-            removeIdentity: preferencesController.removeIdentity.bind(
-              preferencesController,
-            ),
-            syncIdentities: preferencesController.syncIdentities.bind(
-              preferencesController,
-            ),
-            updateIdentities: preferencesController.updateIdentities.bind(
-              preferencesController,
-            ),
-            setSelectedAddress: preferencesController.setSelectedAddress.bind(
-              preferencesController,
-            ),
-            setAccountLabel: preferencesController.setAccountLabel.bind(
-              preferencesController,
-            ),
-          },
-          { encryptor, keyringTypes: additionalKeyrings },
-          initialState.KeyringController,
-        ),
+        keyringController,
         new AccountTrackerController({
           onPreferencesStateChange: (listener) =>
             preferencesController.subscribe(listener),
@@ -331,6 +346,7 @@ class Engine {
           }),
           showApprovalRequest: () => null,
         }),
+        misesController,
       ];
       // set initial state
       // TODO: Pass initial state into each controller constructor instead
@@ -764,6 +780,7 @@ export default {
       TokensController,
       TokenDetectionController,
       CollectibleDetectionController,
+      misesController,
     } = instance.datamodel.state;
 
     // normalize `null` currencyRate to `0`
@@ -797,6 +814,7 @@ export default {
       GasFeeController,
       TokenDetectionController,
       CollectibleDetectionController,
+      misesController,
     };
   },
   get datamodel() {
