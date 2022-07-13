@@ -30,7 +30,7 @@ import { getTicker } from '../../../util/transactions';
 import OnboardingWizard from '../../UI/OnboardingWizard';
 import ErrorBoundary from '../ErrorBoundary';
 import { DrawerContext } from '../../Nav/Main/MainNavigator';
-import { useAppThemeFromContext, mockTheme } from '../../../util/theme';
+import { useAppThemeFromContext, mockTheme, useMisesNetwork } from '../../../util/theme';
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
@@ -76,6 +76,9 @@ const Wallet = ({ navigation }: any) => {
   const accounts = useSelector(
     (state: any) =>
       state.engine.backgroundState.AccountTrackerController.accounts,
+  );
+  const misesAccounts = useSelector(
+    (state: any) => state.engine.backgroundState.MisesController.accountList,
   );
   /**
    * ETH to current currency conversion rate
@@ -153,7 +156,6 @@ const Wallet = ({ navigation }: any) => {
     );
     /* eslint-disable-next-line */
   }, [navigation, themeColors]);
-
   const onRefresh = useCallback(async () => {
     requestAnimationFrame(async () => {
       setRefreshing(true);
@@ -163,6 +165,7 @@ const Wallet = ({ navigation }: any) => {
         AccountTrackerController,
         CurrencyRateController,
         TokenRatesController,
+        MisesController,
       } = Engine.context as any;
       const actions = [
         TokenDetectionController.detectTokens(),
@@ -170,6 +173,7 @@ const Wallet = ({ navigation }: any) => {
         AccountTrackerController.refresh(),
         CurrencyRateController.start(),
         TokenRatesController.poll(),
+        MisesController.getAccountMisesBalance(),
       ];
       await Promise.all(actions);
       setRefreshing(false);
@@ -204,11 +208,33 @@ const Wallet = ({ navigation }: any) => {
   const onRef = useCallback((ref) => {
     accountOverviewRef.current = ref;
   }, []);
-
+  const { MisesController } = Engine.context as any;
+  const isMises = useMisesNetwork(Engine);
+  useEffect(() => {
+    MisesController.getAccountMisesBalance();
+    // eslint-disable-next-line
+  }, []);
   const renderContent = useCallback(() => {
     let balance: any = 0;
     let assets = tokens;
-    if (accounts[selectedAddress]) {
+    if (isMises) {
+      balance = misesAccounts[selectedAddress]?.misesBalance?.amount;
+      assets = [
+        {
+          name: 'Mises',
+          symbol: 'MIS',
+          isETH: false,
+          balance,
+          balanceFiat: weiToFiat(
+            hexToBN('0x0') as any,
+            conversionRate,
+            currentCurrency,
+          ),
+          logo: '../images/mises-token.jpg',
+        },
+        ...(tokens || []),
+      ];
+    } else if (accounts[selectedAddress]) {
       balance = renderFromWei(accounts[selectedAddress].balance);
       assets = [
         {
@@ -217,7 +243,7 @@ const Wallet = ({ navigation }: any) => {
           isETH: true,
           balance,
           balanceFiat: weiToFiat(
-            hexToBN(accounts[selectedAddress].balance) as any,
+            hexToBN(accounts[selectedAddress]?.balance || '0x0') as any,
             conversionRate,
             currentCurrency,
           ),
@@ -228,12 +254,13 @@ const Wallet = ({ navigation }: any) => {
     } else {
       assets = tokens;
     }
+
     const account = {
       address: selectedAddress,
       ...identities[selectedAddress],
       ...accounts[selectedAddress],
+      ...misesAccounts[selectedAddress],
     };
-
     return (
       <View style={styles.wrapper}>
         <AccountOverview
@@ -261,18 +288,19 @@ const Wallet = ({ navigation }: any) => {
       </View>
     );
   }, [
-    renderTabBar,
+    tokens,
     accounts,
+    selectedAddress,
+    ticker,
     conversionRate,
     currentCurrency,
     identities,
+    misesAccounts,
+    styles.wrapper,
     navigation,
-    onChangeTab,
     onRef,
-    selectedAddress,
-    ticker,
-    tokens,
-    styles,
+    renderTabBar,
+    onChangeTab,
   ]);
 
   const renderLoader = useCallback(

@@ -26,6 +26,7 @@ export enum ApprovalTypes {
   SIGN_MESSAGE = 'SIGN_MESSAGE',
   ADD_ETHEREUM_CHAIN = 'ADD_ETHEREUM_CHAIN',
   SWITCH_ETHEREUM_CHAIN = 'SWITCH_ETHEREUM_CHAIN',
+  MISES_STAKINGPOSTTX = 'mises_stakingPostTx',
 }
 
 interface RPCMethodsMiddleParameters {
@@ -630,6 +631,159 @@ export const getRpcMethodMiddleware = ({
       wallet_switchEthereumChain: () => {
         checkTabActive();
         return RPCMethods.wallet_switchEthereumChain({
+          req,
+          res,
+          requestUserApproval,
+        });
+      },
+      /* mises chain */
+
+      mises_requestAccounts: async () => {
+        const { params } = req;
+        const {
+          privacy: { privacyMode },
+        } = store.getState();
+
+        let { selectedAddress } = Engine.context.PreferencesController.state;
+
+        selectedAddress = selectedAddress?.toLowerCase();
+        const nonce = new Date().getTime();
+        if (
+          isWalletConnect ||
+          !privacyMode ||
+          ((!params || !params.force) && getApprovedHosts()[hostname])
+        ) {
+          const key = await Engine.context.MisesController.exportAccount(
+            selectedAddress,
+          );
+          const { auth, misesId } =
+            await Engine.context.MisesController.generateAuth(nonce, key); // get mises auth
+          res.result = {
+            accounts: [selectedAddress],
+            auth,
+            misesId,
+          };
+        } else {
+          try {
+            await requestUserApproval({
+              type: ApprovalTypes.CONNECT_ACCOUNTS,
+              requestData: { hostname },
+            });
+            const fullHostname = new URL(url.current).hostname;
+            approveHost?.(fullHostname);
+            setApprovedHosts?.({
+              ...getApprovedHosts?.(),
+              [fullHostname]: true,
+            });
+            if (selectedAddress) {
+              const key = await Engine.context.MisesController.exportAccount(
+                selectedAddress,
+              );
+              const { auth, misesId } =
+                await Engine.context.MisesController.generateAuth(nonce, key); // get mises auth
+              res.result = {
+                accounts: [selectedAddress],
+                auth,
+                misesId,
+              };
+            } else {
+              res.result = {
+                accounts: [],
+                auth: '',
+                misesId: '',
+              };
+            }
+          } catch (e) {
+            throw ethErrors.provider.userRejectedRequest(
+              'User denied account authorization.',
+            );
+          }
+        }
+      },
+      mises_getMisesAccount: async () => {
+        try {
+          const data = await Engine.context.MisesController.getAccountFlag();
+          res.result = data;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest(
+            'Get Mises Account Failure',
+          );
+        }
+      },
+      mises_setUserInfo: async () => {
+        try {
+          await Engine.context.MisesController.setInfo(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest('User follow Failure');
+        }
+        res.result = 'mises_setUserInfo';
+      },
+      mises_userFollow: async () => {
+        try {
+          await Engine.context.MisesController.setFollow(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest('User follow Failure');
+        }
+      },
+      mises_userUnFollow: async () => {
+        try {
+          await Engine.context.MisesController.setUnFollow(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest('User follow Failure');
+        }
+      },
+      mises_getActive: async () => {
+        try {
+          const data = await Engine.context.MisesController.getActive();
+          res.result = data;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest('User follow Failure');
+        }
+      },
+      mises_openRestore: async () => {
+        res.result = 'mises_openRestore';
+      },
+      mises_openNFTPage: async () => {
+        res.result = 'mises_openNFTPage';
+      },
+      mises_connect: async () => {
+        try {
+          await Engine.context.MisesController.connect(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest('Link chain Failure');
+        }
+      },
+      mises_disconnect: async () => {
+        try {
+          await Engine.context.MisesController.disconnect(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest('Disconnect Failure');
+        }
+      },
+      mises_getAddressToMisesId: async () => {
+        try {
+          await Engine.context.MisesController.addressToMisesId(req.params[0]);
+          res.result = true;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest('Disconnect Failure');
+        }
+      },
+      mises_getCollectibles: async () => {
+        try {
+          await Engine.context.MisesController.getCollectibles();
+          res.result = true;
+        } catch (error) {
+          throw ethErrors.provider.userRejectedRequest('Disconnect Failure');
+        }
+      },
+      mises_stakingPostTx: () => {
+        checkTabActive();
+        return RPCMethods.postTX({
           req,
           res,
           requestUserApproval,

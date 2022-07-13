@@ -19,7 +19,7 @@ import Networks, { getAllNetworks } from '../../../../util/networks';
 import StyledButton from '../../../UI/StyledButton';
 import Engine from '../../../../core/Engine';
 import getImage from '../../../../util/getImage';
-import { MAINNET, RPC } from '../../../../constants/network';
+import { MAINNET, MISES, RPC } from '../../../../constants/network';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
 import ImageIcons from '../../../UI/ImageIcon';
@@ -262,7 +262,34 @@ class NetworksSettings extends PureComponent {
       );
     }
   };
+  renderMises() {
+    const { name: misesName } = Networks.mises;
+    const colors = this.context.colors || mockTheme.colors;
+    const styles = createStyles(colors);
 
+    return (
+      <View style={styles.mainnetHeader}>
+        <TouchableOpacity
+          style={styles.network}
+          key={`network-${MISES}`}
+          onPress={() => this.onNetworkPress(MISES)}
+        >
+          <View style={styles.networkWrapper}>
+            <ImageIcons image="MISES" style={styles.networkIcon} />
+            <View style={styles.networkInfo}>
+              <Text style={styles.networkLabel}>{misesName}</Text>
+            </View>
+          </View>
+          <FontAwesome
+            name="lock"
+            size={20}
+            color={colors.icon.default}
+            style={styles.icon}
+          />
+        </TouchableOpacity>
+      </View>
+    );
+  }
   renderMainnet() {
     const { name: mainnetName } = Networks.mainnet;
     const colors = this.context.colors || mockTheme.colors;
@@ -374,6 +401,7 @@ class NetworksSettings extends PureComponent {
               <Text style={styles.sectionLabel}>
                 {strings('app_settings.mainnet')}
               </Text>
+              {this.renderMises()}
               {this.renderMainnet()}
               {this.renderRpcNetworksView()}
               <Text style={styles.sectionLabel}>

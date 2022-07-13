@@ -3,7 +3,17 @@ import React from 'react';
 import images from 'images/image-icons';
 
 interface ImageIconPropTypes {
-  image: string;
+  image:
+    | 'PALM'
+    | 'MATIC'
+    | 'OPTIMISM'
+    | 'ONE'
+    | 'FTM'
+    | 'ETHEREUM'
+    | 'BNB'
+    | 'AETH'
+    | 'AVAX'
+    | 'MISES';
   style: any;
 }
 

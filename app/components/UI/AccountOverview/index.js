@@ -46,6 +46,7 @@ import AssetSwapButton from '../Swaps/components/AssetSwapButton';
 import ClipboardManager from '../../../core/ClipboardManager';
 import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
+import MisesAddress from '../MisesAddress';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -209,6 +210,10 @@ class AccountOverview extends PureComponent {
      * Current provider ticker
      */
     ticker: PropTypes.string,
+    /**
+     * Current provider type
+     */
+    type: PropTypes.string,
   };
 
   state = {
@@ -286,8 +291,14 @@ class AccountOverview extends PureComponent {
   };
 
   copyAccountToClipboard = async () => {
-    const { selectedAddress } = this.props;
-    await ClipboardManager.setString(selectedAddress);
+    const {
+      selectedAddress,
+      account: { misesId },
+      type,
+    } = this.props;
+    await ClipboardManager.setString(
+      type === 'mises' ? misesId : selectedAddress,
+    );
     this.props.showAlert({
       isVisible: true,
       autodismiss: 1500,
@@ -341,16 +352,16 @@ class AccountOverview extends PureComponent {
 
   render() {
     const {
-      account: { address, name },
+      account: { address, name, misesId },
       currentCurrency,
       onboardingWizard,
       chainId,
       swapsIsLive,
+      type,
     } = this.props;
     const colors = this.context.colors || mockTheme.colors;
     const themeAppearance = this.context.themeAppearance || 'light';
     const styles = createStyles(colors);
-
     const fiatBalance = `${renderFiat(
       Engine.getTotalFiatAccountBalance(),
       currentCurrency,
@@ -360,7 +371,7 @@ class AccountOverview extends PureComponent {
     const { accountLabelEditable, accountLabel, ens } = this.state;
 
     const isQRHardwareWalletAccount = isQRHardwareAccount(address);
-
+    const isMises = type === 'mises';
     return (
       <View
         style={baseStyles.flexGrow}
@@ -451,11 +462,15 @@ class AccountOverview extends PureComponent {
               style={styles.addressWrapper}
               onPress={this.copyAccountToClipboard}
             >
-              <EthereumAddress
-                address={address}
-                style={styles.address}
-                type={'short'}
-              />
+              {isMises ? (
+                <MisesAddress address={misesId} style={styles.address} />
+              ) : (
+                <EthereumAddress
+                  address={address}
+                  style={styles.address}
+                  type={'short'}
+                />
+              )}
             </TouchableOpacity>
 
             <View style={styles.actions}>
@@ -501,6 +516,7 @@ const mapStateToProps = (state) => ({
     state.engine.backgroundState.CurrencyRateController.currentCurrency,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
   ticker: state.engine.backgroundState.NetworkController.provider.ticker,
+  type: state.engine.backgroundState.NetworkController.provider.type,
   network: state.engine.backgroundState.NetworkController.network,
   swapsIsLive: swapsLivenessSelector(state),
 });

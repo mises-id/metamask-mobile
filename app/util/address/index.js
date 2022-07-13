@@ -10,6 +10,10 @@ import { strings } from '../../../locales/i18n';
 import { tlc } from '../general';
 import punycode from 'punycode/punycode';
 import { KeyringTypes } from '@metamask/controllers';
+import {
+  MISES_TRUNCATED_ADDRESS_START_CHARS,
+  shortenAddress,
+} from '../../core/misesController/misesNetwork.util';
 
 /**
  * Returns full checksummed address
@@ -32,7 +36,7 @@ export function renderFullAddress(address) {
 export const formatAddress = (rawAddress, type) => {
   let formattedAddress = rawAddress;
 
-  if (!isValidAddress(rawAddress)) {
+  if (!isValidAddress(rawAddress) && rawAddress.indexOf('mises') === -1) {
     return rawAddress;
   }
 
@@ -40,6 +44,11 @@ export const formatAddress = (rawAddress, type) => {
     formattedAddress = renderShortAddress(rawAddress);
   } else if (type && type === 'mid') {
     formattedAddress = renderSlightlyLongAddress(rawAddress);
+  } else if (type && type === 'misesShort') {
+    formattedAddress = shortenAddress(
+      rawAddress,
+      MISES_TRUNCATED_ADDRESS_START_CHARS,
+    );
   } else {
     formattedAddress = renderFullAddress(rawAddress);
   }

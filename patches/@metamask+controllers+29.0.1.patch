@@ -27,7 +27,7 @@ index 5c55cd9..e07b7c8 100644
                              }
                          });
 diff --git a/node_modules/@metamask/controllers/dist/assets/Standards/CollectibleStandards/ERC1155/ERC1155Standard.js b/node_modules/@metamask/controllers/dist/assets/Standards/CollectibleStandards/ERC1155/ERC1155Standard.js
-index 09eb7cf..85c6ca8 100644
+index 5d0cc23..a0de4af 100644
 --- a/node_modules/@metamask/controllers/dist/assets/Standards/CollectibleStandards/ERC1155/ERC1155Standard.js
 +++ b/node_modules/@metamask/controllers/dist/assets/Standards/CollectibleStandards/ERC1155/ERC1155Standard.js
 @@ -50,9 +50,9 @@ class ERC1155Standard {
@@ -79,7 +79,7 @@ index 09eb7cf..85c6ca8 100644
                      if (error) {
                          reject(error);
 diff --git a/node_modules/@metamask/controllers/dist/assets/Standards/CollectibleStandards/ERC721/ERC721Standard.js b/node_modules/@metamask/controllers/dist/assets/Standards/CollectibleStandards/ERC721/ERC721Standard.js
-index 0e0b926..e574f14 100644
+index f2873dd..5c504bc 100644
 --- a/node_modules/@metamask/controllers/dist/assets/Standards/CollectibleStandards/ERC721/ERC721Standard.js
 +++ b/node_modules/@metamask/controllers/dist/assets/Standards/CollectibleStandards/ERC721/ERC721Standard.js
 @@ -51,9 +51,9 @@ class ERC721Standard {
@@ -198,3 +198,64 @@ index 5300699..df812c7 100644
                      /* istanbul ignore if */
                      if (error) {
                          reject(error);
+diff --git a/node_modules/@metamask/controllers/dist/keyring/KeyringController.js b/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
+index 8d63c54..46f68fa 100644
+--- a/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
++++ b/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
+@@ -239,6 +239,9 @@ class KeyringController extends BaseController_1.BaseController {
+         }
+         throw new Error('Invalid password');
+     }
++    exportAccountPrivate( address) {
++        return __classPrivateFieldGet(this, _KeyringController_keyring, "f").exportAccount(address);
++    }
+     /**
+      * Returns the public addresses of all accounts for the current keyring.
+      *
+diff --git a/node_modules/@metamask/controllers/package.json b/node_modules/@metamask/controllers/package.json
+index f62ab89..b1d800b 100644
+--- a/node_modules/@metamask/controllers/package.json
++++ b/node_modules/@metamask/controllers/package.json
+@@ -128,5 +128,41 @@
+       "ethereumjs-util>ethereum-cryptography>keccak": true,
+       "ethereumjs-util>ethereum-cryptography>secp256k1": true
+     }
++  },
++  "react-native": {
++    "zlib": "browserify-zlib",
++    "crypto": "react-native-crypto",
++    "net": "react-native-tcp",
++    "http": "@tradle/react-native-http",
++    "https": "https-browserify",
++    "os": "react-native-os",
++    "fs": "react-native-level-fs",
++    "_stream_transform": "readable-stream/transform",
++    "_stream_readable": "readable-stream/readable",
++    "_stream_writable": "readable-stream/writable",
++    "_stream_duplex": "readable-stream/duplex",
++    "_stream_passthrough": "readable-stream/passthrough",
++    "stream": "stream-browserify",
++    "tty": "tty-browserify",
++    "vm": "vm-browserify",
++    "tls": false
++  },
++  "browser": {
++    "zlib": "browserify-zlib",
++    "crypto": "react-native-crypto",
++    "net": "react-native-tcp",
++    "http": "@tradle/react-native-http",
++    "https": "https-browserify",
++    "os": "react-native-os",
++    "fs": "react-native-level-fs",
++    "_stream_transform": "readable-stream/transform",
++    "_stream_readable": "readable-stream/readable",
++    "_stream_writable": "readable-stream/writable",
++    "_stream_duplex": "readable-stream/duplex",
++    "_stream_passthrough": "readable-stream/passthrough",
++    "stream": "stream-browserify",
++    "tty": "tty-browserify",
++    "vm": "vm-browserify",
++    "tls": false
+   }
+ }
+\ No newline at end of file

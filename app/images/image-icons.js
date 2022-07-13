@@ -7,6 +7,7 @@ import FTM from './fantom.png';
 import ETHEREUM from './eth-logo.png';
 import BNB from './binance.png';
 import AVAX from './avalanche.png';
+import MISES from './mises-token.jpg';
 
 export default {
   PALM,
@@ -18,4 +19,5 @@ export default {
   BNB,
   AETH,
   AVAX,
+  MISES,
 };
