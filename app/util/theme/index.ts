@@ -132,3 +132,9 @@ export const useAssetFromTheme = (light: any, dark: any) => {
 
   return asset;
 };
+
+export const useMisesNetwork = (Engine: any): boolean => {
+  const { NetworkController } = Engine.context as any;
+  const { provider } = NetworkController.state;
+  return provider.type === 'mises';
+};

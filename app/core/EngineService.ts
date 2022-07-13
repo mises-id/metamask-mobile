@@ -1,3 +1,4 @@
+import Analytics from './Analytics';
 import UntypedEngine from './Engine';
 
 const UPDATE_BG_STATE_KEY = 'UPDATE_BG_STATE';
@@ -27,7 +28,6 @@ class EngineService {
       { name: 'TokenDetectionController' },
       { name: 'CollectibleDetectionController' },
       { name: 'KeyringController' },
-      { name: 'AccountTrackerController' },
       { name: 'NetworkController' },
       { name: 'PhishingController' },
       { name: 'PreferencesController' },

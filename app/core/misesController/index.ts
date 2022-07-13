@@ -23,6 +23,7 @@ import {
   shortenAddress,
 } from './misesNetwork.util';
 import AnalyticsV2 from '../../util/analyticsV2';
+import Analytics from '../Analytics';
 export const MISES_POINT = 'http://127.0.0.1:26657';
 export interface misesBalance {
   amount: string;
@@ -121,24 +122,34 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   /**
    * 1. Get all accounts
    * 2.Get mises balance by account number
-   * @returns misesAccount list
    */
-  async getAccountMisesBalance(): Promise<accounts> {
-    const keyringList = await this.getKeyringAccounts();
-    const accountList = this.getAccountList();
-    const accounts = {} as accounts;
-    keyringList.forEach(async (val) => {
-      const misesBalance: misesBalance = await this.getUserBalance(val);
-      const user = await this.getMisesUser(val);
-      const cacheObj = accountList[val] || {};
-      accounts[val] = {
-        ...cacheObj,
-        address: val,
-        misesBalance,
-        misesId: user.address(),
-      };
-    });
-    return accounts;
+  async getAccountMisesBalance(): Promise<void> {
+    try {
+      const keyringList = await this.getKeyringAccounts();
+      const accountList = this.getAccountList();
+      const accounts = {} as accounts;
+      const promiseAccount = keyringList.map(async (val) => {
+        const misesBalance: misesBalance = await this.getUserBalance(val);
+        const user = await this.getMisesUser(val);
+        const cacheObj = accountList[val] || {};
+        return {
+          ...cacheObj,
+          address: val,
+          misesBalance,
+          misesId: user.address(),
+        };
+      });
+      const res = await Promise.all(promiseAccount);
+      res.forEach((val) => (accounts[val.address] = val));
+      this.update({
+        accountList,
+      });
+    } catch (error) {
+      Analytics.trackEventWithParameters('getAccountMisesBalanceError', {
+        getAccountMisesBalanceError: error,
+      });
+      return Promise.reject(error);
+    }
   }
   /**
    * @returns mises Account list
@@ -477,13 +488,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }
   disconnect({ appid, userid }: { appid: string; userid: string }) {
     return this.#misesSdk.disconnect(appid, userid);
-  }
-
-  async getBalanceList() {
-    const accountList = await this.getAccountMisesBalance();
-    this.update({
-      accountList,
-    });
   }
 
   async addressToMisesId(address: string) {

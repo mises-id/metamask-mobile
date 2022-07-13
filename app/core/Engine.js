@@ -371,7 +371,6 @@ class Engine {
         context[controller.name] = controller;
         return context;
       }, {});
-
       const {
         CollectiblesController: collectibles,
         KeyringController: keyring,
@@ -780,7 +779,7 @@ export default {
       TokensController,
       TokenDetectionController,
       CollectibleDetectionController,
-      misesController,
+      MisesController,
     } = instance.datamodel.state;
 
     // normalize `null` currencyRate to `0`
@@ -814,7 +813,7 @@ export default {
       GasFeeController,
       TokenDetectionController,
       CollectibleDetectionController,
-      misesController,
+      MisesController,
     };
   },
   get datamodel() {
