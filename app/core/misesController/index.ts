@@ -23,7 +23,6 @@ import {
   shortenAddress,
 } from './misesNetwork.util';
 import AnalyticsV2 from '../../util/analyticsV2';
-import Analytics from '../Analytics';
 export const MISES_POINT = 'http://127.0.0.1:26657';
 export interface misesBalance {
   amount: string;
