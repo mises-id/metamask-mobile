@@ -39,7 +39,8 @@ import StyledButton from '../StyledButton';
 import ClipboardManager from '../../../core/ClipboardManager';
 import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
-
+import MisesAddress from '../MisesAddress';
+import Engine from '../../../core/Engine';
 const createStyles = (colors) =>
   StyleSheet.create({
     wrapper: {
@@ -132,6 +133,10 @@ class ReceiveRequest extends PureComponent {
      */
     ticker: PropTypes.string,
     /**
+     * Native asset ticker
+     */
+    type: PropTypes.string,
+    /**
      * Prompts protect wallet modal
      */
     protectWalletModalVisible: PropTypes.func,
@@ -149,8 +154,19 @@ class ReceiveRequest extends PureComponent {
   state = {
     qrModalVisible: false,
     buyModalVisible: false,
+    misesAccount: { misesId: '' },
   };
-
+  componentDidMount() {
+    const isMises = this.props.type === 'mises';
+    isMises &&
+      Engine.context.MisesController.getMisesUserInfo(
+        this.props.selectedAddress,
+      ).then((res) => {
+        this.setState({
+          misesAccount: res,
+        });
+      });
+  }
   /**
    * Share current account public address
    */
@@ -198,8 +214,9 @@ class ReceiveRequest extends PureComponent {
   };
 
   copyAccountToClipboard = async () => {
-    const { selectedAddress } = this.props;
-    ClipboardManager.setString(selectedAddress);
+    const { selectedAddress, type } = this.props;
+    const misesId = this.state.misesAccount.misesId;
+    ClipboardManager.setString(type === 'mises' ? misesId : selectedAddress);
     this.props.showAlert({
       isVisible: true,
       autodismiss: 1500,
@@ -246,7 +263,8 @@ class ReceiveRequest extends PureComponent {
   render() {
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
+    const isMises = this.props.type === 'mises';
+    const misesId = this.state.misesAccount.misesId;
     return (
       <SafeAreaView style={styles.wrapper}>
         <ModalDragger />
@@ -272,7 +290,11 @@ class ReceiveRequest extends PureComponent {
                   }}
                 >
                   <QRCode
-                    value={`ethereum:${this.props.selectedAddress}@${this.props.chainId}`}
+                    value={
+                      isMises
+                        ? `${misesId}@${this.props.chainId}`
+                        : `ethereum:${this.props.selectedAddress}@${this.props.chainId}`
+                    }
                     size={Dimensions.get('window').width / 2}
                     color={colors.text.default}
                     backgroundColor={colors.background.default}
@@ -305,10 +327,14 @@ class ReceiveRequest extends PureComponent {
             testID={'account-address'}
           >
             <Text>
-              <EthereumAddress
-                address={this.props.selectedAddress}
-                type={'short'}
-              />
+              {isMises ? (
+                <MisesAddress address={this.state.misesAccount.misesId} />
+              ) : (
+                <EthereumAddress
+                  address={this.props.selectedAddress}
+                  type={'short'}
+                />
+              )}
             </Text>
             <Text style={styles.copyButton} small>
               {strings('receive_request.copy')}
@@ -356,6 +382,7 @@ const mapStateToProps = (state) => ({
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
   network: state.engine.backgroundState.NetworkController.network,
   ticker: state.engine.backgroundState.NetworkController.provider.ticker,
+  type: state.engine.backgroundState.NetworkController.provider.type,
   selectedAddress:
     state.engine.backgroundState.PreferencesController.selectedAddress,
   receiveAsset: state.modals.receiveAsset,

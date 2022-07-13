@@ -30,7 +30,11 @@ import { getTicker } from '../../../util/transactions';
 import OnboardingWizard from '../../UI/OnboardingWizard';
 import ErrorBoundary from '../ErrorBoundary';
 import { DrawerContext } from '../../Nav/Main/MainNavigator';
-import { useAppThemeFromContext, mockTheme, useMisesNetwork } from '../../../util/theme';
+import {
+  useAppThemeFromContext,
+  mockTheme,
+  useMisesNetwork,
+} from '../../../util/theme';
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
