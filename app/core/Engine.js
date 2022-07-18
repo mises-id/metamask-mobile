@@ -23,6 +23,7 @@ import {
   TokenDetectionController,
   CollectibleDetectionController,
   ApprovalController,
+  NetworkController,
 } from '@metamask/controllers';
 import SwapsController, { swapsUtils } from '@metamask/swaps-controller';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -41,7 +42,6 @@ import NotificationManager from './NotificationManager';
 import Logger from '../util/Logger';
 import { LAST_INCOMING_TX_BLOCK_INFO } from '../constants/storage';
 import { isZero } from '../util/lodash';
-import NetworkController from './misesNetworkController';
 import MisesController from './misesController';
 
 const NON_EMPTY = 'NON_EMPTY';

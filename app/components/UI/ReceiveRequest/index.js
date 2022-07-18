@@ -292,7 +292,7 @@ class ReceiveRequest extends PureComponent {
                   <QRCode
                     value={
                       isMises
-                        ? `${misesId}@${this.props.chainId}`
+                        ? `network:${misesId}@${this.props.chainId}`
                         : `ethereum:${this.props.selectedAddress}@${this.props.chainId}`
                     }
                     size={Dimensions.get('window').width / 2}
@@ -359,14 +359,16 @@ class ReceiveRequest extends PureComponent {
                 })}
               </StyledButton>
             )}
-            <StyledButton
-              type={'normal'}
-              onPress={this.onReceive}
-              containerStyle={styles.actionButton}
-              testID={'request-payment-button'}
-            >
-              {strings('receive_request.request_payment')}
-            </StyledButton>
+            {!isMises ? (
+              <StyledButton
+                type={'normal'}
+                onPress={this.onReceive}
+                containerStyle={styles.actionButton}
+                testID={'request-payment-button'}
+              >
+                {strings('receive_request.request_payment')}
+              </StyledButton>
+            ) : null}
           </View>
         </View>
 

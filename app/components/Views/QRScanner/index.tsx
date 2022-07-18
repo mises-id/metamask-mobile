@@ -170,7 +170,26 @@ const QRScanner = ({ navigation, route }: Props) => {
           onScanSuccess(data, handledContent);
           return;
         }
-
+        if (
+          content.split('network:').length > 1 ||
+          content.startsWith('mises')
+        ) {
+          const handledContent = content.startsWith('mises')
+            ? `network:${content}@${currentChainId}`
+            : content;
+          const dataparse = /network:([a-zA-Z0-9]{44})@(46)/.exec(
+            handledContent,
+          ) as any[];
+          data = {
+            scheme: 'mises',
+            target_address: dataparse[1],
+            chain_id: dataparse[2],
+          };
+          const action = 'send-mises';
+          data = { ...data, action };
+          end();
+          onScanSuccess(data, handledContent);
+        }
         // Checking if it can be handled like deeplinks
         const handledByDeeplink = SharedDeeplinkManager.parse(content, {
           origin: AppConstants.DEEPLINKS.ORIGIN_QR_CODE,

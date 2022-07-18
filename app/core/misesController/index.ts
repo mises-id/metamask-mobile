@@ -50,7 +50,7 @@ interface misesState extends BaseState {
   transformFlag: 'loading' | 'error' | 'success';
 }
 interface misesGasfee {
-  gasWanted: string;
+  gasWanted: string | undefined;
 }
 interface indexed extends IndexedTx {
   raw: any[];
@@ -98,7 +98,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     this.#misesUser = this.#misesSdk.userMgr();
     this.#misesAppMgr = this.#misesSdk.appMgr();
     this.#misesGasfee = {
-      gasWanted: '0',
+      gasWanted: undefined,
     };
     this.defaultState = {
       accountList: {},
@@ -518,8 +518,8 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       amount,
       denom: 'mis',
     });
-    console.warn(simulate, 'simulate');
-    console.warn(memo, 'getMemo');
+    // console.warn(simulate, 'simulate');
+    // console.warn(memo, 'getMemo');
     if (!simulate) {
       try {
         const res: DeliverTxResponse | undefined = await activeUser?.sendUMIS(
@@ -543,7 +543,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     }
 
     try {
-      if (this.#misesGasfee) {
+      if (this.#misesGasfee.gasWanted) {
         console.warn('get cache misesGasfee');
         return this.#misesGasfee;
       }
@@ -556,12 +556,11 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       );
 
       const proposeGasprice = await this.gasPriceAndLimit();
-
       const gasprice = new BigNumber(proposeGasprice)
         .times(new BigNumber(res?.gasWanted || 67751))
         .toString();
 
-      console.warn(proposeGasprice, res, 'propose_gasprice');
+      // console.warn(proposeGasprice, res, 'propose_gasprice');
       const gasWanted = this.#coinDefine.fromCoin({
         amount: gasprice,
         denom: 'umis',
@@ -571,10 +570,12 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         ...res,
         gasWanted: toCoinMIS.amount,
       };
-      return res;
+      return this.#misesGasfee;
     } catch (error) {
-      console.warn(error, 'err-simulate');
-      return false;
+      this.#misesGasfee = {
+        gasWanted: '0.000067',
+      };
+      return Promise.resolve(this.#misesGasfee);
     }
   }
 

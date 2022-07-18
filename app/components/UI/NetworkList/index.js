@@ -35,6 +35,7 @@ import {
   NETWORK_SCROLL_ID,
 } from '../../../constants/test-ids';
 import ImageIcon from '../ImageIcon';
+import { setPrimaryCurrency } from '../../../actions/settings';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -171,6 +172,10 @@ export class NetworkList extends PureComponent {
      * react-navigation object used for switching between screens
      */
     navigation: PropTypes.object,
+    /**
+     * Called to set primary currency
+     */
+    setPrimaryCurrency: PropTypes.func,
   };
 
   getOtherNetworks = () => getAllNetworks().slice(2);
@@ -194,10 +199,12 @@ export class NetworkList extends PureComponent {
   };
 
   onNetworkChange = (type) => {
-    this.handleNetworkSelected(type, ETH, type);
+    const ticker = type === 'mises' ? 'MIS' : ETH;
+    this.handleNetworkSelected(type, ticker, type);
     const { NetworkController, CurrencyRateController } = Engine.context;
-    CurrencyRateController.setNativeCurrency('ETH');
+    CurrencyRateController.setNativeCurrency(ticker);
     NetworkController.setProviderType(type);
+    this.props.setPrimaryCurrency(ticker);
     this.props.thirdPartyApiMode &&
       setTimeout(() => {
         Engine.refreshTransactionHistory();
@@ -456,6 +463,10 @@ const mapStateToProps = (state) => ({
   networkOnboardedState: state.networkOnboarded.networkOnboardedState,
 });
 
+const mapDispatchToProps = (dispatch) => ({
+  setPrimaryCurrency: (primaryCurrency) =>
+    dispatch(setPrimaryCurrency(primaryCurrency)),
+});
 NetworkList.contextType = ThemeContext;
 
-export default connect(mapStateToProps)(NetworkList);
+export default connect(mapStateToProps, mapDispatchToProps)(NetworkList);

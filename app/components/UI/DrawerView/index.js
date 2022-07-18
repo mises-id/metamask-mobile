@@ -76,6 +76,7 @@ import {
   networkSwitched,
 } from '../../../actions/onboardNetwork';
 import Routes from '../../../constants/navigation/Routes';
+import MisesAddress from '../MisesAddress';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -336,6 +337,14 @@ class DrawerView extends PureComponent {
      * List of accounts from the AccountTrackerController
      */
     accounts: PropTypes.object,
+    /**
+     * List of accounts from the AccountTrackerController
+     */
+    networkProvider: PropTypes.object,
+    /**
+     * List of accounts from the AccountTrackerController
+     */
+    accountList: PropTypes.object,
     /**
      * List of accounts from the PreferencesController
      */
@@ -1164,6 +1173,8 @@ class DrawerView extends PureComponent {
       networkOnboardedState,
       switchedNetwork,
       networkModalVisible,
+      accountList,
+      networkProvider,
     } = this.props;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
@@ -1182,6 +1193,7 @@ class DrawerView extends PureComponent {
       ens: ensFromState,
       ...identities[selectedAddress],
       ...accounts[selectedAddress],
+      ...accountList[selectedAddress],
     };
     const { name, ens } = account;
     account.balance =
@@ -1198,7 +1210,7 @@ class DrawerView extends PureComponent {
     const checkIfCustomNetworkExists = networkOnboardedState.filter(
       (item) => item.network === sanitizeUrl(switchedNetwork.networkUrl),
     );
-
+    const isMises = networkProvider.type === 'mises';
     return (
       <View style={styles.wrapper} testID={'drawer-screen'}>
         <ScrollView>
@@ -1239,11 +1251,18 @@ class DrawerView extends PureComponent {
                   <Icon name="caret-down" size={24} style={styles.caretDown} />
                 </View>
                 <Text style={styles.accountBalance}>{fiatBalanceStr}</Text>
-                <EthereumAddress
-                  address={account.address}
-                  style={styles.accountAddress}
-                  type={'short'}
-                />
+                {isMises ? (
+                  <MisesAddress
+                    address={account.misesId}
+                    style={styles.accountAddress}
+                  />
+                ) : (
+                  <EthereumAddress
+                    address={account.address}
+                    style={styles.accountAddress}
+                    type={'short'}
+                  />
+                )}
                 {this.renderTag()}
               </TouchableOpacity>
             </View>
@@ -1460,6 +1479,7 @@ const mapStateToProps = (state) => ({
   selectedAddress:
     state.engine.backgroundState.PreferencesController.selectedAddress,
   accounts: state.engine.backgroundState.AccountTrackerController.accounts,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   identities: state.engine.backgroundState.PreferencesController.identities,
   frequentRpcList:
     state.engine.backgroundState.PreferencesController.frequentRpcList,

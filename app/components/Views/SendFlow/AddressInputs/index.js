@@ -15,6 +15,8 @@ import { strings } from '../../../../../locales/i18n';
 import Text from '../../../Base/Text';
 import { hasZeroWidthPoints } from '../../../../util/confusables';
 import { useAppThemeFromContext, mockTheme } from '../../../../util/theme';
+import { useSelector } from 'react-redux';
+import { shortenAddress } from '../../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -229,6 +231,14 @@ export const AddressTo = (props) => {
 
   const isInputFilled = toSelectedAddress?.length;
 
+  const accountList = useSelector(
+    (state) => state.engine.backgroundState.MisesController.accountList,
+  );
+  const providerType = useSelector(
+    (state) => state.engine.backgroundState.NetworkController.provider.type,
+  );
+  const isMises = providerType === 'mises';
+  const misesAccount = accountList[toSelectedAddress] || '';
   if (isConfirmScreen) {
     return (
       <View style={styles.wrapper}>
@@ -270,7 +280,9 @@ export const AddressTo = (props) => {
                     }
                     numberOfLines={1}
                   >
-                    {renderShortAddress(toSelectedAddress)}
+                    {isMises
+                      ? shortenAddress(misesAccount?.misesId)
+                      : renderShortAddress(toSelectedAddress)}
                   </Text>
                   <View
                     style={
@@ -390,7 +402,11 @@ export const AddressTo = (props) => {
                         }
                         numberOfLines={1}
                       >
-                        {renderShortAddress(toSelectedAddress)}
+                        {isMises
+                          ? shortenAddress(
+                              misesAccount.misesId ?? toSelectedAddress,
+                            )
+                          : renderShortAddress(toSelectedAddress)}
                       </Text>
                       <View
                         style={
@@ -428,7 +444,9 @@ export const AddressTo = (props) => {
                 />
               ) : (
                 <Text style={styles.textInput} numberOfLines={1}>
-                  {renderSlightlyLongAddress(toSelectedAddress, 4, 9)}
+                  {isMises
+                    ? shortenAddress(toSelectedAddress)
+                    : renderSlightlyLongAddress(toSelectedAddress, 4, 9)}
                 </Text>
               )}
               {!!onClear && !isFromAddressBook && (
@@ -541,7 +559,6 @@ export const AddressFrom = (props) => {
   const isHardwareAccount = isQRHardwareAccount(fromAccountAddress);
   const { colors } = useAppThemeFromContext() || mockTheme;
   const styles = createStyles(colors);
-
   return (
     <View style={styles.wrapper}>
       <View style={styles.label}>

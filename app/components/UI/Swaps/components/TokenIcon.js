@@ -9,6 +9,7 @@ import imageIcons from '../../../../images/image-icons';
 
 /* eslint-disable import/no-commonjs */
 const ethLogo = require('../../../../images/eth-logo.png');
+const misesLogo = require('../../../../images/mises-token.jpg');
 /* eslint-enable import/no-commonjs */
 
 const REGULAR_SIZE = 24;
@@ -97,6 +98,9 @@ function TokenIcon({ symbol, icon, medium, big, biggest, style }) {
   const getSource = useCallback(() => {
     if (symbol === 'ETH') {
       return ethLogo;
+    }
+    if (symbol === 'MIS') {
+      return misesLogo;
     }
 
     if (Object.keys(imageIcons).includes(symbol)) {

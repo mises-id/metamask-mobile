@@ -147,7 +147,7 @@ function getTokenTransfer(args) {
     renderTotalGas: `${renderFromWei(totalGas)} ${ticker}`,
     renderValue: renderToken,
   };
-  if (primaryCurrency === 'ETH') {
+  if (['ETH', 'MIS'].includes(primaryCurrency)) {
     transactionDetails = {
       ...transactionDetails,
       summaryAmount: renderToken,
@@ -221,7 +221,7 @@ function getCollectibleTransfer(args) {
 
   let transactionDetails = { renderValue: renderCollectible };
 
-  if (primaryCurrency === 'ETH') {
+  if (['ETH', 'MIS'].includes(primaryCurrency)) {
     transactionDetails = {
       ...transactionDetails,
       summaryAmount: renderCollectible,
@@ -324,7 +324,7 @@ function decodeIncomingTransfer(args) {
     transactionHash,
     transactionType,
   };
-  if (primaryCurrency === 'ETH') {
+  if (['ETH', 'MIS'].includes(primaryCurrency)) {
     transactionDetails = {
       ...transactionDetails,
       summaryAmount: renderToken,
@@ -455,7 +455,7 @@ function decodeTransferFromTx(args) {
     renderTotalGas: `${renderFromWei(totalGas)} ${ticker}`,
   };
 
-  if (primaryCurrency === 'ETH') {
+  if (['ETH', 'MIS'].includes(primaryCurrency)) {
     transactionDetails = {
       ...transactionDetails,
       summaryAmount: renderCollectible,
@@ -540,7 +540,7 @@ function decodeDeploymentTx(args) {
     renderTotalGas: `${renderFromWei(totalGas)} ${ticker}`,
   };
 
-  if (primaryCurrency === 'ETH') {
+  if (['ETH', 'MIS'].includes(primaryCurrency)) {
     transactionDetails = {
       ...transactionDetails,
       summaryAmount: `${renderFromWei(value)} ${ticker}`,
@@ -633,7 +633,7 @@ function decodeConfirmTx(args) {
     transactionType,
   };
 
-  if (primaryCurrency === 'ETH') {
+  if (['ETH', 'MIS'].includes(primaryCurrency)) {
     transactionDetails = {
       ...transactionDetails,
       summaryAmount: renderTotalEth,
@@ -808,7 +808,7 @@ function decodeSwapsTx(args) {
     renderTotalGas: `${totalEthGas} ${ticker}`,
   };
 
-  if (primaryCurrency === 'ETH') {
+  if (['ETH', 'MIS'].includes(primaryCurrency)) {
     transactionDetails = {
       ...transactionDetails,
       summaryAmount: isSwap

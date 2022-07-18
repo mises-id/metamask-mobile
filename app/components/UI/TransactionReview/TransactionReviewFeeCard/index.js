@@ -225,7 +225,8 @@ class TransactionReviewFeeCard extends PureComponent {
     let primaryAmount;
     let primaryNetworkFee;
     let primaryTotalAmount;
-    const showNativeCurrency = primaryCurrency === 'ETH' || !isMainnet;
+    const showNativeCurrency =
+      ['ETH', 'MIS'].includes(primaryCurrency) || !isMainnet;
     if (showNativeCurrency) {
       amount = fiat;
       networkFee = totalGasFiat;

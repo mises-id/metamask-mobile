@@ -84,6 +84,10 @@ class AccountList extends PureComponent {
      */
     accounts: PropTypes.object,
     /**
+     * Map of accounts to information objects including balances
+     */
+    accountList: PropTypes.object,
+    /**
      * An object containing each identity in the format address => account
      */
     identities: PropTypes.object,
@@ -91,6 +95,10 @@ class AccountList extends PureComponent {
      * A string representing the selected address => account
      */
     selectedAddress: PropTypes.string,
+    /**
+     * Network provider type as mainnet
+     */
+    providerType: PropTypes.string,
     /**
      * An object containing all the keyrings
      */
@@ -340,8 +348,15 @@ class AccountList extends PureComponent {
   };
 
   getAccounts() {
-    const { accounts, identities, selectedAddress, keyrings, getBalanceError } =
-      this.props;
+    const {
+      accounts,
+      identities,
+      selectedAddress,
+      keyrings,
+      getBalanceError,
+      providerType,
+      accountList,
+    } = this.props;
     // This is a temporary fix until we can read the state from @metamask/controllers
     const allKeyrings =
       keyrings && keyrings.length
@@ -369,7 +384,12 @@ class AccountList extends PureComponent {
           identityAddressChecksummed,
         );
         let balance = 0x0;
-        if (accounts[identityAddressChecksummed]) {
+        if (providerType === 'mises') {
+          if (accounts[identityAddressChecksummed]) {
+            balance =
+              accountList[identityAddressChecksummed]?.misesBalance?.amount;
+          }
+        } else if (accounts[identityAddressChecksummed]) {
           balance = accounts[identityAddressChecksummed].balance;
         }
 
@@ -477,9 +497,11 @@ AccountList.contextType = ThemeContext;
 
 const mapStateToProps = (state) => ({
   accounts: state.engine.backgroundState.AccountTrackerController.accounts,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   thirdPartyApiMode: state.privacy.thirdPartyApiMode,
   keyrings: state.engine.backgroundState.KeyringController.keyrings,
   network: state.engine.backgroundState.NetworkController.network,
+  providerType: state.engine.backgroundState.NetworkController.provider.type,
 });
 
 export default connect(mapStateToProps)(AccountList);

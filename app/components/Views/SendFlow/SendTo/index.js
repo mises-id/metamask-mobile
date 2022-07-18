@@ -52,6 +52,7 @@ import {
   ENTER_ALIAS_INPUT_BOX_ID,
 } from '../../../../constants/test-ids';
 import Routes from '../../../../constants/navigation/Routes';
+import BigNumber from 'bignumber.js';
 
 const { hexToBN } = util;
 const createStyles = (colors) =>
@@ -191,6 +192,10 @@ class SendFlow extends PureComponent {
      */
     accounts: PropTypes.object,
     /**
+     * Map of accounts to information objects including balances
+     */
+    accountList: PropTypes.object,
+    /**
      * Map representing the address book
      */
     addressBook: PropTypes.object,
@@ -293,6 +298,7 @@ class SendFlow extends PureComponent {
       providerType,
       route,
       isPaymentRequest,
+      accountList,
     } = this.props;
     const { fromAccountName } = this.state;
     this.updateNavBar();
@@ -300,18 +306,33 @@ class SendFlow extends PureComponent {
     navigation.setParams({ providerType, isPaymentRequest });
     const networkAddressBook = addressBook[network] || {};
     const ens = await doENSReverseLookup(selectedAddress, network);
-    const fromAccountBalance = `${renderFromWei(
-      accounts[selectedAddress].balance,
-    )} ${getTicker(ticker)}`;
+    if (providerType === 'mises') {
+      const { amount, denom } =
+        accountList[selectedAddress]?.misesBalance || {};
+      const fromAccountBalance = `${amount} ${getTicker(denom)}`;
+      setTimeout(() => {
+        this.setState({
+          fromAccountName: ens || fromAccountName,
+          fromAccountBalance,
+          balanceIsZero: new BigNumber(amount).isZero(),
+          inputWidth: { width: '100%' },
+        });
+      }, 100);
+    } else {
+      const fromAccountBalance = `${renderFromWei(
+        accounts[selectedAddress].balance,
+      )} ${getTicker(ticker)}`;
 
-    setTimeout(() => {
-      this.setState({
-        fromAccountName: ens || fromAccountName,
-        fromAccountBalance,
-        balanceIsZero: hexToBN(accounts[selectedAddress].balance).isZero(),
-        inputWidth: { width: '100%' },
-      });
-    }, 100);
+      setTimeout(() => {
+        this.setState({
+          fromAccountName: ens || fromAccountName,
+          fromAccountBalance,
+          balanceIsZero: hexToBN(accounts[selectedAddress].balance).isZero(),
+          inputWidth: { width: '100%' },
+        });
+      }, 100);
+    }
+
     if (!Object.keys(networkAddressBook).length) {
       setTimeout(() => {
         this.addressToInputRef &&
@@ -344,23 +365,37 @@ class SendFlow extends PureComponent {
   };
 
   onAccountChange = async (accountAddress) => {
-    const { identities, ticker, accounts } = this.props;
+    const { identities, ticker, accounts, providerType, accountList } =
+      this.props;
     const { name } = identities[accountAddress];
     const { PreferencesController } = Engine.context;
-    const fromAccountBalance = `${renderFromWei(
-      accounts[accountAddress].balance,
-    )} ${getTicker(ticker)}`;
     const ens = await doENSReverseLookup(accountAddress);
     const fromAccountName = ens || name;
     PreferencesController.setSelectedAddress(accountAddress);
     // If new account doesn't have the asset
     this.props.setSelectedAsset(getEther(ticker));
-    this.setState({
-      fromAccountName,
-      fromAccountBalance,
-      fromSelectedAddress: accountAddress,
-      balanceIsZero: hexToBN(accounts[accountAddress].balance).isZero(),
-    });
+    if (providerType === 'mises') {
+      const { amount, denom } = accountList[accountAddress]?.misesBalance || {};
+      const fromAccountBalance = `${amount} ${getTicker(denom)}`;
+      setTimeout(() => {
+        this.setState({
+          fromAccountName,
+          fromAccountBalance,
+          fromSelectedAddress: accountAddress,
+          balanceIsZero: new BigNumber(amount).isZero(),
+        });
+      }, 100);
+    } else {
+      const fromAccountBalance = `${renderFromWei(
+        accounts[accountAddress].balance,
+      )} ${getTicker(ticker)}`;
+      this.setState({
+        fromAccountName,
+        fromAccountBalance,
+        fromSelectedAddress: accountAddress,
+        balanceIsZero: hexToBN(accounts[accountAddress].balance).isZero(),
+      });
+    }
     this.toggleFromAccountModal();
   };
   /**
@@ -456,6 +491,11 @@ class SendFlow extends PureComponent {
 				isOnlyWarning = true;
 			}
 			*/
+    } else if (toSelectedAddress && toSelectedAddress.startsWith('mises')) {
+      toAddressName = toSelectedAddress;
+      // If not in the addressBook nor user accounts
+      addToAddressToAddressBook = true;
+      toSelectedAddressReady = true;
     } else if (isENS(toSelectedAddress)) {
       toEnsName = toSelectedAddress;
       confusableCollection = collectConfusables(toEnsName);
@@ -566,7 +606,11 @@ class SendFlow extends PureComponent {
     this.props.navigation.navigate('QRScanner', {
       onScanSuccess: (meta) => {
         if (meta.target_address) {
-          this.onToSelectedAddressChange(meta.target_address);
+          const findAddress = Object.keys(this.props.accountList).find(
+            (val) =>
+              this.props.accountList[val].misesId === meta.target_address,
+          );
+          findAddress && this.onToSelectedAddressChange(findAddress);
         }
       },
     });
@@ -805,7 +849,8 @@ class SendFlow extends PureComponent {
           <View style={styles.warningContainer}>
             <WarningMessage
               warningMessage={
-                toSelectedAddress.substring(0, 2) === '0x'
+                toSelectedAddress.substring(0, 2) === '0x' ||
+                toSelectedAddress.substring(0, 5) === 'mises'
                   ? strings('transaction.address_invalid')
                   : strings('transaction.ens_not_found')
               }
@@ -923,6 +968,7 @@ SendFlow.contextType = ThemeContext;
 
 const mapStateToProps = (state) => ({
   accounts: state.engine.backgroundState.AccountTrackerController.accounts,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   addressBook: state.engine.backgroundState.AddressBookController.addressBook,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
   selectedAddress:

@@ -333,7 +333,8 @@ const EditGasFeeLegacy = ({
   }, [error, styles, colors]);
 
   const isMainnet = isMainnetByChainId(chainId);
-  const nativeCurrencySelected = primaryCurrency === 'ETH' || !isMainnet;
+  const nativeCurrencySelected =
+    ['ETH', 'MIS'].includes(primaryCurrency) || !isMainnet;
   let gasFeePrimary, gasFeeSecondary;
   if (nativeCurrencySelected) {
     gasFeePrimary = gasFeeNative;

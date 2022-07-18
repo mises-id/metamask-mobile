@@ -190,6 +190,10 @@ class Settings extends PureComponent {
      */
     setHideZeroBalanceTokens: PropTypes.func,
     /**
+     * Network ticker
+     */
+    ticker: PropTypes.string,
+    /**
      * App theme
      */
     // appTheme: PropTypes.string,
@@ -250,18 +254,33 @@ class Settings extends PureComponent {
       { value: 'DuckDuckGo', label: 'DuckDuckGo', key: 'DuckDuckGo' },
       { value: 'Google', label: 'Google', key: 'Google' },
     ];
-    this.primaryCurrencyOptions = [
-      {
-        value: 'ETH',
-        label: strings('app_settings.primary_currency_text_first'),
-        key: 'Native',
-      },
-      {
-        value: 'Fiat',
-        label: strings('app_settings.primary_currency_text_second'),
-        key: 'Fiat',
-      },
-    ];
+    if (this.props.ticker === 'mises') {
+      this.primaryCurrencyOptions = [
+        {
+          value: 'MIS',
+          label: strings('app_settings.primary_currency_text_first'),
+          key: 'Native',
+        },
+        {
+          value: 'Fiat',
+          label: strings('app_settings.primary_currency_text_second'),
+          key: 'Fiat',
+        },
+      ];
+    } else {
+      this.primaryCurrencyOptions = [
+        {
+          value: 'ETH',
+          label: strings('app_settings.primary_currency_text_first'),
+          key: 'Native',
+        },
+        {
+          value: 'Fiat',
+          label: strings('app_settings.primary_currency_text_second'),
+          key: 'Fiat',
+        },
+      ];
+    }
   };
 
   componentDidUpdate = () => {
@@ -341,7 +360,7 @@ class Settings extends PureComponent {
                   textFirst={strings(
                     'app_settings.primary_currency_text_first',
                   )}
-                  valueFirst={'ETH'}
+                  valueFirst={this.primaryCurrencyOptions[0].value}
                   textSecond={strings(
                     'app_settings.primary_currency_text_second',
                   )}
@@ -475,6 +494,7 @@ const mapStateToProps = (state) => ({
   selectedAddress:
     state.engine.backgroundState.PreferencesController.selectedAddress,
   hideZeroBalanceTokens: state.settings.hideZeroBalanceTokens,
+  ticker: state.engine.backgroundState.NetworkController.provider.ticker,
   // appTheme: state.user.appTheme,
 });
 

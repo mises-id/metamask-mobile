@@ -225,7 +225,7 @@ class Tokens extends PureComponent {
 
     // render balances according to primary currency
     let mainBalance, secondaryBalance;
-    if (primaryCurrency === 'ETH') {
+    if (['ETH', 'MIS'].includes(primaryCurrency)) {
       mainBalance = balanceValue;
       secondaryBalance = balanceFiat;
     } else {
@@ -239,15 +239,16 @@ class Tokens extends PureComponent {
     }
 
     asset = { logo, ...asset, balance, balanceFiat };
+    const isMain = asset.isETH || asset.symbol === 'MIS';
     return (
       <AssetElement
         key={itemAddress || '0x'}
         testID={'asset'}
         onPress={this.onItemPress}
-        onLongPress={asset.isETH ? null : this.showRemoveMenu}
+        onLongPress={isMain ? null : this.showRemoveMenu}
         asset={asset}
       >
-        {asset.isETH ? (
+        {isMain ? (
           <NetworkMainAssetLogo
             big
             style={styles.ethLogo}
@@ -349,7 +350,6 @@ class Tokens extends PureComponent {
     const colors = this.context.colors || mockTheme.colors;
     const themeAppearance = this.context.themeAppearance;
     const styles = createStyles(colors);
-
     return (
       <View style={styles.wrapper} testID={'tokens'}>
         {tokens && tokens.length ? this.renderList() : this.renderEmpty()}

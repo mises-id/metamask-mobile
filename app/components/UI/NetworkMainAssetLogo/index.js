@@ -10,6 +10,11 @@ function NetworkMainAssetLogo({ chainId, ticker, style, big, biggest }) {
       <TokenIcon big={big} biggest={biggest} symbol={'ETH'} style={style} />
     );
   }
+  if (chainId === '46') {
+    return (
+      <TokenIcon big={big} biggest={biggest} symbol={'MIS'} style={style} />
+    );
+  }
   return (
     <TokenIcon big={big} biggest={biggest} symbol={ticker} style={style} />
   );

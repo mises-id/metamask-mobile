@@ -123,6 +123,11 @@ export async function getGasLimit(transaction) {
   const gas = hexToBN(estimation.gas);
   return { gas };
 }
+export async function misesGetGasLimit(misesId) {
+  const { MisesController } = Engine.context;
+  const estimation = await MisesController.setMisesBook(misesId, '0.001', true);
+  return { gas: estimation.gasWanted };
+}
 
 export function getValueFromWeiHex({
   value,

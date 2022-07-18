@@ -373,7 +373,8 @@ const EditGasFee1559 = ({
   );
 
   const isMainnet = isMainnetByChainId(chainId);
-  const nativeCurrencySelected = primaryCurrency === 'ETH' || !isMainnet;
+  const nativeCurrencySelected =
+    ['ETH', 'MIS'].includes(primaryCurrency) || !isMainnet;
   let gasFeePrimary,
     gasFeeMaxPrimary,
     maxFeePerGasPrimary,

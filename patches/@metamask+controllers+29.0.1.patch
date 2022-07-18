@@ -212,50 +212,55 @@ index 8d63c54..46f68fa 100644
      /**
       * Returns the public addresses of all accounts for the current keyring.
       *
-diff --git a/node_modules/@metamask/controllers/package.json b/node_modules/@metamask/controllers/package.json
-index f62ab89..b1d800b 100644
---- a/node_modules/@metamask/controllers/package.json
-+++ b/node_modules/@metamask/controllers/package.json
-@@ -128,5 +128,41 @@
-       "ethereumjs-util>ethereum-cryptography>keccak": true,
-       "ethereumjs-util>ethereum-cryptography>secp256k1": true
-     }
-+  },
-+  "react-native": {
-+    "zlib": "browserify-zlib",
-+    "crypto": "react-native-crypto",
-+    "net": "react-native-tcp",
-+    "http": "@tradle/react-native-http",
-+    "https": "https-browserify",
-+    "os": "react-native-os",
-+    "fs": "react-native-level-fs",
-+    "_stream_transform": "readable-stream/transform",
-+    "_stream_readable": "readable-stream/readable",
-+    "_stream_writable": "readable-stream/writable",
-+    "_stream_duplex": "readable-stream/duplex",
-+    "_stream_passthrough": "readable-stream/passthrough",
-+    "stream": "stream-browserify",
-+    "tty": "tty-browserify",
-+    "vm": "vm-browserify",
-+    "tls": false
-+  },
-+  "browser": {
-+    "zlib": "browserify-zlib",
-+    "crypto": "react-native-crypto",
-+    "net": "react-native-tcp",
-+    "http": "@tradle/react-native-http",
-+    "https": "https-browserify",
-+    "os": "react-native-os",
-+    "fs": "react-native-level-fs",
-+    "_stream_transform": "readable-stream/transform",
-+    "_stream_readable": "readable-stream/readable",
-+    "_stream_writable": "readable-stream/writable",
-+    "_stream_duplex": "readable-stream/duplex",
-+    "_stream_passthrough": "readable-stream/passthrough",
-+    "stream": "stream-browserify",
-+    "tty": "tty-browserify",
-+    "vm": "vm-browserify",
-+    "tls": false
-   }
+diff --git a/node_modules/@metamask/controllers/dist/network/NetworkController.d.ts b/node_modules/@metamask/controllers/dist/network/NetworkController.d.ts
+index 8c55e27..cce7006 100644
+--- a/node_modules/@metamask/controllers/dist/network/NetworkController.d.ts
++++ b/node_modules/@metamask/controllers/dist/network/NetworkController.d.ts
+@@ -2,7 +2,7 @@ import { BaseController, BaseConfig, BaseState } from '../BaseController';
+ /**
+  * Human-readable network name
+  */
+-export declare type NetworkType = 'kovan' | 'localhost' | 'mainnet' | 'rinkeby' | 'goerli' | 'ropsten' | 'rpc' | 'optimism' | 'optimismTest';
++export declare type NetworkType = 'kovan' | 'localhost' | 'mainnet' | 'rinkeby' | 'goerli' | 'ropsten' | 'rpc' | 'optimism' | 'optimismTest' | 'mises';
+ export declare enum NetworksChainId {
+     mainnet = "1",
+     kovan = "42",
+@@ -12,7 +12,8 @@ export declare enum NetworksChainId {
+     localhost = "",
+     rpc = "",
+     optimism = "10",
+-    optimismTest = "69"
++    optimismTest = "69",
++    mises = "46"
  }
-\ No newline at end of file
+ /**
+  * @type ProviderConfig
+diff --git a/node_modules/@metamask/controllers/dist/network/NetworkController.js b/node_modules/@metamask/controllers/dist/network/NetworkController.js
+index cb5c205..abd4555 100644
+--- a/node_modules/@metamask/controllers/dist/network/NetworkController.js
++++ b/node_modules/@metamask/controllers/dist/network/NetworkController.js
+@@ -42,6 +42,7 @@ var NetworksChainId;
+     NetworksChainId["rpc"] = "";
+     NetworksChainId["optimism"] = "10";
+     NetworksChainId["optimismTest"] = "69";
++    NetworksChainId["mises"] = "46";
+ })(NetworksChainId = exports.NetworksChainId || (exports.NetworksChainId = {}));
+ const LOCALHOST_RPC_URL = 'http://localhost:8545';
+ /**
+@@ -81,6 +82,7 @@ class NetworkController extends BaseController_1.BaseController {
+             case 'optimism':
+             case 'optimismTest':
+             case 'ropsten':
++            case 'mises':
+                 this.setupInfuraProvider(type);
+                 break;
+             case 'localhost':
+@@ -193,7 +195,7 @@ class NetworkController extends BaseController_1.BaseController {
+     setProviderType(type) {
+         const _a = this.state.provider, { rpcTarget, chainId, nickname } = _a, providerState = __rest(_a, ["rpcTarget", "chainId", "nickname"]);
+         this.update({
+-            provider: Object.assign(Object.assign({}, providerState), { type, ticker: 'ETH', chainId: NetworksChainId[type] }),
++            provider: Object.assign(Object.assign({}, providerState), { type, ticker: type === 'mises' ? 'MIS' : 'ETH', chainId: NetworksChainId[type] }),
+         });
+         this.refreshNetwork();
+     }

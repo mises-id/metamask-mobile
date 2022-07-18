@@ -116,10 +116,14 @@ class TransactionReviewSummary extends PureComponent {
           ) : (
             <View>
               <Text style={styles.summaryPrimary}>
-                {primaryCurrency === 'ETH' ? assetAmount : fiatValue}
+                {['ETH', 'MIS'].includes(primaryCurrency)
+                  ? assetAmount
+                  : fiatValue}
               </Text>
               <Text style={styles.summarySecondary}>
-                {primaryCurrency === 'ETH' ? fiatValue : assetAmount}
+                {['ETH', 'MIS'].includes(primaryCurrency)
+                  ? fiatValue
+                  : assetAmount}
               </Text>
             </View>
           )}

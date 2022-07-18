@@ -1820,7 +1820,7 @@ function SwapsQuotesView({
                     onAnimationEnd={onGasAnimationEnd}
                     style={styles.quotesFiatColumn}
                   >
-                    {primaryCurrency === 'ETH' ? (
+                    {['ETH', 'MIS'].includes(primaryCurrency) ? (
                       <>
                         <Text>
                           {`${
@@ -1929,7 +1929,7 @@ function SwapsQuotesView({
                         {strings('transaction_review_eip1559.max_fee')}:
                       </Text>
                       <Text small primary>
-                        {primaryCurrency === 'ETH'
+                        {['ETH', 'MIS'].includes(primaryCurrency)
                           ? ` ${renderFromWei(
                               toWei(selectedQuoteValue?.maxEthFee || '0x0'),
                             )} ${getTicker(ticker)}` // eslint-disable-line

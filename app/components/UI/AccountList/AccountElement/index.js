@@ -166,7 +166,11 @@ class AccountElement extends PureComponent {
               </Text>
               <View style={styles.accountBalanceWrapper}>
                 <Text style={styles.accountBalance}>
-                  {renderFromWei(updatedBalanceFromStore)} {getTicker(ticker)}
+                  {`${
+                    ticker === 'MIS'
+                      ? updatedBalanceFromStore
+                      : renderFromWei(updatedBalanceFromStore)
+                  } ${getTicker(ticker)}`}
                 </Text>
                 {!!balanceError && (
                   <Text

@@ -113,6 +113,10 @@ class AssetOverview extends PureComponent {
      */
     accounts: PropTypes.object,
     /**
+     * Map of accounts to information objects including balances
+     */
+    accountList: PropTypes.object,
+    /**
     /* navigation object required to access the props
     /* passed by the parent component
     */
@@ -169,6 +173,10 @@ class AssetOverview extends PureComponent {
      * Network ticker
      */
     ticker: PropTypes.string,
+    /**
+     * Network ticker
+     */
+    type: PropTypes.string,
     /**
      * Object that contains tokens by token addresses as key
      */
@@ -227,11 +235,10 @@ class AssetOverview extends PureComponent {
   }
 
   renderLogo = () => {
-    const { tokenList, asset } = this.props;
+    const { tokenList, asset, type } = this.props;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
-    return asset.isETH ? (
+    return asset.isETH || type === 'mises' ? (
       <NetworkMainAssetLogo biggest style={styles.ethLogo} />
     ) : (
       <TokenImage asset={asset} tokenList={tokenList} />
@@ -292,6 +299,8 @@ class AssetOverview extends PureComponent {
       chainId,
       swapsIsLive,
       swapsTokens,
+      type,
+      accountList,
     } = this.props;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
@@ -308,6 +317,11 @@ class AssetOverview extends PureComponent {
         conversionRate,
         currentCurrency,
       );
+    } else if (type === 'mises') {
+      balance =
+        accountList[selectedAddress] &&
+        accountList[selectedAddress].misesBalance.amount;
+      balanceFiat = weiToFiat('0x0', conversionRate, currentCurrency);
     } else {
       const exchangeRate =
         itemAddress in tokenExchangeRates
@@ -325,7 +339,7 @@ class AssetOverview extends PureComponent {
       );
     }
     // choose balances depending on 'primaryCurrency'
-    if (primaryCurrency === 'ETH') {
+    if (['ETH', 'MIS'].includes(primaryCurrency)) {
       mainBalance = `${balance} ${symbol}`;
       secondaryBalance = balanceFiat;
     } else {
@@ -387,6 +401,7 @@ class AssetOverview extends PureComponent {
 
 const mapStateToProps = (state) => ({
   accounts: state.engine.backgroundState.AccountTrackerController.accounts,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   conversionRate:
     state.engine.backgroundState.CurrencyRateController.conversionRate,
   currentCurrency:
@@ -399,6 +414,7 @@ const mapStateToProps = (state) => ({
   tokenExchangeRates:
     state.engine.backgroundState.TokenRatesController.contractExchangeRates,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
+  type: state.engine.backgroundState.NetworkController.provider.type,
   ticker: state.engine.backgroundState.NetworkController.provider.ticker,
   swapsIsLive: swapsLivenessSelector(state),
   swapsTokens: swapsTokensObjectSelector(state),

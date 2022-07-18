@@ -15,6 +15,7 @@ import { isSmartContractAddress } from '../../../../util/transactions';
 import { strings } from '../../../../../locales/i18n';
 import AddressElement from '../AddressElement';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
+import MisesIdElement from '../MisesIdElement';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -96,6 +97,10 @@ class AddressList extends PureComponent {
      */
     addressBook: PropTypes.object,
     /**
+     * Map representing the address book
+     */
+    accountList: PropTypes.object,
+    /**
      * Search input from parent component
      */
     inputSearch: PropTypes.string,
@@ -103,6 +108,10 @@ class AddressList extends PureComponent {
      * Network id
      */
     network: PropTypes.string,
+    /**
+     * Network type
+     */
+    type: PropTypes.string,
     /**
      * Callback called when account in address book is pressed
      */
@@ -227,13 +236,20 @@ class AddressList extends PureComponent {
   };
 
   renderMyAccounts = () => {
-    const { identities, onAccountPress, inputSearch, onAccountLongPress } =
-      this.props;
+    const {
+      identities,
+      onAccountPress,
+      inputSearch,
+      onAccountLongPress,
+      accountList,
+      type,
+    } = this.props;
     const { myAccountsOpened } = this.state;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
 
     if (inputSearch) return;
+    const isMises = type === 'mises';
     return !myAccountsOpened ? (
       <TouchableOpacity
         style={styles.myAccountsTouchable}
@@ -246,22 +262,35 @@ class AddressList extends PureComponent {
       </TouchableOpacity>
     ) : (
       <View>
-        {Object.keys(identities).map((address) => (
-          <AddressElement
-            key={address}
-            address={address}
-            name={identities[address].name}
-            onAccountPress={onAccountPress}
-            onAccountLongPress={onAccountLongPress}
-            testID={'account-identity'}
-          />
-        ))}
+        {Object.keys(identities).map((address) =>
+          isMises ? (
+            <MisesIdElement
+              key={address}
+              address={address}
+              misesId={accountList[address].misesId}
+              name={identities[address].name}
+              onAccountPress={onAccountPress}
+              onAccountLongPress={onAccountLongPress}
+              testID={'account-identity'}
+            />
+          ) : (
+            <AddressElement
+              key={address}
+              address={address}
+              name={identities[address].name}
+              onAccountPress={onAccountPress}
+              onAccountLongPress={onAccountLongPress}
+              testID={'account-identity'}
+            />
+          ),
+        )}
       </View>
     );
   };
 
   renderElement = (element) => {
-    const { onAccountPress, onAccountLongPress } = this.props;
+    const { onAccountPress, onAccountLongPress, type, accountList } =
+      this.props;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
 
@@ -270,8 +299,17 @@ class AddressList extends PureComponent {
     }
 
     const key = element.address + element.name;
-
-    return (
+    const isMises = type === 'mises';
+    return isMises ? (
+      <MisesIdElement
+        key={element.address}
+        address={element.address}
+        misesId={accountList[element.address].misesId}
+        name={element.name}
+        onAccountLongPress={onAccountLongPress}
+        testID={'account-identity'}
+      />
+    ) : (
       <AddressElement
         key={key}
         address={element.address}
@@ -292,6 +330,8 @@ class AddressList extends PureComponent {
       onAccountPress,
       onAccountLongPress,
       inputSearch,
+      type,
+      accountList,
     } = this.props;
     const networkAddressBook = addressBook[network] || {};
     const colors = this.context.colors || mockTheme.colors;
@@ -306,9 +346,12 @@ class AddressList extends PureComponent {
         (addressBook) =>
           addressBook.address.toLowerCase() === address.toLowerCase(),
       )?.name;
-
+    const addressMisesId = (address) =>
+      Object.values(accountList).find(
+        (item) => item.address.toLowerCase() === address.toLowerCase(),
+      )?.misesId;
     if (!recents.length || inputSearch) return;
-
+    const isMises = type === 'mises';
     return (
       <>
         {LabelElement(
@@ -319,15 +362,26 @@ class AddressList extends PureComponent {
         )}
         {recents
           .filter((recent) => recent != null)
-          .map((address, index) => (
-            <AddressElement
-              key={index}
-              address={address}
-              name={addressName(address)}
-              onAccountPress={onAccountPress}
-              onAccountLongPress={onAccountLongPress}
-            />
-          ))}
+          .map((address, index) =>
+            isMises ? (
+              <MisesIdElement
+                key={index}
+                address={address}
+                name={addressName(address)}
+                misesId={addressMisesId(address)}
+                onAccountPress={onAccountPress}
+                onAccountLongPress={onAccountLongPress}
+              />
+            ) : (
+              <AddressElement
+                key={index}
+                address={address}
+                name={addressName(address)}
+                onAccountPress={onAccountPress}
+                onAccountLongPress={onAccountLongPress}
+              />
+            ),
+          )}
       </>
     );
   };
@@ -375,6 +429,8 @@ const mapStateToProps = (state) => ({
   network: state.engine.backgroundState.NetworkController.network,
   transactions: state.engine.backgroundState.TransactionController.transactions,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
+  type: state.engine.backgroundState.NetworkController.provider.type,
+  accountList: state.engine.backgroundState.MisesController.accountList,
 });
 
 export default connect(mapStateToProps)(AddressList);
