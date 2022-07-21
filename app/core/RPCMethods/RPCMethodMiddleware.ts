@@ -17,6 +17,7 @@ import { store } from '../../store';
 import { removeBookmark } from '../../actions/bookmarks';
 import setOnboardingWizardStep from '../../actions/wizard';
 import { v1 as random } from 'uuid';
+
 const Engine = ImportedEngine as any;
 
 let appVersion = '';
@@ -152,10 +153,10 @@ export const getRpcMethodMiddleware = ({
     };
 
     const checkTabActive = () => {
-      if (!tabId) return true;
-      const { browser } = store.getState();
-      if (tabId !== browser.activeTab)
-        throw ethErrors.provider.userRejectedRequest();
+      // if (!tabId) return true;
+      // const { browser } = store.getState();
+      // if (tabId !== browser.activeTab)
+      //   throw ethErrors.provider.userRejectedRequest();
     };
 
     const requestUserApproval = async ({ type = '', requestData = {} }) => {
@@ -163,7 +164,6 @@ export const getRpcMethodMiddleware = ({
       await Engine.context.ApprovalController.clear(
         ethErrors.provider.userRejectedRequest(),
       );
-
       const responseData = await Engine.context.ApprovalController.add({
         origin: hostname,
         type,
@@ -259,6 +259,7 @@ export const getRpcMethodMiddleware = ({
 
             res.result = selectedAddress ? [selectedAddress] : [];
           } catch (e) {
+            console.log(e)
             throw ethErrors.provider.userRejectedRequest(
               'User denied account authorization.',
             );

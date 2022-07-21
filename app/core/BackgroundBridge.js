@@ -98,6 +98,7 @@ export class BackgroundBridge extends EventEmitter {
     isMainFrame,
     isWalletConnect,
     wcRequestActions,
+    port,
   }) {
     super();
     this.url = url;
@@ -118,9 +119,13 @@ export class BackgroundBridge extends EventEmitter {
 
     this.setProviderAndBlockTracker({ provider, blockTracker });
 
-    this.port = this.isWalletConnect
+    if (port) {
+      this.port = port
+    } else {
+      this.port = this.isWalletConnect
       ? new WalletConnectPort(wcRequestActions)
       : new Port(this._webviewRef, isMainFrame);
+    }
 
     this.engine = null;
 
