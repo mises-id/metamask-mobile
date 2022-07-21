@@ -58,6 +58,9 @@ import withQRHardwareAwareness from '../../UI/QRHardware/withQRHardwareAwareness
 import QRSigningModal from '../../UI/QRHardware/QRSigningModal';
 import { networkSwitched } from '../../../actions/onboardNetwork';
 
+import { NativeModules } from 'react-native';
+const { MisesModule } = NativeModules;
+
 const hstInterface = new ethers.utils.Interface(abi);
 
 const styles = StyleSheet.create({
@@ -733,8 +736,12 @@ const RootRPCMethodsUI = (props) => {
         default:
           break;
       }
+
+      MisesModule.popup();
     } else {
       setShowPendingApproval(false);
+
+      MisesModule.dismiss();
     }
   };
 

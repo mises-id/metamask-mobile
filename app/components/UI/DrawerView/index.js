@@ -53,7 +53,6 @@ import { newAssetTransaction } from '../../../actions/transaction';
 import { logOut, protectWalletModalVisible } from '../../../actions/user';
 import DeeplinkManager from '../../../core/DeeplinkManager';
 import SettingsNotification from '../SettingsNotification';
-import WhatsNewModal from '../WhatsNewModal';
 import InvalidCustomNetworkAlert from '../InvalidCustomNetworkAlert';
 import { RPC } from '../../../constants/network';
 import { findRouteNameFromNavigatorState } from '../../../util/general';
@@ -991,7 +990,13 @@ class DrawerView extends PureComponent {
           icon: this.getImageIcon('wallet'),
           selectedIcon: this.getSelectedImageIcon('wallet'),
           action: this.showWallet,
-          routeNames: ['WalletView', 'Asset', 'AddAsset', 'Collectible'],
+          routeNames: [
+            'Wallet',
+            'WalletView',
+            'Asset',
+            'AddAsset',
+            'Collectible',
+          ],
         },
         {
           name: strings('drawer.transaction_activity'),
@@ -1171,7 +1176,7 @@ class DrawerView extends PureComponent {
       currentRoute,
       networkOnboarding,
       networkOnboardedState,
-      switchedNetwork,
+      switchedNetwork: { networkUrl, networkStatus },
       networkModalVisible,
       accountList,
       networkProvider,
@@ -1181,7 +1186,6 @@ class DrawerView extends PureComponent {
 
     const {
       invalidCustomNetwork,
-      showProtectWalletModal,
       account: { name: nameFromState, ens: ensFromState },
       showModal,
       networkType,
@@ -1208,9 +1212,19 @@ class DrawerView extends PureComponent {
     const fiatBalanceStr = renderFiat(this.currentBalance, currentCurrency);
     const accountName = isDefaultAccountName(name) && ens ? ens : name;
     const checkIfCustomNetworkExists = networkOnboardedState.filter(
-      (item) => item.network === sanitizeUrl(switchedNetwork.networkUrl),
+      (item) => item.network === sanitizeUrl(networkUrl),
     );
     const isMises = networkProvider.type === 'mises';
+    const networkSwitchedAndInWalletView =
+      currentRoute === 'WalletView' &&
+      networkStatus &&
+      checkIfCustomNetworkExists.length === 0;
+
+    const canShowNetworkInfoModal =
+      showModal ||
+      networkOnboarding.showNetworkOnboarding ||
+      networkSwitchedAndInWalletView;
+
     return (
       <View style={styles.wrapper} testID={'drawer-screen'}>
         <ScrollView>
@@ -1384,7 +1398,9 @@ class DrawerView extends PureComponent {
           isVisible={
             networkModalVisible || networkOnboarding.showNetworkOnboarding
           }
-          onBackdropPress={showModal ? null : this.toggleNetworksModal}
+          onBackdropPress={
+            canShowNetworkInfoModal ? null : this.toggleNetworksModal
+          }
           onBackButtonPress={showModal ? null : this.toggleNetworksModa}
           onSwipeComplete={showModal ? null : this.toggleNetworksModa}
           swipeDirection={'down'}
@@ -1392,11 +1408,7 @@ class DrawerView extends PureComponent {
           backdropColor={colors.overlay.default}
           backdropOpacity={1}
         >
-          {showModal ||
-          networkOnboarding.showNetworkOnboarding ||
-          (currentRoute === 'WalletView' &&
-            switchedNetwork.networkStatus &&
-            checkIfCustomNetworkExists.length === 0) ? (
+          {canShowNetworkInfoModal ? (
             <NetworkInfo
               onClose={this.onInfoNetworksModalClose}
               type={networkType || networkOnboarding.networkType}
@@ -1463,11 +1475,6 @@ class DrawerView extends PureComponent {
             showReceiveModal={this.showReceiveModal}
           />
         </Modal>
-        <WhatsNewModal
-          navigation={this.props.navigation}
-          enabled={showProtectWalletModal === false}
-        />
-
         {this.renderProtectModal()}
       </View>
     );
