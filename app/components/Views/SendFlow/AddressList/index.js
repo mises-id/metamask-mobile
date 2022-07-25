@@ -267,7 +267,7 @@ class AddressList extends PureComponent {
             <MisesIdElement
               key={address}
               address={address}
-              misesId={accountList[address].misesId}
+              misesId={accountList[address]?.misesId}
               name={identities[address].name}
               onAccountPress={onAccountPress}
               onAccountLongPress={onAccountLongPress}

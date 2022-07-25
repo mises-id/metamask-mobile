@@ -1,0 +1,89 @@
+diff --git a/node_modules/@metamask/controllers/dist/keyring/KeyringController.d.ts b/node_modules/@metamask/controllers/dist/keyring/KeyringController.d.ts
+index 23ee5e3..5f2244d 100644
+--- a/node_modules/@metamask/controllers/dist/keyring/KeyringController.d.ts
++++ b/node_modules/@metamask/controllers/dist/keyring/KeyringController.d.ts
+@@ -172,6 +172,13 @@ export declare class KeyringController extends BaseController<KeyringConfig, Key
+      * @returns Promise resolving to the private key for an address.
+      */
+     exportAccount(password: string, address: string): Promise<string>;
++    /**
++     * Gets the private key from the keyring controlling an address.
++     *
++     * @param address - Address to export.
++     * @returns Promise resolving to the private key for an address.
++     */
++     exportAccountPrivate(address: string): Promise<string>;
+     /**
+      * Returns the public addresses of all accounts for the current keyring.
+      *
+diff --git a/node_modules/@metamask/controllers/dist/keyring/KeyringController.js b/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
+index 8d63c54..3dfee74 100644
+--- a/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
++++ b/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
+@@ -239,6 +239,15 @@ class KeyringController extends BaseController_1.BaseController {
+         }
+         throw new Error('Invalid password');
+     }
++    /**
++     * Gets the private key from the keyring controlling an address.
++     *
++     * @param address - Address to export.
++     * @returns Promise resolving to the private key for an address.
++     */
++     exportAccountPrivate(address) {
++        return __classPrivateFieldGet(this, _KeyringController_keyring, "f").exportAccount(address);
++    }
+     /**
+      * Returns the public addresses of all accounts for the current keyring.
+      *
+diff --git a/node_modules/@metamask/controllers/dist/network/NetworkController.d.ts b/node_modules/@metamask/controllers/dist/network/NetworkController.d.ts
+index 8c55e27..dfabbe7 100644
+--- a/node_modules/@metamask/controllers/dist/network/NetworkController.d.ts
++++ b/node_modules/@metamask/controllers/dist/network/NetworkController.d.ts
+@@ -2,7 +2,7 @@ import { BaseController, BaseConfig, BaseState } from '../BaseController';
+ /**
+  * Human-readable network name
+  */
+-export declare type NetworkType = 'kovan' | 'localhost' | 'mainnet' | 'rinkeby' | 'goerli' | 'ropsten' | 'rpc' | 'optimism' | 'optimismTest';
++export declare type NetworkType = 'kovan' | 'localhost' | 'mainnet' | 'rinkeby' | 'goerli' | 'ropsten' | 'rpc' | 'optimism' | 'optimismTest' | 'mises';
+ export declare enum NetworksChainId {
+     mainnet = "1",
+     kovan = "42",
+@@ -12,7 +12,8 @@ export declare enum NetworksChainId {
+     localhost = "",
+     rpc = "",
+     optimism = "10",
+-    optimismTest = "69"
++    optimismTest = "69",
++    mises = '46'
+ }
+ /**
+  * @type ProviderConfig
+diff --git a/node_modules/@metamask/controllers/dist/network/NetworkController.js b/node_modules/@metamask/controllers/dist/network/NetworkController.js
+index cb5c205..4431aac 100644
+--- a/node_modules/@metamask/controllers/dist/network/NetworkController.js
++++ b/node_modules/@metamask/controllers/dist/network/NetworkController.js
+@@ -42,6 +42,7 @@ var NetworksChainId;
+     NetworksChainId["rpc"] = "";
+     NetworksChainId["optimism"] = "10";
+     NetworksChainId["optimismTest"] = "69";
++    NetworksChainId["mises"] = "46";
+ })(NetworksChainId = exports.NetworksChainId || (exports.NetworksChainId = {}));
+ const LOCALHOST_RPC_URL = 'http://localhost:8545';
+ /**
+@@ -81,6 +82,7 @@ class NetworkController extends BaseController_1.BaseController {
+             case 'optimism':
+             case 'optimismTest':
+             case 'ropsten':
++            case 'mises':
+                 this.setupInfuraProvider(type);
+                 break;
+             case 'localhost':
+@@ -125,6 +127,7 @@ class NetworkController extends BaseController_1.BaseController {
+             chainId !== NetworksChainId.rinkeby &&
+             chainId !== NetworksChainId.goerli &&
+             chainId !== NetworksChainId.ropsten &&
++            chainId !== NetworksChainId.mises &&
+             chainId !== NetworksChainId.localhost);
+     }
+     setupStandardProvider(rpcTarget, chainId, ticker, nickname) {

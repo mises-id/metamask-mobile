@@ -97,6 +97,10 @@ class AccountElement extends PureComponent {
      */
     ticker: PropTypes.string,
     /**
+     * Current ticker
+     */
+    providerType: PropTypes.string,
+    /**
      * Whether the account element should be disabled (opaque and not clickable)
      */
     disabled: PropTypes.bool,
@@ -120,7 +124,7 @@ class AccountElement extends PureComponent {
   };
 
   render() {
-    const { disabled, updatedBalanceFromStore, ticker } = this.props;
+    const { disabled, updatedBalanceFromStore, ticker,providerType } = this.props;
     const {
       address,
       name,
@@ -167,10 +171,10 @@ class AccountElement extends PureComponent {
               <View style={styles.accountBalanceWrapper}>
                 <Text style={styles.accountBalance}>
                   {`${
-                    ticker === 'MIS'
+                    providerType === 'mises'
                       ? updatedBalanceFromStore
                       : renderFromWei(updatedBalanceFromStore)
-                  } ${getTicker(ticker)}`}
+                  } ${providerType === 'mises' ? 'MIS' : getTicker(ticker)}`}
                 </Text>
                 {!!balanceError && (
                   <Text

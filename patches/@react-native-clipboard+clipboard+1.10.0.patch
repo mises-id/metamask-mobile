@@ -1,0 +1,51 @@
+diff --git a/node_modules/@react-native-clipboard/clipboard/android/src/main/java/com/reactnativecommunity/clipboard/ClipboardModule.java b/node_modules/@react-native-clipboard/clipboard/android/src/main/java/com/reactnativecommunity/clipboard/ClipboardModule.java
+index ad75097..6624033 100644
+--- a/node_modules/@react-native-clipboard/clipboard/android/src/main/java/com/reactnativecommunity/clipboard/ClipboardModule.java
++++ b/node_modules/@react-native-clipboard/clipboard/android/src/main/java/com/reactnativecommunity/clipboard/ClipboardModule.java
+@@ -82,6 +82,16 @@ public class ClipboardModule extends ContextBaseJavaModule {
+     }
+   }
+ 
++  @ReactMethod
++  public void clearString() {
++    try {
++      ClipboardManager clipboard = getClipboardService();
++      clipboard.clearPrimaryClip();
++    } catch (Exception e) {
++      e.printStackTrace();
++    }
++  }
++
+   @ReactMethod
+   public void hasString(Promise promise) {
+     try {
+diff --git a/node_modules/@react-native-clipboard/clipboard/dist/Clipboard.d.ts b/node_modules/@react-native-clipboard/clipboard/dist/Clipboard.d.ts
+index cd9a9c4..5177cee 100644
+--- a/node_modules/@react-native-clipboard/clipboard/dist/Clipboard.d.ts
++++ b/node_modules/@react-native-clipboard/clipboard/dist/Clipboard.d.ts
+@@ -53,6 +53,25 @@ export declare const Clipboard: {
+      * @param the content to be stored in the clipboard.
+      */
+     setString(content: string): void;
++	/**
++     * [IOS ONLY] Set content of string type with an expiry date of 60 seconds. You can use following code to set clipboard content
++     * ```javascript
++     * _setContent() {
++     *   Clipboard.setStringExpire('hello world');
++     * }
++     * ```
++     * @param the content to be stored in the clipboard.
++     */
++	setStringExpire(content: string): void;
++	/**
++     * [ANDROID ONLY] Clears the primary clip on Android
++     * ```javascript
++     * _clearContent() {
++     *   Clipboard.clearString();
++     * }
++     * ```
++     */
++	clearString(): void;
+     /**
+      * Returns whether the clipboard has content or is empty.
+      * This method returns a `Promise`, so you can use following code to get clipboard content

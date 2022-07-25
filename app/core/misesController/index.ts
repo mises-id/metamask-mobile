@@ -1,13 +1,14 @@
 import {
   BaseController,
   BaseState,
+  BN,
   KeyringConfig,
   PreferencesController,
   PreferencesState,
 } from '@metamask/controllers';
 import BigNumber from 'bignumber.js';
 import { DeliverTxResponse, IndexedTx } from '@cosmjs/stargate';
-import MisesSdk from 'mises-js-sdk';
+import MisesSdk from 'mises-js-sdk/dist/lib/mises-js-sdk';
 import { MAppMgr } from 'mises-js-sdk/dist/types/mapp';
 import {
   MisesCoin,
@@ -23,6 +24,12 @@ import {
   shortenAddress,
 } from './misesNetwork.util';
 import AnalyticsV2 from '../../util/analyticsV2';
+import Analytics from '../Analytics/Analytics';
+import { uuid } from '@walletconnect/utils';
+
+import { NativeModules } from 'react-native';
+import { BNToHex, toHex } from '@metamask/controllers/dist/util';
+const { MisesModule } = NativeModules;
 export const MISES_POINT = 'http://127.0.0.1:26657';
 export interface misesBalance {
   amount: string;
@@ -111,6 +118,18 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         const userInfo = await this.getMisesUserInfo(
           preferencesState.selectedAddress,
         ); // get activity user
+        const misesAccount = await this.getMisesBalance(
+          preferencesState.selectedAddress,
+        ); // get mises balance
+        const accountList = this.getAccountList();
+        if (!accountList[preferencesState.selectedAddress]) {
+          this.update({
+            accountList: {
+              ...accountList,
+              [preferencesState.selectedAddress]: misesAccount,
+            },
+          });
+        }
         userInfo && (await this.setToMisesPrivate(userInfo));
       } catch (error) {
         console.warn(error, preferencesState.selectedAddress);
@@ -119,29 +138,27 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     this.initialize();
   }
   /**
+   * @returns mises Account list
+   */
+  getAccountList(): accounts {
+    const { accountList } = this.state;
+    return accountList;
+  }
+  /**
    * 1. Get all accounts
    * 2.Get mises balance by account number
    */
   async getAccountMisesBalance(): Promise<void> {
     try {
       const keyringList = await this.getKeyringAccounts();
-      const accountList = this.getAccountList();
       const accounts = {} as accounts;
-      const promiseAccount = keyringList.map(async (val) => {
-        const misesBalance: misesBalance = await this.getUserBalance(val);
-        const user = await this.getMisesUser(val);
-        const cacheObj = accountList[val] || {};
-        return {
-          ...cacheObj,
-          address: val,
-          misesBalance,
-          misesId: user.address(),
-        };
-      });
+      const promiseAccount = keyringList.map((val) =>
+        this.getMisesBalance(val),
+      );
       const res = await Promise.all(promiseAccount);
       res.forEach((val) => (accounts[val.address] = val));
       this.update({
-        accountList,
+        accountList: accounts,
       });
     } catch (error) {
       Analytics.trackEventWithParameters('getAccountMisesBalanceError', {
@@ -150,12 +167,21 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       return Promise.reject(error);
     }
   }
-  /**
-   * @returns mises Account list
-   */
-  getAccountList(): accounts {
-    const { accountList } = this.state;
-    return accountList;
+  async getMisesBalance(address: string): Promise<misesAccount> {
+    try {
+      const accountList = this.getAccountList();
+      const misesBalance: misesBalance = await this.getUserBalance(address);
+      const user = await this.getMisesUser(address);
+      const cacheObj = accountList[address] || {};
+      return {
+        ...cacheObj,
+        address,
+        misesBalance,
+        misesId: user.address(),
+      };
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   /**
@@ -163,9 +189,13 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
    * @returns mises user
    */
   async getMisesUser(address: string): Promise<MUser> {
-    const key = await this.exportAccount(address); // get priKeyHex
-    const user = await this.#misesUser.getUser(key);
-    return user;
+    try {
+      const key = await this.exportAccount(address); // get priKeyHex
+      const user = await this.#misesUser.getUser(key);
+      return user;
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   /**
@@ -317,7 +347,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         user_authz: { auth: account.auth },
         referrer,
       });
-      console.warn(referrer, 'referrer');
+      // console.warn(referrer, 'referrer');
       account.token = token; // token;
       account.timestamp = new Date().getTime();
       const activeUser = this.getActive();
@@ -382,6 +412,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     token: string;
   }): Promise<void> {
     AnalyticsV2.trackEvent('Ready to call setmisesid', params);
+    MisesModule?.setMisesUserInfo?.(JSON.stringify(params));
     // window.localStorage.setItem('setAccount', true);
     // return new Promise((resolve) => {
     //   /* global chrome */
@@ -544,7 +575,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
 
     try {
       if (this.#misesGasfee.gasWanted) {
-        console.warn('get cache misesGasfee');
+        // console.warn('get cache misesGasfee');
         return this.#misesGasfee;
       }
 
@@ -599,16 +630,16 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }
   transfer(event: any, activeUserAddr: string) {
     let amount = { amount: '', denom: '' };
-    const amountItem = event.attributes.find(
+    const amountItem = event.attributes?.find(
       (item: any) => item.key === 'amount',
     );
     if (amountItem) {
       amount = this.parseAmountItem(amountItem);
     }
-    const recipient = event.attributes.find(
+    const recipient = event.attributes?.find(
       (item: any) => item.key === 'recipient',
     );
-    const sender = event.attributes.find((item: any) => item.key === 'sender');
+    const sender = event.attributes?.find((item: any) => item.key === 'sender');
     const category =
       recipient && recipient.value === activeUserAddr ? 'receive' : 'send';
     const transactionGroupType =
@@ -624,14 +655,14 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }
   withdrawRewards(event: any, activeUserAddr: string) {
     let amount = { amount: '', denom: '' };
-    const amountItem = event.attributes.find(
+    const amountItem = event.attributes?.find(
       (item: any) => item.key === 'amount',
     );
     if (amountItem) {
       amount = this.parseAmountItem(amountItem);
     }
     return {
-      sender: event.attributes.find((item: any) => item.key === 'validator'),
+      sender: event.attributes?.find((item: any) => item.key === 'validator'),
       recipient: { value: activeUserAddr },
       category: 'interaction',
       title: 'Withdraw Rewards',
@@ -641,7 +672,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }
   delegate(event: any, activeUserAddr: string) {
     let amount = { amount: '', denom: '' };
-    const amountItem = event.attributes.find(
+    const amountItem = event.attributes?.find(
       (item: any) => item.key === 'amount',
     );
     if (amountItem) {
@@ -649,7 +680,9 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     }
     return {
       sender: { value: activeUserAddr },
-      recipient: event.attributes.find((item: any) => item.key === 'validator'),
+      recipient: event.attributes?.find(
+        (item: any) => item.key === 'validator',
+      ),
       category: 'interaction',
       title: 'Delegate',
       transactionGroupType: 'misesOut',
@@ -658,7 +691,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }
   redelegate(event: any, activeUserAddr: string) {
     let amount = { amount: '', denom: '' };
-    const amountItem = event.attributes.find(
+    const amountItem = event.attributes?.find(
       (item: any) => item.key === 'amount',
     );
     if (amountItem) {
@@ -666,7 +699,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     }
     return {
       sender: { value: activeUserAddr },
-      recipient: event.attributes.find(
+      recipient: event.attributes?.find(
         (item: any) => item.key === 'destination_validator',
       ),
       category: 'interaction',
@@ -677,14 +710,14 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }
   unbond(event: any, activeUserAddr: string) {
     let amount = { amount: '', denom: '' };
-    const amountItem = event.attributes.find(
+    const amountItem = event.attributes?.find(
       (item: any) => item.key === 'amount',
     );
     if (amountItem) {
       amount = this.parseAmountItem(amountItem);
     }
     return {
-      sender: event.attributes.find((item: any) => item.key === 'validator'),
+      sender: event.attributes?.find((item: any) => item.key === 'validator'),
       recipient: { value: activeUserAddr },
       category: 'interaction',
       title: 'Undelegate',
@@ -692,7 +725,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       amount,
     };
   }
-  parseTxEvents(activeUserAddr: string, tx: indexed) {
+  parseTxEvents(activeUserAddr: string | undefined, tx: indexed) {
     const events = tx.raw;
     return events.reduce((result, event) => {
       const subtitle = '';
@@ -711,53 +744,90 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         },
         title: '',
       };
+      if (!activeUserAddr) {
+        return null;
+      }
       switch (event.type) {
         case 'transfer': {
-          formatEvent = this.transfer(events, activeUserAddr);
+          formatEvent = this.transfer(event, activeUserAddr);
           break;
         }
         case 'withdraw_rewards': {
-          formatEvent = this.withdrawRewards(events, activeUserAddr);
+          formatEvent = this.withdrawRewards(event, activeUserAddr);
           break;
         }
         case 'delegate': {
-          formatEvent = this.delegate(events, activeUserAddr);
+          formatEvent = this.delegate(event, activeUserAddr);
           break;
         }
         case 'redelegate': {
-          formatEvent = this.redelegate(events, activeUserAddr);
+          formatEvent = this.redelegate(event, activeUserAddr);
           break;
         }
         case 'unbond': {
-          formatEvent = this.unbond(events, activeUserAddr);
+          formatEvent = this.unbond(event, activeUserAddr);
           break;
         }
         default:
           return result;
       }
+      // console.log(new BN('10'),'xxx')
       return result.concat({
-        category: formatEvent.category,
+        blockNumber: tx.height,
+        chainId: '46',
+        id: uuid(),
+        insertImportTime: true,
+        networkID: '46',
+        status: 'confirmed',
+        time: 1650959960000,
         date:
           result.length === 0
             ? `${tx.height}`
             : `${tx.height}:${result.length}`,
-        height: tx.height,
-        displayedStatusKey: 'confirmed',
-        isPending: false,
-        primaryCurrency: `${formatEvent.amount.amount} ${formatEvent.amount.denom}`,
-        recipientAddress: formatEvent.recipient.value ?? '',
-        secondaryCurrency: `${formatEvent.amount.amount} ${formatEvent.amount.denom}`,
-        senderAddress: formatEvent.sender.value ?? '',
-        subtitle,
-        subtitleContainsOrigin: false,
-        title: formatEvent.title,
-        nonce: '0x0',
+        toSmartContract: false,
+        transaction: {
+          data: '0x',
+          from: formatEvent.sender.value,
+          gas: '0x',
+          gasPrice: '0x',
+          gasUsed: '0x',
+          nonce: '0x0',
+          to: formatEvent.recipient.value,
+          value: formatEvent.amount.amount,
+        },
         transactionGroupType: formatEvent.transactionGroupType,
-        hasCancelled: false,
-        hasRetried: false,
-        initialTransaction: { id: '0x0', hash: tx.hash },
-        primaryTransaction: { err: {}, status: '', hash: tx.hash },
+        transactionHash: tx.hash,
+        verifiedOnBlockchain: true,
+        title: formatEvent.title,
+        ticker: formatEvent.amount?.denom,
       });
+      // return result.concat({
+      //   category: formatEvent.category,
+      //   date:
+      //     result.length === 0
+      //       ? `${tx.height}`
+      //       : `${tx.height}:${result.length}`,
+      //   height: tx.height,
+      //   displayedStatusKey: 'confirmed',
+      //   isPending: false,
+      //   transaction: {
+      //     to: formatEvent.recipient.value,
+      //     from: formatEvent.sender.value,
+      //   },
+      //   primaryCurrency: `${formatEvent.amount?.amount} ${formatEvent.amount?.denom}`,
+      //   recipientAddress: formatEvent.recipient?.value ?? '',
+      //   secondaryCurrency: `${formatEvent.amount?.amount} ${formatEvent.amount?.denom}`,
+      //   senderAddress: formatEvent.sender?.value ?? '',
+      //   subtitle,
+      //   subtitleContainsOrigin: false,
+      //   title: formatEvent.title,
+      //   nonce: '0x0',
+      //   transactionGroupType: formatEvent.transactionGroupType,
+      //   hasCancelled: false,
+      //   hasRetried: false,
+      //   initialTransaction: { id: '0x0', hash: tx.hash },
+      //   primaryTransaction: { err: {}, status: '', hash: tx.hash },
+      // });
     }, []);
   }
 
@@ -769,30 +839,33 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       console.warn('get cache', currentAddress);
       return currentAddress.transactions || [];
     }
-    console.warn('get network');
+    // console.warn('get network');
     try {
       const activeUser = this.getActive();
       let list = (await activeUser?.recentTransactions(
         currentAddress.height,
       )) as indexed[];
-      console.warn(list, 'recentTransactions');
-      list = list?.reduce((result, val) => {
-        const item = { ...val };
-        const rowLog = JSON.parse(val.rawLog) as any[];
-        item.rawLog = JSON.parse(val.rawLog);
-        item.raw = [];
-        rowLog.forEach((obj: any) => {
-          item.raw = [...obj.raw, ...obj.events];
-        });
-        return result.concat(
-          this.parseTxEvents(accountList[selectedAddress].misesId, item),
-        );
-      }, []);
-      accountList[selectedAddress].transactions = list;
-      this.update({
-        accountList,
-      });
-      console.warn(list);
+      list = list
+        ?.reduce((result, val) => {
+          const item = { ...val };
+          const rowLog = JSON.parse(val.rawLog) as any[];
+          item.rawLog = rowLog as any;
+          item.raw = [];
+          rowLog.forEach((obj: any) => {
+            item.raw = [...item.raw, ...obj.events];
+          });
+          return result.concat(this.parseTxEvents(activeUser?.address(), item));
+        }, [])
+        .filter((val) => val);
+
+      for (const key in accountList) {
+        if (accountList[key].misesId === activeUser?.address()) {
+          accountList[key].transactions = list || [];
+          this.update({
+            accountList,
+          });
+        }
+      }
       return list;
     } catch (error) {
       console.warn(error);

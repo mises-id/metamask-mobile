@@ -674,7 +674,6 @@ class Amount extends PureComponent {
     if (selectedAsset.erc20) {
       transactionObject.readableValue = value;
     }
-
     setTransactionObject(transactionObject);
   };
 
@@ -768,10 +767,11 @@ class Amount extends PureComponent {
         transactionTo,
       },
       providerType,
+      accountList,
     } = this.props;
     if (providerType === 'mises') {
-      const toAddress = 'mises1nax7hf8se44aelhpqw9nf9syz4pn3h7s89rusj';
-      const { gas } = await misesGetGasLimit(toAddress);
+      const { misesId } = accountList[transactionTo] || {};
+      const { gas } = await misesGetGasLimit(misesId);
       return gas;
     }
     const { gas } = await getGasLimit({

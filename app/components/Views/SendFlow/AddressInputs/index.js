@@ -238,7 +238,7 @@ export const AddressTo = (props) => {
     (state) => state.engine.backgroundState.NetworkController.provider.type,
   );
   const isMises = providerType === 'mises';
-  const misesAccount = accountList[toSelectedAddress] || '';
+  const misesAccount = accountList[toSelectedAddress] || {};
   if (isConfirmScreen) {
     return (
       <View style={styles.wrapper}>

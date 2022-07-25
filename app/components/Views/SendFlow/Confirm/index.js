@@ -265,6 +265,10 @@ class Confirm extends PureComponent {
      */
     accounts: PropTypes.object,
     /**
+     * Map of accounts to information objects including balances
+     */
+    accountList: PropTypes.object,
+    /**
      * Map representing the address book
      */
     addressBook: PropTypes.object,
@@ -471,30 +475,39 @@ class Confirm extends PureComponent {
 
   componentWillUnmount = () => {
     const { GasFeeController } = Engine.context;
-    GasFeeController.stopPolling(this.state.pollToken);
+    if (this.state.pollToken)
+      GasFeeController.stopPolling(this.state.pollToken);
   };
 
   componentDidMount = async () => {
-    this.updateNavBar();
-    this.getGasLimit();
+    try {
+      this.updateNavBar();
+      this.getGasLimit();
+      const { showCustomNonce, navigation, providerType, isPaymentRequest } =
+        this.props;
+      const { GasFeeController } = Engine.context;
+      if (providerType !== 'mises') {
+        const pollToken =
+          await GasFeeController.getGasFeeEstimatesAndStartPolling(
+            this.state.pollToken,
+          );
+        this.setState({ pollToken });
+      } else {
+        this.setState({ pollToken: false });
+      }
+      // For analytics
+      AnalyticsV2.trackEvent(
+        AnalyticsV2.ANALYTICS_EVENTS.SEND_TRANSACTION_STARTED,
+        this.getAnalyticsParams(),
+      );
 
-    const { GasFeeController } = Engine.context;
-    const pollToken = await GasFeeController.getGasFeeEstimatesAndStartPolling(
-      this.state.pollToken,
-    );
-    this.setState({ pollToken });
-    // For analytics
-    AnalyticsV2.trackEvent(
-      AnalyticsV2.ANALYTICS_EVENTS.SEND_TRANSACTION_STARTED,
-      this.getAnalyticsParams(),
-    );
-
-    const { showCustomNonce, navigation, providerType, isPaymentRequest } =
-      this.props;
-    showCustomNonce && (await this.setNetworkNonce());
-    navigation.setParams({ providerType, isPaymentRequest });
-    this.handleConfusables();
-    this.parseTransactionDataHeader();
+      showCustomNonce && (await this.setNetworkNonce());
+      navigation.setParams({ providerType, isPaymentRequest });
+      this.handleConfusables();
+      this.parseTransactionDataHeader();
+    } catch (error) {
+      console.warn(error, 'componentDidMount');
+    }
   };
 
   componentDidUpdate = (prevProps, prevState) => {
@@ -677,6 +690,8 @@ class Confirm extends PureComponent {
         transaction: { from, value, data },
       },
       ticker,
+      accountList,
+      providerType,
     } = this.props;
     const { fromSelectedAddress } = this.state;
     let fromAccountBalance,
@@ -685,18 +700,28 @@ class Confirm extends PureComponent {
       transactionTo;
     const valueBN = hexToBN(value);
     const parsedTicker = getTicker(ticker);
-
     if (selectedAsset.isETH) {
-      fromAccountBalance = `${renderFromWei(
-        accounts[fromSelectedAddress].balance,
-      )} ${parsedTicker}`;
-      transactionValue = `${renderFromWei(value)} ${parsedTicker}`;
-      transactionValueFiat = weiToFiat(
-        valueBN,
-        conversionRate,
-        currentCurrency,
-      );
-      transactionTo = to;
+      if (providerType === 'mises') {
+        fromAccountBalance = `${accountList[fromSelectedAddress]?.misesBalance?.amount} ${parsedTicker}`;
+        transactionValue = `${renderFromWei(value)} ${parsedTicker}`;
+        transactionValueFiat = weiToFiat(
+          valueBN,
+          conversionRate,
+          currentCurrency,
+        );
+        transactionTo = to;
+      } else {
+        fromAccountBalance = `${renderFromWei(
+          accounts[fromSelectedAddress].balance,
+        )} ${parsedTicker}`;
+        transactionValue = `${renderFromWei(value)} ${parsedTicker}`;
+        transactionValueFiat = weiToFiat(
+          valueBN,
+          conversionRate,
+          currentCurrency,
+        );
+        transactionTo = to;
+      }
     } else if (selectedAsset.tokenId) {
       fromAccountBalance = `${renderFromWei(
         accounts[from].balance,
@@ -754,6 +779,11 @@ class Confirm extends PureComponent {
       transactionValueFiat,
       transactionTo,
     });
+
+    const isMises = providerType === 'mises';
+    if (isMises) {
+      this.onUpdatingValuesEnd();
+    }
   };
 
   parseTransactionDataEIP1559 = (gasFee, options) => {
@@ -1385,11 +1415,12 @@ class Confirm extends PureComponent {
       network,
       chainId,
       gasEstimateType,
+      providerType,
     } = this.props;
     const { nonce } = this.props.transaction;
     const {
       gasEstimationReady,
-      fromAccountBalance,
+      fromAccountBalance = '0x0',
       fromAccountName,
       fromSelectedAddress,
       transactionValue = '',
@@ -1421,7 +1452,6 @@ class Confirm extends PureComponent {
     const displayExclamation =
       !existingContact && !!confusableCollection.length;
     const isQRHardwareWalletDevice = isQRHardwareAccount(fromSelectedAddress);
-
     const AdressToComponent = () => (
       <AddressTo
         addressToReady
@@ -1450,7 +1480,7 @@ class Confirm extends PureComponent {
       ? strings('transaction.go_to_faucet')
       : strings('transaction.buy_more');
     const { EIP1559TransactionData } = this.state;
-
+    const isMises = providerType === 'mises';
     return (
       <SafeAreaView
         edges={['bottom']}
@@ -1643,6 +1673,7 @@ Confirm.contextType = ThemeContext;
 
 const mapStateToProps = (state) => ({
   accounts: state.engine.backgroundState.AccountTrackerController.accounts,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   addressBook: state.engine.backgroundState.AddressBookController?.addressBook,
   contractBalances:
     state.engine.backgroundState.TokenBalancesController.contractBalances,

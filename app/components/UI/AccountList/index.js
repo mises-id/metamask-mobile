@@ -334,7 +334,7 @@ class AccountList extends PureComponent {
   };
 
   renderItem = ({ item }) => {
-    const { ticker } = this.props;
+    const { ticker, providerType } = this.props;
     const { accountsENS } = this.state;
     return (
       <AccountElement
@@ -342,6 +342,7 @@ class AccountList extends PureComponent {
         onLongPress={this.onLongPress}
         item={{ ...item, ens: accountsENS[item.address] }}
         ticker={ticker}
+        providerType={providerType}
         disabled={Boolean(item.balanceError)}
       />
     );
@@ -387,7 +388,8 @@ class AccountList extends PureComponent {
         if (providerType === 'mises') {
           if (accounts[identityAddressChecksummed]) {
             balance =
-              accountList[identityAddressChecksummed]?.misesBalance?.amount;
+              accountList[identityAddressChecksummed]?.misesBalance?.amount ||
+              0;
           }
         } else if (accounts[identityAddressChecksummed]) {
           balance = accounts[identityAddressChecksummed].balance;

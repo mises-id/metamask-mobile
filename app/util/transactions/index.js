@@ -363,7 +363,16 @@ export async function getTransactionActionKey(transaction, chainId) {
  * @param {string} selectedAddress - Current account public address
  * @returns {string} - Transaction type message
  */
-export async function getActionKey(tx, selectedAddress, ticker, chainId) {
+export async function getActionKey(
+  tx,
+  selectedAddress,
+  ticker,
+  chainId,
+  providerType,
+) {
+  if (providerType === 'mises') {
+    return tx.title;
+  }
   const actionKey = await getTransactionActionKey(tx, chainId);
   if (actionKey === SEND_ETHER_ACTION_KEY) {
     let currencySymbol = ticker;

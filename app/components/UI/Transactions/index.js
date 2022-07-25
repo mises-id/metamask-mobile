@@ -99,6 +99,10 @@ class Transactions extends PureComponent {
      */
     accounts: PropTypes.object,
     /**
+     * Map of accounts to information objects including balances
+     */
+    accountList: PropTypes.object,
+    /**
      * Callback to close the view
      */
     close: PropTypes.func,
@@ -118,6 +122,10 @@ class Transactions extends PureComponent {
      * Object representing the selected network
      */
     network: PropTypes.object,
+    /**
+     * Object representing the selected network
+     */
+    networkType: PropTypes.string,
     /**
      * An array that represents the user collectible contracts
      */
@@ -192,6 +200,7 @@ class Transactions extends PureComponent {
     rpcBlockExplorer: undefined,
     errorMsg: undefined,
     isQRHardwareAccount: false,
+    transactions: [],
   };
 
   existingGas = null;
@@ -245,8 +254,21 @@ class Transactions extends PureComponent {
         }
       }, 1000);
     }
+    this.getMisesTransactions();
   }
-
+  getMisesTransactions() {
+    if (this.props.networkType === 'mises') {
+      const { MisesController } = Engine.context;
+      const { selectedAddress } = this.props;
+      return MisesController.recentTransactions(false, selectedAddress).then(
+        (res) => {
+          this.setState({
+            transactions: res,
+          });
+        },
+      );
+    }
+  }
   scrollToIndex = (index) => {
     if (!this.scrolling && (this.props.headerHeight || index)) {
       this.scrolling = true;
@@ -286,7 +308,13 @@ class Transactions extends PureComponent {
 
   onRefresh = async () => {
     this.setState({ refreshing: true });
-    this.props.thirdPartyApiMode && (await Engine.refreshTransactionHistory());
+    if (this.props.networkType === 'mises') {
+      await this.getMisesTransactions();
+    } else {
+      this.props.thirdPartyApiMode &&
+        (await Engine.refreshTransactionHistory());
+    }
+
     this.setState({ refreshing: false });
   };
 
@@ -304,7 +332,6 @@ class Transactions extends PureComponent {
   renderEmpty = () => {
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
     return (
       <ScrollView
         contentContainerStyle={styles.emptyContainer}
@@ -391,7 +418,7 @@ class Transactions extends PureComponent {
     index,
   });
 
-  keyExtractor = (item) => item.id.toString();
+  keyExtractor = (item, index) => item.id?.toString() || index.toString();
 
   onSpeedUpAction = (speedUpAction, existingGas, tx) => {
     this.existingGas = existingGas;
@@ -615,16 +642,17 @@ class Transactions extends PureComponent {
       confirmedTransactions,
       header,
       isSigningQRObject,
+      networkType,
     } = this.props;
     const { cancelConfirmDisabled, speedUpConfirmDisabled } = this.state;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
     const transactions =
-      submittedTransactions && submittedTransactions.length
+      networkType === 'mises'
+        ? this.state.transactions
+        : submittedTransactions && submittedTransactions.length
         ? submittedTransactions.concat(confirmedTransactions)
-        : this.props.transactions;
-
+        : confirmedTransactions;
     const renderSpeedUpGas = () => {
       if (!this.existingGas) return null;
       if (!this.existingGas.isEIP1559Transaction)
@@ -640,7 +668,6 @@ class Transactions extends PureComponent {
           Math.floor(this.existingGas.gasPrice * CANCEL_RATE),
         )} ${strings('unit.eth')}`;
     };
-
     return (
       <View style={styles.wrapper} testID={'transactions-screen'}>
         <FlatList
@@ -706,11 +733,16 @@ class Transactions extends PureComponent {
       </View>
     );
   };
-
+  renderTransactions = () => {
+    const length =
+      this.props.networkType !== 'mises'
+        ? this.props.transactions.length
+        : this.state.transactions.length;
+    return !length ? this.renderEmpty() : this.renderList();
+  };
   render = () => {
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
     return (
       <SafeAreaView
         edges={['bottom']}
@@ -719,9 +751,7 @@ class Transactions extends PureComponent {
       >
         {!this.state.ready || this.props.loading
           ? this.renderLoader()
-          : !this.props.transactions.length
-          ? this.renderEmpty()
-          : this.renderList()}
+          : this.renderTransactions()}
         {(this.state.speedUp1559IsOpen || this.state.cancel1559IsOpen) &&
           this.renderUpdateTxEIP1559Gas(this.state.cancel1559IsOpen)}
       </SafeAreaView>
@@ -731,6 +761,7 @@ class Transactions extends PureComponent {
 
 const mapStateToProps = (state) => ({
   accounts: state.engine.backgroundState.AccountTrackerController.accounts,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
   collectibleContracts: collectibleContractsSelector(state),
   contractExchangeRates:

@@ -277,7 +277,6 @@ function decodeIncomingTransfer(args) {
     primaryCurrency,
     selectedAddress,
   } = args;
-
   const amount = toBN(value);
   const token = { symbol, decimals, address: contractAddress };
 
@@ -577,23 +576,21 @@ function decodeConfirmTx(args) {
     actionKey,
     primaryCurrency,
     selectedAddress,
+    providerType,
   } = args;
-
   const ticker = getTicker(args.ticker);
-  const totalEth = hexToBN(value);
-  const renderTotalEth = `${renderFromWei(totalEth)} ${ticker}`;
-  const renderTotalEthFiat = weiToFiat(
-    totalEth,
-    conversionRate,
-    currentCurrency,
-  );
-
+  const isMises = providerType === 'mises';
+  const totalEth = isMises ? value : hexToBN(value);
+  const renderTotalEth = `${isMises ? totalEth : renderFromWei(totalEth)} ${
+    isMises ? 'MIS' : ticker
+  }`;
+  const renderTotalEthFiat = weiToFiat('0x', conversionRate, currentCurrency);
   const totalGas = calculateTotalGas(transaction);
+
   const totalValue = isBN(totalEth) ? totalEth.add(totalGas) : totalGas;
 
-  const renderFrom = renderFullAddress(from);
-  const renderTo = renderFullAddress(to);
-
+  const renderFrom = isMises ? from : renderFullAddress(from);
+  const renderTo = isMises ? to : renderFullAddress(to);
   const tokenList = Engine.context.TokenListController.state.tokenList;
   let symbol;
   if (renderTo in tokenList) {
@@ -610,7 +607,9 @@ function decodeConfirmTx(args) {
       !actionKey.includes(strings('transactions.received')))
   )
     transactionType = TRANSACTION_TYPES.SITE_INTERACTION;
-  else if (renderFrom === selectedAddress)
+  else if (isMises) {
+    transactionType = actionKey;
+  } else if (renderFrom === selectedAddress)
     transactionType = TRANSACTION_TYPES.SENT;
   else if (renderTo === selectedAddress)
     transactionType = TRANSACTION_TYPES.RECEIVED;
@@ -626,7 +625,9 @@ function decodeConfirmTx(args) {
     renderFrom,
     renderTo,
     transactionHash,
-    renderValue: `${renderFromWei(value)} ${ticker}`,
+    renderValue: `${isMises ? value : renderFromWei(value)} ${
+      isMises ? 'MIS' : ticker
+    }`,
     renderGas: parseInt(gas, 16).toString(),
     renderGasPrice: renderGwei(transaction),
     renderTotalGas: `${renderFromWei(totalGas)} ${ticker}`,
@@ -846,12 +847,24 @@ function decodeSwapsTx(args) {
  * currentCurrency, exchangeRate, contractExchangeRates, collectibleContracts, tokens
  */
 export default async function decodeTransaction(args) {
-  const { tx, selectedAddress, ticker, chainId, swapsTransactions = {} } = args;
+  const {
+    tx,
+    selectedAddress,
+    ticker,
+    chainId,
+    swapsTransactions = {},
+    providerType,
+  } = args;
   const { isTransfer } = tx || {};
 
-  const actionKey = await getActionKey(tx, selectedAddress, ticker, chainId);
+  const actionKey = await getActionKey(
+    tx,
+    selectedAddress,
+    ticker,
+    chainId,
+    providerType,
+  );
   let transactionElement, transactionDetails;
-
   if (
     tx.transaction.to?.toLowerCase() === getSwapsContractAddress(chainId) ||
     swapsTransactions[tx.id]

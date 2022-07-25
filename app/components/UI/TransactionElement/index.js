@@ -104,6 +104,10 @@ class TransactionElement extends PureComponent {
     */
     identities: PropTypes.object,
     /**
+    /* Identities object required to get import time name
+    */
+    accountList: PropTypes.object,
+    /**
      * Current element of the list index
      */
     i: PropTypes.number,
@@ -125,6 +129,10 @@ class TransactionElement extends PureComponent {
      * Chain Id
      */
     chainId: PropTypes.string,
+    /**
+     * Chain type
+     */
+    providerType: PropTypes.string,
     signQRTransaction: PropTypes.func,
     cancelUnsignedQRTransaction: PropTypes.func,
     isQRHardwareAccount: PropTypes.bool,
@@ -181,12 +189,17 @@ class TransactionElement extends PureComponent {
   };
 
   renderTxTime = () => {
-    const { tx, selectedAddress } = this.props;
-    const incoming =
-      safeToChecksumAddress(tx.transaction.to) === selectedAddress;
+    const { tx, selectedAddress, providerType, accountList } = this.props;
+    const isMises = providerType === 'mises';
+    const isMe = accountList[selectedAddress].misesId;
+    const incoming = isMises
+      ? tx.transaction.to === isMe
+      : safeToChecksumAddress(tx.transaction.to) === selectedAddress;
     const selfSent =
       incoming &&
-      safeToChecksumAddress(tx.transaction.from) === selectedAddress;
+      (isMises
+        ? tx.transaction.from === isMe
+        : safeToChecksumAddress(tx.transaction.from) === selectedAddress);
     return `${
       (!incoming || selfSent) && tx.deviceConfirmedOn === WalletDevice.MM_MOBILE
         ? `#${parseInt(tx.transaction.nonce, 16)} - ${toDateFormat(
@@ -195,7 +208,7 @@ class TransactionElement extends PureComponent {
             'transactions.from_device_label',
             // eslint-disable-next-line no-mixed-spaces-and-tabs
           )}`
-        : `${toDateFormat(tx.time)}
+        : `${tx.date ? tx.date : toDateFormat(tx.time)}
       `
     }`;
   };
@@ -277,6 +290,7 @@ class TransactionElement extends PureComponent {
       selectedAddress,
       isQRHardwareAccount,
       tx: { time, status },
+      providerType,
     } = this.props;
     const { value, fiatValue = false, actionKey } = transactionElement;
     const renderNormalActions =
@@ -286,7 +300,9 @@ class TransactionElement extends PureComponent {
     const accountImportTime = identities[selectedAddress]?.importTime;
     return (
       <>
-        {accountImportTime > time && this.renderImportTime()}
+        {providerType !== 'mises' &&
+          accountImportTime > time &&
+          this.renderImportTime()}
         <ListItem>
           <ListItem.Date>{this.renderTxTime()}</ListItem.Date>
           <ListItem.Content>
@@ -527,6 +543,8 @@ class TransactionElement extends PureComponent {
 
 const mapStateToProps = (state) => ({
   ticker: state.engine.backgroundState.NetworkController.provider.ticker,
+  providerType: state.engine.backgroundState.NetworkController.provider.type,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
   identities: state.engine.backgroundState.PreferencesController.identities,
   primaryCurrency: state.settings.primaryCurrency,
