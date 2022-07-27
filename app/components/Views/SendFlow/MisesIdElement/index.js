@@ -87,7 +87,6 @@ class MisesIdElement extends PureComponent {
     const secondaryLabel = name && name[0] !== ' ' && shortenAddress(misesId);
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
     return (
       <TouchableOpacity
         onPress={() => onAccountPress(address)}

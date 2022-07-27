@@ -36,6 +36,7 @@ import {
   WalletDevice,
   NetworksChainId,
   GAS_ESTIMATE_TYPES,
+  BN,
 } from '@metamask/controllers';
 import {
   prepareTransaction,
@@ -88,6 +89,8 @@ import { showAlert } from '../../../../actions/alert';
 import ClipboardManager from '../../../../core/ClipboardManager';
 import GlobalAlert from '../../../UI/GlobalAlert';
 import { allowedToBuy } from '../../../UI/FiatOrders';
+import TransactionReviewMises from '../../../UI/TransactionReview/TransactionReviewMises';
+import { uuid } from '@walletconnect/utils';
 
 const EDIT = 'edit';
 const EDIT_NONCE = 'edit_nonce';
@@ -960,52 +963,91 @@ class Confirm extends PureComponent {
   };
 
   onNext = async () => {
-    const { TransactionController, KeyringController } = Engine.context;
+    const { TransactionController, KeyringController, MisesController } =
+      Engine.context;
     const {
       transactionState: { assetType },
       navigation,
       resetTransaction,
       gasEstimateType,
+      providerType,
     } = this.props;
     const {
       EIP1559TransactionData,
       LegacyTransactionData,
       transactionConfirmed,
+      memo,
     } = this.state;
     if (transactionConfirmed) return;
+    const transaction = this.prepareTransactionToSend();
     this.setState({ transactionConfirmed: true, stopUpdateGas: true });
+    let transactionMeta = {};
     try {
-      const transaction = this.prepareTransactionToSend();
-      let error;
-      if (gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
-        error = this.validateAmount({
-          transaction,
-          total: EIP1559TransactionData.totalMaxHex,
-        });
+      if (providerType === 'mises') {
+        let misesId = '';
+        if (transaction.to.indexOf('mises') > -1) {
+          misesId = transaction.to;
+        } else {
+          const misesUser = await MisesController.getMisesUser(transaction.to);
+          misesId = misesUser.address();
+        }
+        const value =
+          hexToBN(transaction.value)
+            .div(new BN(10).pow(new BN(12)))
+            .toNumber() / 1000000;
+        await MisesController.setMisesBook(misesId, value, false, memo);
+        transactionMeta = {
+          chainId: '46',
+          deviceConfirmedOn: 'metamask_mobile',
+          id: uuid(),
+          networkID: '46',
+          origin: 'MetaMask Mobile',
+          status: 'Confirmed',
+          time: new Date().getTime(),
+          transaction: {
+            estimatedBaseFee: '0x0',
+            from: transaction.from,
+            gas: '0x0',
+            maxFeePerGas: '0x0',
+            maxPriorityFeePerGas: '0x0',
+            to: misesId,
+            value,
+          },
+          verifiedOnBlockchain: false,
+        };
+        await KeyringController.resetQRKeyringState();
       } else {
-        error = this.validateAmount({
-          transaction,
-          total: LegacyTransactionData.totalHex,
-        });
-      }
-      this.setError(error);
-      if (error) {
-        this.setState({ transactionConfirmed: false, stopUpdateGas: true });
-        return;
-      }
+        let error;
+        if (gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
+          error = this.validateAmount({
+            transaction,
+            total: EIP1559TransactionData.totalMaxHex,
+          });
+        } else {
+          error = this.validateAmount({
+            transaction,
+            total: LegacyTransactionData.totalHex,
+          });
+        }
+        this.setError(error);
+        if (error) {
+          this.setState({ transactionConfirmed: false, stopUpdateGas: true });
+          return;
+        }
 
-      const { result, transactionMeta } =
-        await TransactionController.addTransaction(
-          transaction,
-          TransactionTypes.MMM,
-          WalletDevice.MM_MOBILE,
-        );
-      await KeyringController.resetQRKeyringState();
-      await TransactionController.approveTransaction(transactionMeta.id);
-      await new Promise((resolve) => resolve(result));
-
-      if (transactionMeta.error) {
-        throw transactionMeta.error;
+        const { result, transactionMetaResult } =
+          await TransactionController.addTransaction(
+            transaction,
+            TransactionTypes.MMM,
+            WalletDevice.MM_MOBILE,
+          );
+        await KeyringController.resetQRKeyringState();
+        await TransactionController.approveTransaction(transactionMeta.id);
+        await new Promise((resolve) => resolve(result));
+        transactionMeta = transactionMetaResult;
+        if (transactionMeta.error) {
+          throw transactionMeta.error;
+        }
       }
 
       InteractionManager.runAfterInteractions(() => {
@@ -1403,7 +1445,9 @@ class Confirm extends PureComponent {
   onUpdatingValuesEnd = () => {
     this.setState({ isAnimating: false });
   };
-
+  getMemo = (memo) => {
+    this.setState({ memo });
+  };
   render = () => {
     const { transactionToName, selectedAsset, paymentRequest } =
       this.props.transactionState;
@@ -1561,6 +1605,11 @@ class Confirm extends PureComponent {
               gasEstimationReady={gasEstimationReady}
               legacy
             />
+          ) : isMises ? (
+            <TransactionReviewMises
+              primaryCurrency={primaryCurrency}
+              getMemo={this.getMemo}
+            />
           ) : (
             <TransactionReviewEIP1559
               totalNative={EIP1559TransactionData.renderableTotalMinNative}
@@ -1641,10 +1690,11 @@ class Confirm extends PureComponent {
           <StyledButton
             type={'confirm'}
             disabled={
-              transactionConfirmed ||
-              !gasEstimationReady ||
-              Boolean(errorMessage) ||
-              isAnimating
+              (transactionConfirmed ||
+                !gasEstimationReady ||
+                Boolean(errorMessage) ||
+                isAnimating) &&
+              !isMises
             }
             containerStyle={styles.buttonNext}
             onPress={this.onNext}

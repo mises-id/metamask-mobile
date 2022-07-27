@@ -81,8 +81,8 @@ class Engine {
           useTokenDetection:
             initialState?.PreferencesController?.useTokenDetection ?? true,
           // TODO: Use previous value when preferences UI is available
-          useCollectibleDetection: false,
-          openSeaEnabled: false,
+          useCollectibleDetection: true,
+          openSeaEnabled: true,
         },
       );
       const networkController = new NetworkController({

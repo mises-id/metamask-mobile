@@ -213,6 +213,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const balanceLong = await user.getBalanceUMIS();
       if (user && balanceLong) {
         const balanceObj = this.#coinDefine.toCoinMIS(balanceLong);
+        console.log(balanceObj, 'balanceObjbalanceObj');
         return {
           ...balanceObj,
           denom: balanceObj.denom.toUpperCase(),
@@ -549,9 +550,8 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       amount,
       denom: 'mis',
     });
-    // console.warn(simulate, 'simulate');
-    // console.warn(memo, 'getMemo');
     if (!simulate) {
+      console.log(misesId, amountLong, simulate, memo, amount, '===========');
       try {
         const res: DeliverTxResponse | undefined = await activeUser?.sendUMIS(
           misesId,
@@ -559,15 +559,9 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           simulate,
           memo,
         );
-        this.update({
-          transformFlag: res?.code === 0 ? 'success' : 'error',
-        });
         console.warn(res, memo, 'success-setMisesBook');
-        return true;
+        return res?.code === 1;
       } catch (error) {
-        this.update({
-          transformFlag: 'error',
-        });
         console.warn(error, 'err-setMisesBook');
         return false;
       }

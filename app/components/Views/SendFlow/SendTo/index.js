@@ -501,7 +501,7 @@ class SendFlow extends PureComponent {
 				isOnlyWarning = true;
 			}
 			*/
-    } else if (toSelectedAddress && toSelectedAddress.startsWith('mises')) {
+    } else if (toSelectedAddress && toSelectedAddress.indexOf('mises') > -1) {
       toAddressName = toSelectedAddress;
       // If not in the addressBook nor user accounts
       addToAddressToAddressBook = true;
@@ -636,7 +636,7 @@ class SendFlow extends PureComponent {
       fromAccountName,
       toEnsAddressResolved,
     } = this.state;
-    if (!this.isAddressSaved()) {
+    if (!this.isAddressSaved() && providerType !== 'mises') {
       const addressError = await this.validateToAddress();
       if (addressError) return;
     }

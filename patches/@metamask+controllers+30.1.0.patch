@@ -96,3 +96,18 @@ index cb5c205..8a3c130 100644
          });
          this.refreshNetwork();
      }
+diff --git a/node_modules/@metamask/controllers/dist/user/PreferencesController.js b/node_modules/@metamask/controllers/dist/user/PreferencesController.js
+index e0d8c23..be4e793 100644
+--- a/node_modules/@metamask/controllers/dist/user/PreferencesController.js
++++ b/node_modules/@metamask/controllers/dist/user/PreferencesController.js
+@@ -27,8 +27,8 @@ class PreferencesController extends BaseController_1.BaseController {
+             lostIdentities: {},
+             selectedAddress: '',
+             useTokenDetection: true,
+-            useCollectibleDetection: false,
+-            openSeaEnabled: false,
++            useCollectibleDetection: true,
++            openSeaEnabled: true,
+         };
+         this.initialize();
+     }

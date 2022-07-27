@@ -288,8 +288,8 @@ export const migrations = {
   10: (state) => {
     state.engine.backgroundState.PreferencesController = {
       ...state.engine.backgroundState.PreferencesController,
-      useCollectibleDetection: false,
-      openSeaEnabled: false,
+      useCollectibleDetection: true,
+      openSeaEnabled: true,
     };
     return state;
   },

@@ -13,7 +13,7 @@ import { ThemeContext, mockTheme } from '../../../../util/theme';
 
 const EMPTY = '0x0';
 const BALANCE_KEY = 'balance';
-
+const MISESBALANCE_KEY = 'misesBalance';
 const createStyles = (colors) =>
   StyleSheet.create({
     account: {
@@ -124,7 +124,8 @@ class AccountElement extends PureComponent {
   };
 
   render() {
-    const { disabled, updatedBalanceFromStore, ticker,providerType } = this.props;
+    const { disabled, updatedBalanceFromStore, ticker, providerType } =
+      this.props;
     const {
       address,
       name,
@@ -174,7 +175,7 @@ class AccountElement extends PureComponent {
                     providerType === 'mises'
                       ? updatedBalanceFromStore
                       : renderFromWei(updatedBalanceFromStore)
-                  } ${providerType === 'mises' ? 'MIS' : getTicker(ticker)}`}
+                  } ${getTicker(ticker)}`}
                 </Text>
                 {!!balanceError && (
                   <Text
@@ -197,23 +198,42 @@ class AccountElement extends PureComponent {
 const mapStateToProps = (
   {
     engine: {
-      backgroundState: { PreferencesController, AccountTrackerController },
+      backgroundState: {
+        PreferencesController,
+        AccountTrackerController,
+        MisesController,
+        NetworkController,
+      },
     },
   },
   { item: { balance, address } },
 ) => {
+  const isMises = NetworkController.provider.type === 'mises';
   const { selectedAddress } = PreferencesController;
-  const { accounts } = AccountTrackerController;
-  const selectedAccount = accounts[selectedAddress];
+  if (!isMises) {
+    const { accounts } = AccountTrackerController;
+    const selectedAccount = accounts[selectedAddress];
+    const selectedAccountHasBalance =
+      selectedAccount &&
+      Object.prototype.hasOwnProperty.call(selectedAccount, BALANCE_KEY);
+    const updatedBalanceFromStore =
+      balance === EMPTY &&
+      selectedAddress === address &&
+      selectedAccount &&
+      selectedAccountHasBalance
+        ? selectedAccount[BALANCE_KEY]
+        : balance;
+    return {
+      updatedBalanceFromStore,
+    };
+  }
+  const selectedAccount = MisesController.accountList[selectedAddress];
   const selectedAccountHasBalance =
     selectedAccount &&
-    Object.prototype.hasOwnProperty.call(selectedAccount, BALANCE_KEY);
+    Object.prototype.hasOwnProperty.call(selectedAccount, MISESBALANCE_KEY);
   const updatedBalanceFromStore =
-    balance === EMPTY &&
-    selectedAddress === address &&
-    selectedAccount &&
-    selectedAccountHasBalance
-      ? selectedAccount[BALANCE_KEY]
+    selectedAddress === address && selectedAccount && selectedAccountHasBalance
+      ? selectedAccount[MISESBALANCE_KEY]?.amount
       : balance;
   return {
     updatedBalanceFromStore,

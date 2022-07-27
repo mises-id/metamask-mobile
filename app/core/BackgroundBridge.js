@@ -120,11 +120,11 @@ export class BackgroundBridge extends EventEmitter {
     this.setProviderAndBlockTracker({ provider, blockTracker });
 
     if (port) {
-      this.port = port
+      this.port = port;
     } else {
       this.port = this.isWalletConnect
-      ? new WalletConnectPort(wcRequestActions)
-      : new Port(this._webviewRef, isMainFrame);
+        ? new WalletConnectPort(wcRequestActions)
+        : new Port(this._webviewRef, isMainFrame);
     }
 
     this.engine = null;
@@ -195,8 +195,8 @@ export class BackgroundBridge extends EventEmitter {
   }
 
   getProviderNetworkState({ network }) {
-    const networkType = Engine.context.NetworkController.state.provider.type;
     const networkProvider = Engine.context.NetworkController.state.provider;
+    const networkType = networkProvider.type;
 
     const isInitialNetwork =
       networkType && getAllNetworks().includes(networkType);

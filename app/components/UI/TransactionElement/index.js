@@ -191,7 +191,7 @@ class TransactionElement extends PureComponent {
   renderTxTime = () => {
     const { tx, selectedAddress, providerType, accountList } = this.props;
     const isMises = providerType === 'mises';
-    const isMe = accountList[selectedAddress].misesId;
+    const isMe = accountList[selectedAddress]?.misesId;
     const incoming = isMises
       ? tx.transaction.to === isMe
       : safeToChecksumAddress(tx.transaction.to) === selectedAddress;

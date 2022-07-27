@@ -262,28 +262,28 @@ class AddressList extends PureComponent {
       </TouchableOpacity>
     ) : (
       <View>
-        {Object.keys(identities).map((address) =>
-          isMises ? (
-            <MisesIdElement
-              key={address}
-              address={address}
-              misesId={accountList[address]?.misesId}
-              name={identities[address].name}
-              onAccountPress={onAccountPress}
-              onAccountLongPress={onAccountLongPress}
-              testID={'account-identity'}
-            />
-          ) : (
-            <AddressElement
-              key={address}
-              address={address}
-              name={identities[address].name}
-              onAccountPress={onAccountPress}
-              onAccountLongPress={onAccountLongPress}
-              testID={'account-identity'}
-            />
-          ),
-        )}
+        {isMises
+          ? Object.keys(accountList).map((address) => (
+              <MisesIdElement
+                key={address}
+                address={address}
+                misesId={accountList[address]?.misesId}
+                name={identities[address].name}
+                onAccountPress={onAccountPress}
+                onAccountLongPress={onAccountLongPress}
+                testID={'account-identity'}
+              />
+            ))
+          : Object.keys(identities).map((address) => (
+              <AddressElement
+                key={address}
+                address={address}
+                name={identities[address].name}
+                onAccountPress={onAccountPress}
+                onAccountLongPress={onAccountLongPress}
+                testID={'account-identity'}
+              />
+            ))}
       </View>
     );
   };
@@ -349,7 +349,7 @@ class AddressList extends PureComponent {
     const addressMisesId = (address) =>
       Object.values(accountList).find(
         (item) => item.address.toLowerCase() === address.toLowerCase(),
-      )?.misesId;
+      )?.misesId || address;
     if (!recents.length || inputSearch) return;
     const isMises = type === 'mises';
     return (
