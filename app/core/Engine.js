@@ -47,6 +47,10 @@ import { LAST_INCOMING_TX_BLOCK_INFO } from '../constants/storage';
 import { isZero } from '../util/lodash';
 import MisesController from './misesController';
 import AnalyticsV2 from '../util/analyticsV2';
+import {
+  MisesCollectibleDetectionController,
+  MisesCollectiblesController,
+} from './misesCollectibles';
 
 const NON_EMPTY = 'NON_EMPTY';
 
@@ -134,37 +138,6 @@ class Engine {
         onNetworkStateChange: (listener) =>
           networkController.subscribe(listener),
       });
-      const collectiblesController = new CollectiblesController(
-        {
-          onPreferencesStateChange: (listener) =>
-            preferencesController.subscribe(listener),
-          onNetworkStateChange: (listener) =>
-            networkController.subscribe(listener),
-          getERC721AssetName: assetsContractController.getERC721AssetName.bind(
-            assetsContractController,
-          ),
-          getERC721AssetSymbol:
-            assetsContractController.getERC721AssetSymbol.bind(
-              assetsContractController,
-            ),
-          getERC721TokenURI: assetsContractController.getERC721TokenURI.bind(
-            assetsContractController,
-          ),
-          getERC721OwnerOf: assetsContractController.getERC721OwnerOf.bind(
-            assetsContractController,
-          ),
-          getERC1155BalanceOf:
-            assetsContractController.getERC1155BalanceOf.bind(
-              assetsContractController,
-            ),
-          getERC1155TokenURI: assetsContractController.getERC1155TokenURI.bind(
-            assetsContractController,
-          ),
-        },
-        {
-          useIPFSSubdomains: false,
-        },
-      );
       const tokensController = new TokensController({
         onPreferencesStateChange: (listener) =>
           preferencesController.subscribe(listener),
@@ -244,6 +217,38 @@ class Engine {
         { encryptor, keyringTypes: additionalKeyrings },
         initialState.KeyringController,
       );
+      const collectiblesController = new MisesCollectiblesController(
+        {
+          onPreferencesStateChange: (listener) =>
+            preferencesController.subscribe(listener),
+          onNetworkStateChange: (listener) =>
+            networkController.subscribe(listener),
+          getERC721AssetName: assetsContractController.getERC721AssetName.bind(
+            assetsContractController,
+          ),
+          getERC721AssetSymbol:
+            assetsContractController.getERC721AssetSymbol.bind(
+              assetsContractController,
+            ),
+          getERC721TokenURI: assetsContractController.getERC721TokenURI.bind(
+            assetsContractController,
+          ),
+          getERC721OwnerOf: assetsContractController.getERC721OwnerOf.bind(
+            assetsContractController,
+          ),
+          getERC1155BalanceOf:
+            assetsContractController.getERC1155BalanceOf.bind(
+              assetsContractController,
+            ),
+          getERC1155TokenURI: assetsContractController.getERC1155TokenURI.bind(
+            assetsContractController,
+          ),
+          getMisesAccount: misesController.getAccountList.bind(misesController),
+        },
+        {
+          useIPFSSubdomains: false,
+        },
+      );
       const controllers = [
         keyringController,
         new AccountTrackerController({
@@ -289,7 +294,7 @@ class Engine {
               assetsContractController,
             ),
         }),
-        new CollectibleDetectionController({
+        new MisesCollectibleDetectionController({
           onCollectiblesStateChange: (listener) =>
             collectiblesController.subscribe(listener),
           onPreferencesStateChange: (listener) =>
@@ -301,6 +306,11 @@ class Engine {
             collectiblesController,
           ),
           getCollectiblesState: () => collectiblesController.state,
+          isUnlocked: () => keyringController.isUnlocked(),
+          getNetwork: collectiblesController.getNetwork.bind(
+            collectiblesController,
+          ),
+          getMisesAccount: misesController.getAccountList.bind(misesController),
         }),
         currencyRateController,
         new PersonalMessageManager(),
