@@ -12,7 +12,10 @@ import Engine from '../../../core/Engine';
 import { QR_HARDWARE_WALLET_DEVICE } from '../../../constants/keyringTypes';
 import Device from '../../../util/device';
 import { ThemeContext, mockTheme } from '../../../util/theme';
-import { shortenAddress } from '../../../core/misesController/misesNetwork.util';
+import {
+  getMisesAccount,
+  shortenAddress,
+} from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -158,7 +161,7 @@ class AccountInfoCard extends PureComponent {
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
     const weiBalance = hexToBN(accounts[selectedAddress].balance);
-    const misesAccount = accountList[selectedAddress] || {};
+    const misesAccount = getMisesAccount(accountList, selectedAddress);
     const isMises = type === 'mises';
     const balance = `(${
       isMises ? misesAccount.misesBalance.amount : renderFromWei(weiBalance)

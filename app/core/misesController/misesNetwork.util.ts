@@ -1,3 +1,5 @@
+import { accounts, misesAccount } from './index';
+
 export const MISES_SITE_API = 'https://api.alb.mises.site/api/v1';
 // export const MISES_SITE_API = 'http://192.168.1.2:8080/api/v1';
 // export const MISES_POINT = 'http://192.168.1.8:26657';
@@ -91,4 +93,11 @@ export function shortenAddress(
   return `${address.slice(0, prefix)}...${address.slice(
     -TRUNCATED_ADDRESS_END_CHARS,
   )}`;
+}
+export function getMisesAccount(
+  accountList: accounts,
+  address: string,
+): misesAccount {
+  const key = address?.toLowerCase();
+  return accountList[key] || {};
 }

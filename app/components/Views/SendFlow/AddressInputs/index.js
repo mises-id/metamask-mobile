@@ -16,7 +16,10 @@ import Text from '../../../Base/Text';
 import { hasZeroWidthPoints } from '../../../../util/confusables';
 import { useAppThemeFromContext, mockTheme } from '../../../../util/theme';
 import { useSelector } from 'react-redux';
-import { shortenAddress } from '../../../../core/misesController/misesNetwork.util';
+import {
+  getMisesAccount,
+  shortenAddress,
+} from '../../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -238,7 +241,8 @@ export const AddressTo = (props) => {
     (state) => state.engine.backgroundState.NetworkController.provider.type,
   );
   const isMises = providerType === 'mises';
-  const misesAccount = accountList[toSelectedAddress] || {};
+
+  const misesAccount = getMisesAccount(accountList, toSelectedAddress) || {};
   if (isConfirmScreen) {
     return (
       <View style={styles.wrapper}>

@@ -212,9 +212,7 @@ class Engine {
           onPreferencesStateChange: (listener) =>
             preferencesController.subscribe(listener),
         },
-        {
-          accountList: {},
-        },
+        {},
         initialState.MisesController,
       );
       const collectiblesController = new MisesCollectiblesController(

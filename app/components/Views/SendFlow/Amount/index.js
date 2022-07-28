@@ -73,6 +73,7 @@ import {
 import { gte } from '../../../../util/lodash';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
 import BigNumber from 'bignumber.js';
+import { getMisesAccount } from '../../../../core/misesController/misesNetwork.util';
 
 const { hexToBN, BNToHex } = util;
 
@@ -727,9 +728,8 @@ class Amount extends PureComponent {
     if (isDecimal(inputValue)) {
       if (selectedAsset.isETH) {
         if (providerType === 'mises') {
-          weiBalance = new BigNumber(
-            accountList[selectedAddress]?.misesBalance.amount,
-          );
+          const selectedAccount = getMisesAccount(accountList, selectedAddress);
+          weiBalance = new BigNumber(selectedAccount?.misesBalance.amount);
           weiInput = new BigNumber(inputValue).plus(estimatedTotalGas);
         } else {
           weiBalance = hexToBN(accounts[selectedAddress].balance);
@@ -796,8 +796,9 @@ class Amount extends PureComponent {
     let input;
     if (selectedAsset.isETH) {
       if (providerType === 'mises') {
+        const selectedAccount = getMisesAccount(accountList, selectedAddress);
         const realMaxValue = new BigNumber(
-          accountList[selectedAddress].misesBalance?.amount,
+          selectedAccount?.misesBalance?.amount,
         ).minus(new BigNumber(estimatedTotalGas));
         const maxValue =
           realMaxValue.isZero() || realMaxValue.isNegative()
@@ -976,7 +977,8 @@ class Amount extends PureComponent {
       currentBalance = `${renderableBalance} ${symbol}`;
     } else if (isETH) {
       if (providerType === 'mises') {
-        currentBalance = `${accountList[selectedAddress].misesBalance?.amount} ${accountList[selectedAddress].misesBalance?.denom}`;
+        const selectedAccount = getMisesAccount(accountList, selectedAddress);
+        currentBalance = `${selectedAccount?.misesBalance?.amount} ${selectedAccount?.misesBalance?.denom}`;
       } else {
         currentBalance = `${renderFromWei(
           accounts[selectedAddress].balance,

@@ -10,6 +10,7 @@ import { strings } from '../../../../../locales/i18n';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { connect } from 'react-redux';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
+import { getMisesAccount } from '../../../../core/misesController/misesNetwork.util';
 
 const EMPTY = '0x0';
 const BALANCE_KEY = 'balance';
@@ -227,7 +228,11 @@ const mapStateToProps = (
       updatedBalanceFromStore: `${updatedBalanceFromStore}`,
     };
   }
-  const selectedAccount = MisesController.accountList[selectedAddress];
+
+  const selectedAccount = getMisesAccount(
+    MisesController.accountList,
+    selectedAddress,
+  );
   const selectedAccountHasBalance =
     selectedAccount &&
     Object.prototype.hasOwnProperty.call(selectedAccount, MISESBALANCE_KEY);
