@@ -60,7 +60,7 @@ index 8c55e27..dfabbe7 100644
  /**
   * @type ProviderConfig
 diff --git a/node_modules/@metamask/controllers/dist/network/NetworkController.js b/node_modules/@metamask/controllers/dist/network/NetworkController.js
-index cb5c205..8a3c130 100644
+index cb5c205..8035219 100644
 --- a/node_modules/@metamask/controllers/dist/network/NetworkController.js
 +++ b/node_modules/@metamask/controllers/dist/network/NetworkController.js
 @@ -42,6 +42,7 @@ var NetworksChainId;
@@ -71,6 +71,15 @@ index cb5c205..8a3c130 100644
  })(NetworksChainId = exports.NetworksChainId || (exports.NetworksChainId = {}));
  const LOCALHOST_RPC_URL = 'http://localhost:8545';
  /**
+@@ -65,7 +66,7 @@ class NetworkController extends BaseController_1.BaseController {
+         this.defaultState = {
+             network: 'loading',
+             isCustomNetwork: false,
+-            provider: { type: constants_1.MAINNET, chainId: NetworksChainId.mainnet },
++            provider: { type: 'mises', chainId: NetworksChainId.mises },
+             properties: { isEIP1559Compatible: false },
+         };
+         this.initialize();
 @@ -81,6 +82,7 @@ class NetworkController extends BaseController_1.BaseController {
              case 'optimism':
              case 'optimismTest':
