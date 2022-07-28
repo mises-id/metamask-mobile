@@ -19,9 +19,7 @@ import {
   WalletDevice,
   GasFeeController,
   TokensController,
-  CollectiblesController,
   TokenDetectionController,
-  CollectibleDetectionController,
   ApprovalController,
   NetworkController,
 } from '@metamask/controllers';
@@ -214,8 +212,10 @@ class Engine {
           onPreferencesStateChange: (listener) =>
             preferencesController.subscribe(listener),
         },
-        { encryptor, keyringTypes: additionalKeyrings },
-        initialState.KeyringController,
+        {
+          accountList: {},
+        },
+        initialState.MisesController,
       );
       const collectiblesController = new MisesCollectiblesController(
         {

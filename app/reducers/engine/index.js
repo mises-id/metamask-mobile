@@ -9,6 +9,10 @@ const engineReducer = (state = initialState, action) => {
     case 'INIT_BG_STATE':
       return { backgroundState: Engine.state };
     case 'UPDATE_BG_STATE': {
+      if (action.key === 'MisesController') {
+        console.log(Engine.state[action.key], 'action.keyaction.keyaction.key');
+      }
+
       const newState = { ...state };
       newState.backgroundState[action.key] = Engine.state[action.key];
       return newState;

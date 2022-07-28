@@ -177,7 +177,7 @@
     "json-rpc-middleware-stream": "3.0.0",
     "lottie-react-native": "git+https://github.com/MetaMask/lottie-react-native.git#7ce6a78ac4ac7b9891bc513cb3f12f8b9c9d9106",
     "metro-config": "^0.71.1",
-    "mises-js-sdk": "^0.1.13",
+    "mises-js-sdk": "^0.1.14",
     "multihashes": "0.4.14",
     "number-to-bn": "1.7.0",
     "obj-multiplex": "1.0.0",
@@ -446,7 +446,6 @@
       "highlight.js": false,
       "es5-ext": false,
       "registry.npmmirror.com:/@lavamoat/preinstall-always-fail/-/preinstall-always-fail-1.0.0.tgz": false,
-      "registry.npmmirror.com:/core-js/-/core-js-3.23.5.tgz": false,
       "registry.npmmirror.com:/detox/-/detox-19.6.5.tgz": false,
       "registry.npmmirror.com:/dtrace-provider/-/dtrace-provider-0.8.8.tgz": false,
       "registry.npmmirror.com:/husky/-/husky-1.3.1.tgz": false,
@@ -464,7 +463,8 @@
       "registry.npmmirror.com:/keccak/-/keccak-1.4.0.tgz": false,
       "registry.npmmirror.com:/secp256k1/-/secp256k1-3.8.0.tgz": false,
       "registry.npmmirror.com:/protobufjs/-/protobufjs-6.11.3.tgz": false,
-      "registry.npmmirror.com:/protobufjs/-/protobufjs-6.10.3.tgz": false
+      "registry.npmmirror.com:/protobufjs/-/protobufjs-6.10.3.tgz": false,
+      "registry.npmmirror.com:/core-js/-/core-js-3.24.0.tgz": false
     }
   }
 }

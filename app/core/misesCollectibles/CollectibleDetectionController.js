@@ -63,7 +63,7 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
         isCustom: true,
       });
       this.offset = next || '';
-      return assets;
+      return assets || [];
     } catch (error) {
       return [];
     }

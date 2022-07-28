@@ -224,7 +224,7 @@ const mapStateToProps = (
         ? selectedAccount[BALANCE_KEY]
         : balance;
     return {
-      updatedBalanceFromStore,
+      updatedBalanceFromStore: `${updatedBalanceFromStore}`,
     };
   }
   const selectedAccount = MisesController.accountList[selectedAddress];
@@ -236,7 +236,7 @@ const mapStateToProps = (
       ? selectedAccount[MISESBALANCE_KEY]?.amount
       : balance;
   return {
-    updatedBalanceFromStore,
+    updatedBalanceFromStore: `${updatedBalanceFromStore}`,
   };
 };
 

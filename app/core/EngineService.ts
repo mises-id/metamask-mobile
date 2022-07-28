@@ -1,4 +1,3 @@
-import Analytics from './Analytics';
 import UntypedEngine from './Engine';
 
 const UPDATE_BG_STATE_KEY = 'UPDATE_BG_STATE';
@@ -36,6 +35,7 @@ class EngineService {
       { name: 'TransactionController' },
       { name: 'TypedMessageManager' },
       { name: 'SwapsController' },
+      { name: 'MisesController' },
       {
         name: 'TokenListController',
         key: `${Engine.context.TokenListController.name}:stateChange`,
@@ -60,7 +60,6 @@ class EngineService {
         this.engineInitialized = true;
       }
     });
-
     controllers.forEach((controller) => {
       const { name, key = undefined } = controller;
       const update_bg_state_cb = () =>

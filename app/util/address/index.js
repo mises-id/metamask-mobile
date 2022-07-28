@@ -96,7 +96,7 @@ export function renderSlightlyLongAddress(
 export function renderAccountName(address, identities) {
   address = safeToChecksumAddress(address);
   if (identities && address && address in identities) {
-    return identities[address].name;
+    return identities[address]?.name;
   }
   return renderShortAddress(address);
 }

@@ -7,14 +7,16 @@ import {
 } from '@metamask/controllers';
 import BigNumber from 'bignumber.js';
 import { DeliverTxResponse, IndexedTx } from '@cosmjs/stargate';
-import MisesSdk from 'mises-js-sdk/dist/lib/mises-js-sdk';
-import { MAppMgr } from 'mises-js-sdk/dist/types/mapp';
 import {
+  MSdk,
+  MAppMgr,
+  MUserMgr,
+  MUser,
   MisesCoin,
   MisesConfig,
   MsgReader,
-} from 'mises-js-sdk/dist/types/mises';
-import { MUser, MUserMgr } from 'mises-js-sdk/dist/types/muser';
+} from 'mises-js-sdk';
+
 import {
   getBaseApi,
   misesAPi,
@@ -52,7 +54,6 @@ interface accounts {
 }
 interface misesState extends BaseState {
   accountList: accounts;
-  transformFlag: 'loading' | 'error' | 'success';
 }
 interface misesGasfee {
   gasWanted: string | undefined;
@@ -67,7 +68,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   #config: MisesConfig;
   #coinDefine: MisesCoin;
   #msgReader: MsgReader;
-  #misesSdk: MisesSdk;
+  #misesSdk: MSdk;
   #misesAppMgr: MAppMgr;
   #misesUser: MUserMgr;
   #misesGasfee: misesGasfee;
@@ -93,11 +94,11 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     this.getKeyringAccounts = getKeyringAccounts;
     this.updateIdentities = updateIdentities;
     // init Mises sdk
-    this.#config = MisesSdk.newConfig();
+    this.#config = MSdk.newConfig();
     this.exportAccount = exportAccount;
-    this.#misesSdk = MisesSdk.newSdk(this.#config);
-    this.#coinDefine = MisesSdk.newCoinDefine();
-    this.#msgReader = MisesSdk.newMsgReader();
+    this.#misesSdk = MSdk.newSdk(this.#config);
+    this.#coinDefine = MSdk.newCoinDefine();
+    this.#msgReader = MSdk.newMsgReader();
     this.#coinDefine.load();
     this.#config.setLCDEndpoint(MISES_POINT);
     this.#misesUser = this.#misesSdk.userMgr();
@@ -107,7 +108,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     };
     this.defaultState = {
       accountList: {},
-      transformFlag: 'loading',
     };
     onPreferencesStateChange(async (preferencesState) => {
       try {
@@ -211,6 +211,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const balanceLong = await user.getBalanceUMIS();
       if (user && balanceLong) {
         const balanceObj = this.#coinDefine.toCoinMIS(balanceLong);
+        console.log(balanceObj, '=======');
         return {
           ...balanceObj,
           denom: balanceObj.denom.toUpperCase(),
@@ -598,12 +599,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       };
       return Promise.resolve(this.#misesGasfee);
     }
-  }
-
-  resetTranstionFlag() {
-    this.update({
-      transformFlag: 'loading',
-    });
   }
 
   parseAmountItem(item: { value: string }) {
