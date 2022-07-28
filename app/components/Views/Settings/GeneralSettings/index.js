@@ -194,6 +194,10 @@ class Settings extends PureComponent {
      */
     ticker: PropTypes.string,
     /**
+     * Network ticker
+     */
+    type: PropTypes.string,
+    /**
      * App theme
      */
     // appTheme: PropTypes.string,
@@ -254,7 +258,7 @@ class Settings extends PureComponent {
       { value: 'DuckDuckGo', label: 'DuckDuckGo', key: 'DuckDuckGo' },
       { value: 'Google', label: 'Google', key: 'Google' },
     ];
-    if (this.props.ticker === 'mises') {
+    if (this.props.type === 'mises') {
       this.primaryCurrencyOptions = [
         {
           value: 'MIS',
@@ -495,6 +499,7 @@ const mapStateToProps = (state) => ({
     state.engine.backgroundState.PreferencesController.selectedAddress,
   hideZeroBalanceTokens: state.settings.hideZeroBalanceTokens,
   ticker: state.engine.backgroundState.NetworkController.provider.ticker,
+  type: state.engine.backgroundState.NetworkController.provider.type,
   // appTheme: state.user.appTheme,
 });
 

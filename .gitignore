@@ -64,7 +64,7 @@ tests
 # app-specific
 /android/app/src/main/assets/InpageBridgeWeb3.js
 /app/core/InpageBridgeWeb3.js
-
+sourcemaps/
 # environment variables
 .js.env
 .ios.env

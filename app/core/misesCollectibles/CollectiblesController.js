@@ -141,7 +141,7 @@ export default class MisesCollectiblesController extends CollectiblesController 
    */
   getCollectibleContractInformationFromApi(contractAddress) {
     const misesAccount = this.getMisesAccount()[contractAddress];
-    if (!misesAccount.token) {
+    if (!misesAccount?.token) {
       return Promise.resolve(new Error('No token found'));
     }
     return request({

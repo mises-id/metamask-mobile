@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { StyleSheet, Alert, InteractionManager } from 'react-native';
+import {
+  StyleSheet,
+  Alert,
+  InteractionManager,
+  NativeModules,
+} from 'react-native';
 import PropTypes from 'prop-types';
 import { connect, useSelector } from 'react-redux';
 import { ethers } from 'ethers';
@@ -39,6 +44,7 @@ import AccountApproval from '../../UI/AccountApproval';
 import TransactionTypes from '../../../core/TransactionTypes';
 import AddCustomNetwork from '../../UI/AddCustomNetwork';
 import SwitchCustomNetwork from '../../UI/SwitchCustomNetwork';
+import MisesPostTx from '../../UI/MisesPostTx';
 import {
   toggleDappTransactionModal,
   toggleApproveModal,
@@ -58,7 +64,6 @@ import withQRHardwareAwareness from '../../UI/QRHardware/withQRHardwareAwareness
 import QRSigningModal from '../../UI/QRHardware/QRSigningModal';
 import { networkSwitched } from '../../../actions/onboardNetwork';
 
-import { NativeModules } from 'react-native';
 const { MisesModule } = NativeModules;
 
 const hstInterface = new ethers.utils.Interface(abi);
@@ -84,6 +89,7 @@ const RootRPCMethodsUI = (props) => {
 
   const [customNetworkToAdd, setCustomNetworkToAdd] = useState(null);
   const [customNetworkToSwitch, setCustomNetworkToSwitch] = useState(null);
+  const [postTx, setPostTx] = useState(null);
 
   const [hostToApprove, setHostToApprove] = useState(null);
 
@@ -111,6 +117,7 @@ const RootRPCMethodsUI = (props) => {
       type: ApprovalTypes.SIGN_MESSAGE,
       origin: signMessageParams.origin,
     });
+    MisesModule.popup();
   };
 
   const initializeWalletConnect = () => {
@@ -686,7 +693,52 @@ const RootRPCMethodsUI = (props) => {
       />
     </Modal>
   );
+  /**
+   * Render the add asset modal
+   */
 
+  const onPostTxReject = () => {
+    setShowPendingApproval(false);
+    rejectPendingApproval(postTx.id, ethErrors.provider.userRejectedRequest());
+  };
+
+  const onPostTxConfirm = () => {
+    const { MisesController } = Engine.context;
+    const { data } = postTx;
+    MisesController.postTx({
+      msgs: data.tx,
+      gasLimit: data.gasLimit,
+      gasFee: data.gasFee,
+    }).then((res) => {
+      setShowPendingApproval(false);
+      acceptPendingApproval(postTx.id, {
+        txHash: res.transactionHash,
+      });
+    });
+  };
+  const renderPostPxModal = () => (
+    <Modal
+      isVisible={
+        showPendingApproval?.type === ApprovalTypes.MISES_STAKINGPOSTTX
+      }
+      animationIn="slideInUp"
+      animationOut="slideOutDown"
+      style={styles.bottomModal}
+      backdropColor={colors.overlay.default}
+      backdropOpacity={1}
+      animationInTiming={300}
+      animationOutTiming={300}
+      onBackdropPress={onPostTxReject}
+      onSwipeComplete={onPostTxConfirm}
+      swipeDirection={'down'}
+    >
+      <MisesPostTx
+        onCancel={onPostTxReject}
+        onConfirm={onPostTxConfirm}
+        postTx={postTx?.data}
+      />
+    </Modal>
+  );
   // unapprovedTransaction effect
   useEffect(() => {
     Engine.context.TransactionController.hub.on(
@@ -733,10 +785,16 @@ const RootRPCMethodsUI = (props) => {
             origin: request.origin,
           });
           break;
+        case ApprovalTypes.MISES_STAKINGPOSTTX:
+          setPostTx({ data: requestData, id: request.id });
+          showPendingApprovalModal({
+            type: ApprovalTypes.MISES_STAKINGPOSTTX,
+            origin: request.origin,
+          });
+          break;
         default:
           break;
       }
-
       MisesModule.popup();
     } else {
       setShowPendingApproval(false);
@@ -799,6 +857,7 @@ const RootRPCMethodsUI = (props) => {
       {renderAccountsApprovalModal()}
       {renderWatchAssetModal()}
       {renderQRSigningModal()}
+      {renderPostPxModal()}
     </React.Fragment>
   );
 };

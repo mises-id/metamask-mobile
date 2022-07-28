@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 import Device from '../../../util/device';
 import Text from '../../Base/Text';
 import { useAppThemeFromContext, mockTheme } from '../../../util/theme';
-
+import stakingIcon from '../../../images/staking.jpg';
 const createStyles = (colors) =>
   StyleSheet.create({
     button: {
@@ -24,11 +24,11 @@ const createStyles = (colors) =>
       width: 36,
       height: 36,
       borderRadius: 18,
+      backgroundColor: colors.primary.default,
       paddingTop: Device.isAndroid() ? 2 : 4,
       paddingLeft: 1,
       justifyContent: 'center',
       alignContent: 'center',
-      backgroundColor: colors.primary.default,
     },
     buttonIcon: {
       justifyContent: 'center',
@@ -55,6 +55,13 @@ const createStyles = (colors) =>
       right: Device.isAndroid() ? 0.5 : 0,
       bottom: Device.isAndroid() ? 1 : 2,
     },
+    imageIcon: {
+      width: 36,
+      height: 36,
+      position: 'relative',
+      top: -2,
+      left: -1,
+    },
   });
 
 function AssetActionButton({ onPress, icon, label, disabled }) {
@@ -62,7 +69,6 @@ function AssetActionButton({ onPress, icon, label, disabled }) {
   const styles = createStyles(colors);
 
   const maxStringLength = 10;
-
   const getIcon = (type) => {
     switch (type) {
       case 'send': {
@@ -109,6 +115,9 @@ function AssetActionButton({ onPress, icon, label, disabled }) {
             style={[styles.buttonIcon, styles.buyIcon]}
           />
         );
+      }
+      case 'Staking': {
+        return <Image source={stakingIcon} style={styles.imageIcon} />;
       }
       default: {
         return null;

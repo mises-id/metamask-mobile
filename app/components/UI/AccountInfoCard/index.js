@@ -12,6 +12,7 @@ import Engine from '../../../core/Engine';
 import { QR_HARDWARE_WALLET_DEVICE } from '../../../constants/keyringTypes';
 import Device from '../../../util/device';
 import { ThemeContext, mockTheme } from '../../../util/theme';
+import { shortenAddress } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -89,6 +90,10 @@ class AccountInfoCard extends PureComponent {
      */
     accounts: PropTypes.object,
     /**
+     * Map of accounts to information objects including balances
+     */
+    accountList: PropTypes.object,
+    /**
      * List of accounts from the PreferencesController
      */
     identities: PropTypes.object,
@@ -116,6 +121,10 @@ class AccountInfoCard extends PureComponent {
      * Current selected ticker
      */
     ticker: PropTypes.string,
+    /**
+     * Current selected type
+     */
+    type: PropTypes.string,
   };
 
   state = {
@@ -142,14 +151,22 @@ class AccountInfoCard extends PureComponent {
       operation,
       ticker,
       showFiatBalance = true,
+      type,
+      accountList,
     } = this.props;
     const { isHardwareKeyring } = this.state;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
     const weiBalance = hexToBN(accounts[selectedAddress].balance);
-    const balance = `(${renderFromWei(weiBalance)} ${getTicker(ticker)})`;
+    const misesAccount = accountList[selectedAddress] || {};
+    const isMises = type === 'mises';
+    const balance = `(${
+      isMises ? misesAccount.misesBalance.amount : renderFromWei(weiBalance)
+    } ${getTicker(ticker)})`;
     const accountLabel = renderAccountName(selectedAddress, identities);
-    const address = renderShortAddress(selectedAddress);
+    const address = isMises
+      ? shortenAddress(misesAccount?.misesId)
+      : renderShortAddress(selectedAddress);
     const dollarBalance = weiToFiat(
       weiBalance,
       conversionRate,
@@ -211,6 +228,7 @@ class AccountInfoCard extends PureComponent {
 
 const mapStateToProps = (state) => ({
   accounts: state.engine.backgroundState.AccountTrackerController.accounts,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   selectedAddress:
     state.engine.backgroundState.PreferencesController.selectedAddress,
   identities: state.engine.backgroundState.PreferencesController.identities,
@@ -219,6 +237,7 @@ const mapStateToProps = (state) => ({
   currentCurrency:
     state.engine.backgroundState.CurrencyRateController.currentCurrency,
   ticker: state.engine.backgroundState.NetworkController.provider.ticker,
+  type: state.engine.backgroundState.NetworkController.provider.type,
 });
 
 AccountInfoCard.contextType = ThemeContext;

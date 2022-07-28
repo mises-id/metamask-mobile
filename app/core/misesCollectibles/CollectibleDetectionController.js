@@ -47,7 +47,7 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
   async getOwnerCollectibles(address) {
     // const { token } = this.getMisesAccount(address);
     const misesAccount = this.getMisesAccount()[address];
-    if (!misesAccount.token) {
+    if (!misesAccount?.token) {
       return Promise.resolve([]);
     }
     try {

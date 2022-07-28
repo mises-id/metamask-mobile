@@ -204,7 +204,7 @@ class AssetOverview extends PureComponent {
 
   onSend = async () => {
     const { asset, ticker } = this.props;
-    if (asset.isETH) {
+    if (asset.isETH || asset.name === 'Mises') {
       this.props.newAssetTransaction(getEther(ticker));
       this.props.navigation.navigate('SendFlowView');
     } else {
@@ -212,7 +212,9 @@ class AssetOverview extends PureComponent {
       this.props.navigation.navigate('SendFlowView');
     }
   };
-
+  staking = () => {
+    console.warn('navigate to staking');
+  };
   goToSwaps = () => {
     this.props.navigation.navigate('Swaps', {
       screen: 'SwapsAmountView',
@@ -308,6 +310,7 @@ class AssetOverview extends PureComponent {
     let mainBalance, secondaryBalance;
     const itemAddress = safeToChecksumAddress(address);
     let balance, balanceFiat;
+    const isMises = type === 'mises';
     if (isETH) {
       balance = renderFromWei(
         accounts[selectedAddress] && accounts[selectedAddress].balance,
@@ -317,7 +320,7 @@ class AssetOverview extends PureComponent {
         conversionRate,
         currentCurrency,
       );
-    } else if (type === 'mises') {
+    } else if (isMises) {
       balance =
         accountList[selectedAddress] &&
         accountList[selectedAddress].misesBalance.amount;
@@ -384,13 +387,24 @@ class AssetOverview extends PureComponent {
               onPress={this.onSend}
               label={strings('asset_overview.send_button')}
             />
-            {AppConstants.SWAPS.ACTIVE && (
-              <AssetSwapButton
-                isFeatureLive={swapsIsLive}
-                isNetworkAllowed={isSwapsAllowed(chainId)}
-                isAssetAllowed={isETH || address?.toLowerCase() in swapsTokens}
-                onPress={this.goToSwaps}
+            {isMises ? (
+              <AssetActionButton
+                testID={'token-send-button'}
+                icon="Staking"
+                onPress={this.staking}
+                label="Staking"
               />
+            ) : (
+              AppConstants.SWAPS.ACTIVE && (
+                <AssetSwapButton
+                  isFeatureLive={swapsIsLive}
+                  isNetworkAllowed={isSwapsAllowed(chainId)}
+                  isAssetAllowed={
+                    isETH || address?.toLowerCase() in swapsTokens
+                  }
+                  onPress={this.goToSwaps}
+                />
+              )
             )}
           </View>
         )}

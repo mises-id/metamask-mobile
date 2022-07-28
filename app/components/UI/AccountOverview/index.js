@@ -318,7 +318,9 @@ class AccountOverview extends PureComponent {
     newAssetTransaction(getEther(ticker));
     navigation.navigate('SendFlowView');
   };
-
+  staking = () => {
+    console.warn('navigate to staking');
+  };
   onBuy = () => {
     this.props.navigation.navigate(Routes.FIAT_ON_RAMP_AGGREGATOR.ID);
     InteractionManager.runAfterInteractions(() => {
@@ -492,13 +494,22 @@ class AccountOverview extends PureComponent {
                 onPress={this.onSend}
                 label={strings('asset_overview.send_button')}
               />
-              {AppConstants.SWAPS.ACTIVE && (
-                <AssetSwapButton
-                  isFeatureLive={swapsIsLive}
-                  isNetworkAllowed={isSwapsAllowed(chainId)}
-                  onPress={this.goToSwaps}
-                  isAssetAllowed
+              {isMises ? (
+                <AssetActionButton
+                  testID={'token-send-button'}
+                  icon="Staking"
+                  onPress={this.staking}
+                  label="Staking"
                 />
+              ) : (
+                AppConstants.SWAPS.ACTIVE && (
+                  <AssetSwapButton
+                    isFeatureLive={swapsIsLive}
+                    isNetworkAllowed={isSwapsAllowed(chainId)}
+                    isAssetAllowed
+                    onPress={this.goToSwaps}
+                  />
+                )
               )}
             </View>
           </View>

@@ -1,7 +1,6 @@
 import {
   BaseController,
   BaseState,
-  BN,
   KeyringConfig,
   PreferencesController,
   PreferencesState,
@@ -28,7 +27,6 @@ import Analytics from '../Analytics/Analytics';
 import { uuid } from '@walletconnect/utils';
 
 import { NativeModules } from 'react-native';
-import { BNToHex, toHex } from '@metamask/controllers/dist/util';
 const { MisesModule } = NativeModules;
 export const MISES_POINT = 'http://127.0.0.1:26657';
 export interface misesBalance {
@@ -213,7 +211,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const balanceLong = await user.getBalanceUMIS();
       if (user && balanceLong) {
         const balanceObj = this.#coinDefine.toCoinMIS(balanceLong);
-        console.log(balanceObj, 'balanceObjbalanceObj');
         return {
           ...balanceObj,
           denom: balanceObj.denom.toUpperCase(),
@@ -551,7 +548,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       denom: 'mis',
     });
     if (!simulate) {
-      console.log(misesId, amountLong, simulate, memo, amount, '===========');
       try {
         const res: DeliverTxResponse | undefined = await activeUser?.sendUMIS(
           misesId,
@@ -611,15 +607,21 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }
 
   parseAmountItem(item: { value: string }) {
-    const amount = item.value.replace('umis', '|umis').split('|');
-    const currency = this.#coinDefine.fromCoin({
-      amount: amount[0],
-      denom: amount[1],
-    });
-    const coin = this.#coinDefine.toCoinMIS(currency);
+    if (item.value) {
+      const amount = item.value?.replace('umis', '|umis').split('|');
+      const currency = this.#coinDefine.fromCoin({
+        amount: amount[0],
+        denom: amount[1],
+      });
+      const coin = this.#coinDefine.toCoinMIS(currency);
+      return {
+        amount: coin.amount,
+        denom: coin.denom.toUpperCase(),
+      };
+    }
     return {
-      amount: coin.amount,
-      denom: coin.denom.toUpperCase(),
+      amount: '0',
+      denom: 'MIS',
     };
   }
   transfer(event: any, activeUserAddr: string) {
@@ -722,7 +724,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   parseTxEvents(activeUserAddr: string | undefined, tx: indexed) {
     const events = tx.raw;
     return events.reduce((result, event) => {
-      const subtitle = '';
       let formatEvent = {
         recipient: {
           value: '',

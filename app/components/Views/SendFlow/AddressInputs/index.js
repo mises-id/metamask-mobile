@@ -323,7 +323,11 @@ export const AddressTo = (props) => {
               autoCapitalize="none"
               autoCorrect={false}
               onChangeText={onToSelectedAddressChange}
-              placeholder={strings('transactions.address_to_placeholder')}
+              placeholder={
+                isMises
+                  ? 'Search Mises ID'
+                  : strings('transactions.address_to_placeholder')
+              }
               placeholderTextColor={colors.text.muted}
               spellCheck={false}
               style={[styles.textInput, inputWidth]}
