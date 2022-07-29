@@ -27,6 +27,7 @@ import { RPC, NO_RPC_BLOCK_EXPLORER } from '../../../../constants/network';
 import { withNavigation } from '@react-navigation/compat';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
 import MisesAddress from '../../MisesAddress';
+import { isMisesChain } from '../../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -135,7 +136,8 @@ class TransactionDetails extends PureComponent {
     } = this.props;
     const { rpcBlockExplorer } = this.state;
     try {
-      if (type === 'mises') {
+      const isMises = isMisesChain(type);
+      if (isMises) {
         const url = `https://gw.mises.site/tx/${transactionHash}`;
         const title = new URL(url).hostname;
         navigation.push('Webview', {
@@ -241,7 +243,7 @@ class TransactionDetails extends PureComponent {
       },
     } = this.props;
     const styles = this.getStyles();
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     const renderTxActions = status === 'submitted' || status === 'approved';
     const { rpcBlockExplorer } = this.state;
     return transactionDetails ? (

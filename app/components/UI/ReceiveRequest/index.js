@@ -41,7 +41,10 @@ import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
 // import Engine from '../../../core/Engine';
-import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../core/misesController/misesNetwork.util';
 const createStyles = (colors) =>
   StyleSheet.create({
     wrapper: {
@@ -162,7 +165,7 @@ class ReceiveRequest extends PureComponent {
     misesAccount: { misesId: '' },
   };
   componentDidMount() {
-    const isMises = this.props.type === 'mises';
+    const isMises = isMisesChain(this.props.type);
     if (isMises) {
       const misesAccount = findMisesAccount(
         this.props.accountList,
@@ -222,7 +225,8 @@ class ReceiveRequest extends PureComponent {
   copyAccountToClipboard = async () => {
     const { selectedAddress, type } = this.props;
     const misesId = this.state.misesAccount.misesId;
-    ClipboardManager.setString(type === 'mises' ? misesId : selectedAddress);
+    const isMises = isMisesChain(type);
+    ClipboardManager.setString(isMises ? misesId : selectedAddress);
     this.props.showAlert({
       isVisible: true,
       autodismiss: 1500,
@@ -269,7 +273,7 @@ class ReceiveRequest extends PureComponent {
   render() {
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-    const isMises = this.props.type === 'mises';
+    const isMises = isMisesChain(this.props.type);
     const misesId = this.state.misesAccount.misesId;
     return (
       <SafeAreaView style={styles.wrapper}>

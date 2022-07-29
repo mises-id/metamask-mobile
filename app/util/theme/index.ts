@@ -4,6 +4,7 @@ import { AppThemeKey, Theme } from './models';
 import { useSelector } from 'react-redux';
 import { lightTheme, darkTheme } from '@metamask/design-tokens';
 import Device from '../device';
+import { misesKey } from '../../core/misesController/misesNetwork.util';
 
 /**
  * This is needed to make our unit tests pass since Enzyme doesn't support contextType
@@ -143,5 +144,5 @@ export const useAssetFromTheme = (light: any, dark: any) => {
 export const useMisesNetwork = (Engine: any): boolean => {
   const { NetworkController } = Engine.context as any;
   const { provider } = NetworkController.state;
-  return provider.type === 'mises';
+  return provider.type === misesKey;
 };

@@ -6,12 +6,9 @@ import { fontStyles } from '../../../styles/common';
 import { useNavigation } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { strings } from '../../../../locales/i18n';
-import {
-  useAppThemeFromContext,
-  mockTheme,
-  useMisesNetwork,
-} from '../../../util/theme';
+import { useAppThemeFromContext, mockTheme } from '../../../util/theme';
 import useBlockExplorer from '../../../components/UI/Swaps/utils/useBlockExplorer';
+import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
@@ -71,7 +68,8 @@ const AssetOptions = (props: Props) => {
   const provider = useSelector(
     (state: any) => state.engine.backgroundState.NetworkController.provider,
   );
-  const isNativeCurrency = isNativeCurrencyTokens || provider.type === 'mises';
+  const isMises = isMisesChain(provider.type);
+  const isNativeCurrency = isNativeCurrencyTokens || isMises;
   const frequentRpcList = useSelector(
     (state: any) =>
       state.engine.backgroundState.PreferencesController.frequentRpcList,

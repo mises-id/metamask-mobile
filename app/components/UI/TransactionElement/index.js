@@ -25,7 +25,10 @@ import DetailsModal from '../../Base/DetailsModal';
 import { isMainNet } from '../../../util/networks';
 import { WalletDevice, util } from '@metamask/controllers/';
 import { ThemeContext, mockTheme } from '../../../util/theme';
-import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../core/misesController/misesNetwork.util';
 const { weiHexToGweiDec, isEIP1559Transaction } = util;
 
 const createStyles = (colors) =>
@@ -191,7 +194,7 @@ class TransactionElement extends PureComponent {
 
   renderTxTime = () => {
     const { tx, selectedAddress, providerType, accountList } = this.props;
-    const isMises = providerType === 'mises';
+    const isMises = isMisesChain(providerType);
     const isMe = findMisesAccount(accountList, selectedAddress)?.misesId;
     const incoming = isMises
       ? tx.transaction.to === isMe

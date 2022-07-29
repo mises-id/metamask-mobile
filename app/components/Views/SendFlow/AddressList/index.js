@@ -16,7 +16,10 @@ import { strings } from '../../../../../locales/i18n';
 import AddressElement from '../AddressElement';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
 import MisesIdElement from '../MisesIdElement';
-import { findMisesAccount } from '../../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -250,7 +253,7 @@ class AddressList extends PureComponent {
     const styles = createStyles(colors);
 
     if (inputSearch) return;
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     return !myAccountsOpened ? (
       <TouchableOpacity
         style={styles.myAccountsTouchable}
@@ -300,7 +303,7 @@ class AddressList extends PureComponent {
     }
 
     const key = element.address + element.name;
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     return isMises ? (
       <MisesIdElement
         key={element.address}
@@ -350,7 +353,7 @@ class AddressList extends PureComponent {
     const addressMisesId = (address) =>
       findMisesAccount(accountList, address)?.misesId || address;
     if (!recents.length || inputSearch) return;
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     return (
       <>
         {LabelElement(

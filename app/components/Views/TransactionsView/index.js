@@ -20,7 +20,10 @@ import {
 import { safeToChecksumAddress } from '../../../util/address';
 import { addAccountTimeFlagFilter } from '../../../util/transactions';
 import { toLowerCaseEquals } from '../../../util/general';
-import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../core/misesController/misesNetwork.util';
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -135,7 +138,8 @@ const TransactionsView = ({
     computing the transactions which will make the app feel more responsive. Also this takes usually less than 1 seconds
     so the effect will not be noticeable if the user is in this screen.
     */
-    if (networkType === 'mises') {
+    const isMises = isMisesChain(networkType);
+    if (isMises) {
       const misesAccount = findMisesAccount(accountList, selectedAddress);
       if (misesAccount.transactions) {
         setAllTransactions(misesAccount.transactions ?? []);

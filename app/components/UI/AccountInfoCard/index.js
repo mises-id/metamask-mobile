@@ -15,6 +15,7 @@ import { ThemeContext, mockTheme } from '../../../util/theme';
 import {
   findMisesAccount,
   shortenAddress,
+  isMisesChain,
 } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
@@ -162,7 +163,7 @@ class AccountInfoCard extends PureComponent {
     const styles = createStyles(colors);
     const weiBalance = hexToBN(accounts[selectedAddress].balance);
     const misesAccount = findMisesAccount(accountList, selectedAddress);
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     const balance = `(${
       isMises ? misesAccount.misesBalance.amount : renderFromWei(weiBalance)
     } ${getTicker(ticker)})`;

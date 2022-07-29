@@ -73,7 +73,10 @@ import {
 import { gte } from '../../../../util/lodash';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
 import BigNumber from 'bignumber.js';
-import { findMisesAccount } from '../../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../../core/misesController/misesNetwork.util';
 
 const { hexToBN, BNToHex } = util;
 
@@ -451,8 +454,9 @@ class Amount extends PureComponent {
     this.onInputChange(readableValue);
     !selectedAsset.tokenId && this.handleSelectedAssetBalance(selectedAsset);
 
+    const isMises = isMisesChain(providerType);
     const { GasFeeController } = Engine.context;
-    if (providerType === 'mises') {
+    if (isMises) {
       const gas = await this.estimateGasLimit();
       this.setState({
         estimatedTotalGas: gas,
@@ -727,7 +731,8 @@ class Amount extends PureComponent {
     let weiBalance, weiInput, amountError;
     if (isDecimal(inputValue)) {
       if (selectedAsset.isETH) {
-        if (providerType === 'mises') {
+        const isMises = isMisesChain(providerType);
+        if (isMises) {
           const selectedAccount = findMisesAccount(
             accountList,
             selectedAddress,
@@ -742,9 +747,10 @@ class Amount extends PureComponent {
         weiBalance = contractBalances[selectedAsset.address];
         weiInput = toTokenMinimalUnit(inputValue, selectedAsset.decimals);
       }
+      const isMises = isMisesChain(providerType);
       // TODO: weiBalance is not always guaranteed to be type BN. Need to consolidate type.
       amountError = (
-        providerType === 'mises'
+        isMises
           ? [1, 0].includes(weiBalance.comparedTo(weiInput))
           : gte(weiBalance, weiInput)
       )
@@ -772,7 +778,8 @@ class Amount extends PureComponent {
       providerType,
       accountList,
     } = this.props;
-    if (providerType === 'mises') {
+    const isMises = isMisesChain(providerType);
+    if (isMises) {
       const { misesId } = accountList[transactionTo] || {};
       const { gas } = await misesGetGasLimit(misesId);
       return gas;
@@ -798,7 +805,8 @@ class Amount extends PureComponent {
     const { internalPrimaryCurrencyIsCrypto, estimatedTotalGas } = this.state;
     let input;
     if (selectedAsset.isETH) {
-      if (providerType === 'mises') {
+      const isMises = isMisesChain(providerType);
+      if (isMises) {
         const selectedAccount = findMisesAccount(accountList, selectedAddress);
         const realMaxValue = new BigNumber(
           selectedAccount?.misesBalance?.amount,
@@ -863,7 +871,8 @@ class Amount extends PureComponent {
       hasExchangeRate,
       comma;
 
-    if (providerType === 'mises') {
+    const isMises = isMisesChain(providerType);
+    if (isMises) {
       const processedTicker = getTicker(ticker);
       const processedInputValue = isDecimal(inputValue) ? inputValue : '0';
       selectedAsset = selectedAsset || this.props.selectedAsset;
@@ -979,7 +988,8 @@ class Amount extends PureComponent {
     if (renderableBalance) {
       currentBalance = `${renderableBalance} ${symbol}`;
     } else if (isETH) {
-      if (providerType === 'mises') {
+      const isMises = isMisesChain(providerType);
+      if (isMises) {
         const selectedAccount = findMisesAccount(accountList, selectedAddress);
         currentBalance = `${selectedAccount?.misesBalance?.amount} ${selectedAccount?.misesBalance?.denom}`;
       } else {
@@ -1295,6 +1305,7 @@ class Amount extends PureComponent {
     } = this.props;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
+    const isMises = isMisesChain(providerType);
     return (
       <SafeAreaView
         edges={['bottom']}
@@ -1305,7 +1316,7 @@ class Amount extends PureComponent {
           <View style={styles.inputWrapper}>
             <View style={styles.actionsWrapper}>
               <View style={styles.actionBorder} />
-              {providerType === 'mises' ? null : (
+              {isMises ? null : (
                 <View style={styles.action}>
                   <TouchableOpacity
                     style={styles.actionDropdown}

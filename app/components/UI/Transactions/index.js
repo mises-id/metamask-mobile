@@ -44,7 +44,10 @@ import { collectibleContractsSelector } from '../../../reducers/collectibles';
 import { isQRHardwareAccount } from '../../../util/address';
 import { ThemeContext, mockTheme } from '../../../util/theme';
 import withQRHardwareAwareness from '../QRHardware/withQRHardwareAwareness';
-import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -255,7 +258,8 @@ class Transactions extends PureComponent {
         }
       }, 1000);
     }
-    if (this.props.networkType === 'mises') {
+    const isMises = isMisesChain(this.props.networkType);
+    if (isMises) {
       this.setState({
         transactions:
           findMisesAccount(this.props.accountList, this.props.selectedAddress)
@@ -265,7 +269,8 @@ class Transactions extends PureComponent {
     }
   }
   getMisesTransactions() {
-    if (this.props.networkType === 'mises') {
+    const isMises = isMisesChain(this.props.networkType);
+    if (isMises) {
       const { MisesController } = Engine.context;
       const { selectedAddress } = this.props;
       return MisesController.recentTransactions(false, selectedAddress).then(
@@ -316,7 +321,8 @@ class Transactions extends PureComponent {
 
   onRefresh = async () => {
     this.setState({ refreshing: true });
-    if (this.props.networkType === 'mises') {
+    const isMises = isMisesChain(this.props.networkType);
+    if (isMises) {
       await this.getMisesTransactions();
     } else {
       this.props.thirdPartyApiMode &&
@@ -655,12 +661,13 @@ class Transactions extends PureComponent {
     const { cancelConfirmDisabled, speedUpConfirmDisabled } = this.state;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-    const transactions =
-      networkType === 'mises'
-        ? this.state.transactions
-        : submittedTransactions && submittedTransactions.length
-        ? submittedTransactions.concat(confirmedTransactions)
-        : confirmedTransactions;
+
+    const isMises = isMisesChain(networkType);
+    const transactions = isMises
+      ? this.state.transactions
+      : submittedTransactions && submittedTransactions.length
+      ? submittedTransactions.concat(confirmedTransactions)
+      : confirmedTransactions;
     const renderSpeedUpGas = () => {
       if (!this.existingGas) return null;
       if (!this.existingGas.isEIP1559Transaction)

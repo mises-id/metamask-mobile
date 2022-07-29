@@ -36,6 +36,7 @@ import {
 } from '../../../constants/test-ids';
 import ImageIcon from '../ImageIcon';
 import { setPrimaryCurrency } from '../../../actions/settings';
+import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -199,7 +200,8 @@ export class NetworkList extends PureComponent {
   };
 
   onNetworkChange = (type) => {
-    const ticker = type === 'mises' ? 'MIS' : ETH;
+    const isMises = isMisesChain(type);
+    const ticker = isMises ? 'MIS' : ETH;
     this.handleNetworkSelected(type, ticker, type);
     const { NetworkController, CurrencyRateController } = Engine.context;
     CurrencyRateController.setNativeCurrency(ticker);

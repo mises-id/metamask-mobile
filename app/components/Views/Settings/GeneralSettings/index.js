@@ -34,6 +34,7 @@ import PickComponent from '../../PickComponent';
 import { toDataUrl } from '../../../../util/blockies.js';
 import Jazzicon from 'react-native-jazzicon';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
+import { isMisesChain } from '../../../../core/misesController/misesNetwork.util';
 // import { AppThemeKey } from '../../../../util/theme/models';
 // import StyledButton from '../../../UI/StyledButton';
 
@@ -258,7 +259,8 @@ class Settings extends PureComponent {
       { value: 'DuckDuckGo', label: 'DuckDuckGo', key: 'DuckDuckGo' },
       { value: 'Google', label: 'Google', key: 'Google' },
     ];
-    if (this.props.type === 'mises') {
+    const isMises = isMisesChain(this.props.type);
+    if (isMises) {
       this.primaryCurrencyOptions = [
         {
           value: 'MIS',

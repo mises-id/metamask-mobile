@@ -53,7 +53,11 @@ import {
 } from '../../../../constants/test-ids';
 import Routes from '../../../../constants/navigation/Routes';
 import BigNumber from 'bignumber.js';
-import { findMisesAccount } from '../../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+  misesKey,
+} from '../../../../core/misesController/misesNetwork.util';
 
 const { hexToBN } = util;
 const createStyles = (colors) =>
@@ -307,7 +311,8 @@ class SendFlow extends PureComponent {
     navigation.setParams({ providerType, isPaymentRequest });
     const networkAddressBook = addressBook[network] || {};
     const ens = await doENSReverseLookup(selectedAddress, network);
-    if (providerType === 'mises') {
+    const isMises = isMisesChain(providerType);
+    if (isMises) {
       const selectedAccount = findMisesAccount(accountList, selectedAddress);
       const { amount, denom } = selectedAccount.misesBalance || {};
       const fromAccountBalance = `${amount} ${getTicker(denom)}`;
@@ -375,7 +380,8 @@ class SendFlow extends PureComponent {
     PreferencesController.setSelectedAddress(accountAddress);
     // If new account doesn't have the asset
     this.props.setSelectedAsset(getEther(ticker));
-    if (providerType === 'mises') {
+    const isMises = isMisesChain(providerType);
+    if (isMises) {
       const selectedAccount = findMisesAccount(accountList, accountAddress);
       const { amount, denom } = selectedAccount.misesBalance || {};
       const fromAccountBalance = `${amount} ${getTicker(denom)}`;
@@ -865,7 +871,7 @@ class SendFlow extends PureComponent {
             <WarningMessage
               warningMessage={
                 toSelectedAddress.substring(0, 2) === '0x' ||
-                toSelectedAddress.substring(0, 5) === 'mises'
+                toSelectedAddress.substring(0, 5) === misesKey
                   ? strings('transaction.address_invalid')
                   : strings('transaction.ens_not_found')
               }

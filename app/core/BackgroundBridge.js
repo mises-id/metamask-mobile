@@ -21,6 +21,7 @@ import {
   createSwappableProxy,
   createEventEmitterProxy,
 } from 'swappable-obj-proxy';
+import { isMisesChain } from './misesController/misesNetwork.util';
 
 const createFilterMiddleware = require('eth-json-rpc-filters');
 const createSubscriptionManager = require('eth-json-rpc-filters/subscriptionManager');
@@ -204,7 +205,8 @@ export class BackgroundBridge extends EventEmitter {
     console.warn(networkType, 'networkType');
     if (isInitialNetwork) {
       chainId = NetworksChainId[networkType];
-      if (networkType === 'mises') {
+      const isMises = isMisesChain(networkType);
+      if (isMises) {
         chainId = networkProvider.chainId;
         network = '1';
       }

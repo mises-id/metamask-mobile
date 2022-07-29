@@ -15,6 +15,7 @@ import {
 } from '../../../constants/test-ids';
 import { fontStyles } from '../../../styles/common';
 import { util as controllerUtils } from '@metamask/controllers';
+import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors: {
   background: { default: string };
@@ -141,6 +142,7 @@ const NetworkInfo = (props: NetworkInfoProps) => {
     return false;
   }, [isTokenDetectionEnabled, isTokenDetectionSupported]);
 
+  const isMises = isMisesChain(type);
   return (
     <View style={styles.wrapper}>
       <View
@@ -175,7 +177,7 @@ const NetworkInfo = (props: NetworkInfoProps) => {
                 >
                   {type === RPC
                     ? `${nickname}`
-                    : type === MAINNET || type === 'mises'
+                    : type === MAINNET || isMises
                     ? `${type}`
                     : `${strings('network_information.testnet_network', {
                         type,

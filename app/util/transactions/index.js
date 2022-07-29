@@ -42,6 +42,7 @@ import {
 } from '../confirm-tx';
 
 import Logger from '../../util/Logger';
+import { isMisesChain } from '../../core/misesController/misesNetwork.util';
 
 const { SAI_ADDRESS } = AppConstants;
 
@@ -370,7 +371,8 @@ export async function getActionKey(
   chainId,
   providerType,
 ) {
-  if (providerType === 'mises') {
+  const isMises = isMisesChain(providerType);
+  if (isMises) {
     return tx.title;
   }
   const actionKey = await getTransactionActionKey(tx, chainId);

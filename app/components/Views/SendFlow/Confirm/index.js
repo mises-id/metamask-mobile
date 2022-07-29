@@ -91,7 +91,10 @@ import GlobalAlert from '../../../UI/GlobalAlert';
 import { allowedToBuy } from '../../../UI/FiatOrders';
 import TransactionReviewMises from '../../../UI/TransactionReview/TransactionReviewMises';
 import { uuid } from '@walletconnect/utils';
-import { findMisesAccount } from '../../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../../core/misesController/misesNetwork.util';
 
 const EDIT = 'edit';
 const EDIT_NONCE = 'edit_nonce';
@@ -705,7 +708,8 @@ class Confirm extends PureComponent {
     const valueBN = hexToBN(value);
     const parsedTicker = getTicker(ticker);
     if (selectedAsset.isETH) {
-      if (providerType === 'mises') {
+      const isMises = isMisesChain(providerType);
+      if (isMises) {
         const selectedAccount = findMisesAccount(
           accountList,
           fromSelectedAddress,
@@ -788,7 +792,7 @@ class Confirm extends PureComponent {
       transactionTo,
     });
 
-    const isMises = providerType === 'mises';
+    const isMises = isMisesChain(providerType);
     if (isMises) {
       this.onUpdatingValuesEnd();
     }
@@ -988,7 +992,8 @@ class Confirm extends PureComponent {
     this.setState({ transactionConfirmed: true, stopUpdateGas: true });
     let transactionMeta = {};
     try {
-      if (providerType === 'mises') {
+      const isMises = isMisesChain(providerType);
+      if (isMises) {
         let misesId = '';
         if (transaction.to.indexOf('mises') > -1) {
           misesId = transaction.to;
@@ -1529,7 +1534,7 @@ class Confirm extends PureComponent {
       ? strings('transaction.go_to_faucet')
       : strings('transaction.buy_more');
     const { EIP1559TransactionData } = this.state;
-    const isMises = providerType === 'mises';
+    const isMises = isMisesChain(providerType);
     return (
       <SafeAreaView
         edges={['bottom']}

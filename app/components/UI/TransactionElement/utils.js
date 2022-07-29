@@ -31,6 +31,7 @@ import { isSwapsNativeAsset } from '../Swaps/utils';
 import { toLowerCaseEquals } from '../../../util/general';
 import Engine from '../../../core/Engine';
 import { util } from '@metamask/controllers';
+import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 const { isEIP1559Transaction } = util;
 
 const { getSwapsContractAddress } = swapsUtils;
@@ -579,7 +580,7 @@ function decodeConfirmTx(args) {
     providerType,
   } = args;
   const ticker = getTicker(args.ticker);
-  const isMises = providerType === 'mises';
+  const isMises = isMisesChain(providerType);
   const totalEth = isMises ? value : hexToBN(value);
   const renderTotalEth = `${isMises ? totalEth : renderFromWei(totalEth)} ${
     isMises ? 'MIS' : ticker

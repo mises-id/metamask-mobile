@@ -78,6 +78,7 @@ import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
 import {
   findMisesAccount,
+  isMisesChain,
   misesExplorer,
 } from '../../../core/misesController/misesNetwork.util';
 
@@ -799,12 +800,14 @@ class DrawerView extends PureComponent {
       frequentRpcList,
       accountList,
     } = this.props;
+
+    const isMises = isMisesChain(type);
     if (network.provider.type === RPC) {
       const blockExplorer = findBlockExplorerForRpc(rpcTarget, frequentRpcList);
       const url = `${blockExplorer}/address/${selectedAddress}`;
       const title = new URL(blockExplorer).hostname;
       this.goToBrowserUrl(url, title);
-    } else if (type === 'mises') {
+    } else if (isMises) {
       const url = `${misesExplorer}holders/${
         findMisesAccount(accountList, selectedAddress).misesId
       }`;
@@ -984,7 +987,7 @@ class DrawerView extends PureComponent {
       frequentRpcList,
     } = this.props;
     let blockExplorer, blockExplorerName;
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     if (type === RPC) {
       blockExplorer = findBlockExplorerForRpc(rpcTarget, frequentRpcList);
       blockExplorerName = getBlockExplorerName(blockExplorer);
@@ -1079,7 +1082,8 @@ class DrawerView extends PureComponent {
   onShare = () => {
     const { selectedAddress, accountList, networkProvider } = this.props;
     let shareSelectAddress = selectedAddress;
-    if (networkProvider.type === 'mises') {
+    const isMises = isMisesChain(networkProvider.type);
+    if (isMises) {
       shareSelectAddress = findMisesAccount(
         accountList,
         selectedAddress,
@@ -1236,7 +1240,7 @@ class DrawerView extends PureComponent {
     const checkIfCustomNetworkExists = networkOnboardedState.filter(
       (item) => item.network === sanitizeUrl(networkUrl),
     );
-    const isMises = networkProvider.type === 'mises';
+    const isMises = isMisesChain(networkProvider.type);
     const networkSwitchedAndInWalletView =
       currentRoute === 'WalletView' &&
       networkStatus &&
