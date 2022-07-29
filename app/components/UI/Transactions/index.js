@@ -258,7 +258,7 @@ class Transactions extends PureComponent {
     if (this.props.networkType === 'mises') {
       this.setState({
         transactions:
-        findMisesAccount(this.props.accountList, this.props.selectedAddress)
+          findMisesAccount(this.props.accountList, this.props.selectedAddress)
             .transactions || [],
       });
       this.getMisesTransactions();

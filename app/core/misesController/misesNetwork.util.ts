@@ -101,3 +101,4 @@ export function findMisesAccount(
   const key = address?.toLowerCase();
   return accountList[key] || {};
 }
+export const misesExplorer = 'https://gw.mises.site/';

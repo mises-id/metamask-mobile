@@ -40,7 +40,8 @@ import ClipboardManager from '../../../core/ClipboardManager';
 import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
-import Engine from '../../../core/Engine';
+// import Engine from '../../../core/Engine';
+import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
 const createStyles = (colors) =>
   StyleSheet.create({
     wrapper: {
@@ -113,6 +114,10 @@ class ReceiveRequest extends PureComponent {
      */
     receiveAsset: PropTypes.object,
     /**
+     * Asset to receive, could be not defined
+     */
+    accountList: PropTypes.object,
+    /**
      * Action that toggles the receive modal
      */
     toggleReceiveModal: PropTypes.func,
@@ -158,14 +163,15 @@ class ReceiveRequest extends PureComponent {
   };
   componentDidMount() {
     const isMises = this.props.type === 'mises';
-    isMises &&
-      Engine.context.MisesController.getMisesUserInfo(
+    if (isMises) {
+      const misesAccount = findMisesAccount(
+        this.props.accountList,
         this.props.selectedAddress,
-      ).then((res) => {
-        this.setState({
-          misesAccount: res,
-        });
+      );
+      this.setState({
+        misesAccount,
       });
+    }
   }
   /**
    * Share current account public address
@@ -389,6 +395,7 @@ const mapStateToProps = (state) => ({
     state.engine.backgroundState.PreferencesController.selectedAddress,
   receiveAsset: state.modals.receiveAsset,
   seedphraseBackedUp: state.user.seedphraseBackedUp,
+  accountList: state.engine.backgroundState.MisesController.accountList,
 });
 
 const mapDispatchToProps = (dispatch) => ({

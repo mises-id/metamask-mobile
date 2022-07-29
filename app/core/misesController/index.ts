@@ -771,7 +771,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         default:
           return result;
       }
-      // console.log(new BN('10'),'xxx')
       return result.concat({
         blockNumber: tx.height,
         chainId: '46',
