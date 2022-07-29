@@ -51,7 +51,7 @@
     "prestorybook": "rnstl",
     "create-release": "./scripts/set-versions.sh && yarn update-changelog",
     "patch": "./scripts/postinstallPatch.sh",
-    "jsbundle:ios": "node_modules/.bin/react-native bundle --platform ios --entry-file index.js --dev false --reset-cache --bundle-output ios/main.jsbundle --assets-dest ios --sourcemap-output sourcemaps/ios/index.js.map"
+    "jsbundle:ios": "./scripts/build.sh ios bundle"
   },
   "husky": {
     "hooks": {
@@ -177,7 +177,7 @@
     "json-rpc-middleware-stream": "3.0.0",
     "lottie-react-native": "git+https://github.com/MetaMask/lottie-react-native.git#7ce6a78ac4ac7b9891bc513cb3f12f8b9c9d9106",
     "metro-config": "^0.71.1",
-    "mises-js-sdk": "^0.1.13",
+    "mises-js-sdk": "^0.1.14",
     "multihashes": "0.4.14",
     "number-to-bn": "1.7.0",
     "obj-multiplex": "1.0.0",

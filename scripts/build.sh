@@ -164,6 +164,13 @@ buildAndroidRunE2E(){
 	react-native run-android
 }
 
+
+buildIosBundle(){
+	prebuild_ios
+	react-native bundle --platform ios --entry-file index.js --dev false --reset-cache --bundle-output ios/main.jsbundle --assets-dest ios --sourcemap-output sourcemaps/ios/index.js.map
+}
+
+
 buildIosSimulator(){
 	prebuild_ios
 	SIM="${IOS_SIMULATOR:-"iPhone 11 Pro"}"
@@ -277,6 +284,8 @@ buildIos() {
 		buildIosReleaseE2E
 	elif [ "$MODE" == "debugE2E" ] ; then
 		buildIosSimulatorE2E
+	elif [ "$MODE" == "bundle" ] ; then
+		buildIosBundle
 	else
 		if [ "$RUN_DEVICE" = true ] ; then
 			buildIosDevice

@@ -713,10 +713,10 @@ export const getRpcMethodMiddleware = ({
       },
       mises_setUserInfo: async () => {
         try {
-          await Engine.context.MisesController.setInfo(req.params[0]);
+          await Engine.context.MisesController.setUserInfo(req.params[0]);
           res.result = true;
         } catch (error) {
-          throw ethErrors.provider.userRejectedRequest('User follow Failure');
+          throw ethErrors.provider.userRejectedRequest('User setInfo Failure');
         }
         res.result = 'mises_setUserInfo';
       },
