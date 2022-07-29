@@ -53,7 +53,7 @@ import {
 } from '../../../../constants/test-ids';
 import Routes from '../../../../constants/navigation/Routes';
 import BigNumber from 'bignumber.js';
-import { getMisesAccount } from '../../../../core/misesController/misesNetwork.util';
+import { findMisesAccount } from '../../../../core/misesController/misesNetwork.util';
 
 const { hexToBN } = util;
 const createStyles = (colors) =>
@@ -308,7 +308,7 @@ class SendFlow extends PureComponent {
     const networkAddressBook = addressBook[network] || {};
     const ens = await doENSReverseLookup(selectedAddress, network);
     if (providerType === 'mises') {
-      const selectedAccount = getMisesAccount(accountList, selectedAddress);
+      const selectedAccount = findMisesAccount(accountList, selectedAddress);
       const { amount, denom } = selectedAccount.misesBalance || {};
       const fromAccountBalance = `${amount} ${getTicker(denom)}`;
       setTimeout(() => {
@@ -376,7 +376,7 @@ class SendFlow extends PureComponent {
     // If new account doesn't have the asset
     this.props.setSelectedAsset(getEther(ticker));
     if (providerType === 'mises') {
-      const selectedAccount = getMisesAccount(accountList, accountAddress);
+      const selectedAccount = findMisesAccount(accountList, accountAddress);
       const { amount, denom } = selectedAccount.misesBalance || {};
       const fromAccountBalance = `${amount} ${getTicker(denom)}`;
       setTimeout(() => {

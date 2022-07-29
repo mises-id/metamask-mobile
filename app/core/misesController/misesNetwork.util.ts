@@ -94,7 +94,7 @@ export function shortenAddress(
     -TRUNCATED_ADDRESS_END_CHARS,
   )}`;
 }
-export function getMisesAccount(
+export function findMisesAccount(
   accountList: accounts,
   address: string,
 ): misesAccount {

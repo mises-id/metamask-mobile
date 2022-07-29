@@ -19,7 +19,7 @@ import {
 
 import {
   getBaseApi,
-  getMisesAccount,
+  findMisesAccount,
   misesAPi,
   MISES_TRUNCATED_ADDRESS_START_CHARS,
   request,
@@ -449,7 +449,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const accountList = this.getAccountList();
       const misesId = activeUser?.address() || '';
       const address = this.misesIdFindEthAddress(misesId);
-      const account = getMisesAccount(accountList, address);
+      const account = findMisesAccount(accountList, address);
       if (account) {
         const { token } = account || {};
         const updateUserInfo = {
@@ -871,7 +871,10 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   async setAccountTransactionsHeight(selectedAddress: string) {
     // const selectedAddress = this.getSelectedAddress();
     const accountList = this.getAccountList();
-    const { transactions = [] } = getMisesAccount(accountList, selectedAddress);
+    const { transactions = [] } = findMisesAccount(
+      accountList,
+      selectedAddress,
+    );
     const last = transactions[0] || {};
     accountList[selectedAddress].height = last.height + 1;
     // console.log(last.height, accountList, 'setAccountTransactionsHeight');

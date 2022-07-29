@@ -60,7 +60,7 @@ index 8c55e27..dfabbe7 100644
  /**
   * @type ProviderConfig
 diff --git a/node_modules/@metamask/controllers/dist/network/NetworkController.js b/node_modules/@metamask/controllers/dist/network/NetworkController.js
-index cb5c205..8035219 100644
+index cb5c205..8aef501 100644
 --- a/node_modules/@metamask/controllers/dist/network/NetworkController.js
 +++ b/node_modules/@metamask/controllers/dist/network/NetworkController.js
 @@ -42,6 +42,7 @@ var NetworksChainId;
@@ -80,15 +80,16 @@ index cb5c205..8035219 100644
              properties: { isEIP1559Compatible: false },
          };
          this.initialize();
-@@ -81,6 +82,7 @@ class NetworkController extends BaseController_1.BaseController {
-             case 'optimism':
-             case 'optimismTest':
+@@ -83,6 +84,8 @@ class NetworkController extends BaseController_1.BaseController {
              case 'ropsten':
-+            case 'mises':
                  this.setupInfuraProvider(type);
                  break;
++            case 'mises':
++                break;
              case 'localhost':
-@@ -125,6 +127,7 @@ class NetworkController extends BaseController_1.BaseController {
+                 this.setupStandardProvider(LOCALHOST_RPC_URL);
+                 break;
+@@ -125,6 +128,7 @@ class NetworkController extends BaseController_1.BaseController {
              chainId !== NetworksChainId.rinkeby &&
              chainId !== NetworksChainId.goerli &&
              chainId !== NetworksChainId.ropsten &&
@@ -96,7 +97,7 @@ index cb5c205..8035219 100644
              chainId !== NetworksChainId.localhost);
      }
      setupStandardProvider(rpcTarget, chainId, ticker, nickname) {
-@@ -193,7 +196,7 @@ class NetworkController extends BaseController_1.BaseController {
+@@ -193,7 +197,7 @@ class NetworkController extends BaseController_1.BaseController {
      setProviderType(type) {
          const _a = this.state.provider, { rpcTarget, chainId, nickname } = _a, providerState = __rest(_a, ["rpcTarget", "chainId", "nickname"]);
          this.update({

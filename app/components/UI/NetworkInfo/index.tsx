@@ -175,7 +175,7 @@ const NetworkInfo = (props: NetworkInfoProps) => {
                 >
                   {type === RPC
                     ? `${nickname}`
-                    : type === MAINNET
+                    : type === MAINNET || type === 'mises'
                     ? `${type}`
                     : `${strings('network_information.testnet_network', {
                         type,

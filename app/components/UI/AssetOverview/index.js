@@ -40,7 +40,7 @@ import AssetSwapButton from '../Swaps/components/AssetSwapButton';
 import NetworkMainAssetLogo from '../NetworkMainAssetLogo';
 import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
-import { getMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -322,7 +322,7 @@ class AssetOverview extends PureComponent {
         currentCurrency,
       );
     } else if (isMises) {
-      const selectedAccount = getMisesAccount(accountList, selectedAddress);
+      const selectedAccount = findMisesAccount(accountList, selectedAddress);
       balance = selectedAccount.misesBalance?.amount;
       balanceFiat = weiToFiat('0x0', conversionRate, currentCurrency);
     } else {

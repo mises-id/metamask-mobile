@@ -38,7 +38,7 @@ import {
 import { shouldShowWhatsNewModal } from '../../../util/onboarding';
 import Logger from '../../../util/Logger';
 import Routes from '../../../constants/navigation/Routes';
-import { getMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
@@ -261,7 +261,7 @@ const Wallet = ({ navigation }: any) => {
     let balance: any = 0;
     let assets = tokens;
     if (isMises) {
-      const misesAccount = getMisesAccount(misesAccounts, selectedAddress);
+      const misesAccount = findMisesAccount(misesAccounts, selectedAddress);
       balance = misesAccount.misesBalance?.amount;
       assets = [
         {
@@ -299,7 +299,7 @@ const Wallet = ({ navigation }: any) => {
       assets = tokens;
     }
 
-    const misesAccount = getMisesAccount(misesAccounts, selectedAddress);
+    const misesAccount = findMisesAccount(misesAccounts, selectedAddress);
     const account = {
       ...identities[selectedAddress],
       ...accounts[selectedAddress],

@@ -76,7 +76,7 @@ import {
 } from '../../../actions/onboardNetwork';
 import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
-import { getMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -1198,7 +1198,7 @@ class DrawerView extends PureComponent {
       ens: ensFromState,
       ...identities[selectedAddress],
       ...accounts[selectedAddress],
-      ...getMisesAccount(accountList, selectedAddress),
+      ...findMisesAccount(accountList, selectedAddress),
     };
     const { name, ens } = account;
     account.balance =

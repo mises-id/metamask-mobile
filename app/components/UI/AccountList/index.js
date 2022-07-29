@@ -25,7 +25,7 @@ import { doENSReverseLookup } from '../../../util/ENSUtils';
 import AccountElement from './AccountElement';
 import { connect } from 'react-redux';
 import { ThemeContext, mockTheme } from '../../../util/theme';
-import { getMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -387,7 +387,7 @@ class AccountList extends PureComponent {
         );
         let balance = 0x0;
         if (providerType === 'mises') {
-          const misesAccount = getMisesAccount(
+          const misesAccount = findMisesAccount(
             accountList,
             identityAddressChecksummed,
           );
