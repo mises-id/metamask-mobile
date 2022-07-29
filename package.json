@@ -51,7 +51,7 @@
     "prestorybook": "rnstl",
     "create-release": "./scripts/set-versions.sh && yarn update-changelog",
     "patch": "./scripts/postinstallPatch.sh",
-    "jsbundle:ios": "node_modules/.bin/react-native bundle --platform ios --entry-file index.js --dev false --reset-cache --bundle-output ios/main.jsbundle --assets-dest ios --sourcemap-output sourcemaps/ios/index.js.map"
+    "jsbundle:ios": "./scripts/build.sh ios bundle"
   },
   "husky": {
     "hooks": {
