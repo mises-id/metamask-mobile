@@ -53,6 +53,7 @@ import {
 } from '../../../../constants/test-ids';
 import Routes from '../../../../constants/navigation/Routes';
 import BigNumber from 'bignumber.js';
+import { getMisesAccount } from '../../../../core/misesController/misesNetwork.util';
 
 const { hexToBN } = util;
 const createStyles = (colors) =>
@@ -307,8 +308,8 @@ class SendFlow extends PureComponent {
     const networkAddressBook = addressBook[network] || {};
     const ens = await doENSReverseLookup(selectedAddress, network);
     if (providerType === 'mises') {
-      const { amount, denom } =
-        accountList[selectedAddress]?.misesBalance || {};
+      const selectedAccount = getMisesAccount(accountList, selectedAddress);
+      const { amount, denom } = selectedAccount.misesBalance || {};
       const fromAccountBalance = `${amount} ${getTicker(denom)}`;
       setTimeout(() => {
         this.setState({
@@ -375,7 +376,8 @@ class SendFlow extends PureComponent {
     // If new account doesn't have the asset
     this.props.setSelectedAsset(getEther(ticker));
     if (providerType === 'mises') {
-      const { amount, denom } = accountList[accountAddress]?.misesBalance || {};
+      const selectedAccount = getMisesAccount(accountList, accountAddress);
+      const { amount, denom } = selectedAccount.misesBalance || {};
       const fromAccountBalance = `${amount} ${getTicker(denom)}`;
       setTimeout(() => {
         this.setState({
@@ -618,7 +620,8 @@ class SendFlow extends PureComponent {
         if (meta.target_address) {
           const findAddress = Object.keys(this.props.accountList).find(
             (val) =>
-              this.props.accountList[val].misesId === meta.target_address,
+              this.props.accountList[val].misesId.toLowerCase() ===
+              meta.target_address.toLowerCase(),
           );
           findAddress && this.onToSelectedAddressChange(findAddress);
         }

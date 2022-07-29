@@ -1,0 +1,33 @@
+diff --git a/node_modules/mises-js-sdk/dist/mises-js-sdk.umd.js b/node_modules/mises-js-sdk/dist/mises-js-sdk.umd.js
+index 9e62acb..4c7b73b 100644
+--- a/node_modules/mises-js-sdk/dist/mises-js-sdk.umd.js
++++ b/node_modules/mises-js-sdk/dist/mises-js-sdk.umd.js
+@@ -88090,7 +88090,7 @@
+     			} else {
+     				// If you set a process.env field to null or undefined, it gets cast to the
+     				// string 'null' or 'undefined'. Just delete instead.
+-    				delete process.env.DEBUG;
++    				// delete process.env.DEBUG;
+     			}
+     		}
+ 
+@@ -100383,11 +100383,14 @@
+     	const accounts_1 = accounts;
+     	const queries_1 = requireQueries();
+     	const search_1 = search;
+-    	class TimeoutError extends Error {
+-    	    constructor(message, txId) {
+-    	        super(message);
+-    	        this.txId = txId;
+-    	    }
++    	class TimeoutError{
++				name;
++				message;
++				stack;
++				constructor(message, txId) {
++						// super(message);
++						this.txId = txId;
++				}
+     	}
+     	stargateclient.TimeoutError = TimeoutError;
+     	function isDeliverTxFailure(result) {

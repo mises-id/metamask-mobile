@@ -16,6 +16,7 @@ import { strings } from '../../../../../locales/i18n';
 import AddressElement from '../AddressElement';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
 import MisesIdElement from '../MisesIdElement';
+import { getMisesAccount } from '../../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -263,12 +264,12 @@ class AddressList extends PureComponent {
     ) : (
       <View>
         {isMises
-          ? Object.keys(accountList).map((address) => (
+          ? Object.keys(identities).map((address) => (
               <MisesIdElement
                 key={address}
                 address={address}
-                misesId={accountList[address]?.misesId}
-                name={identities[address].name}
+                misesId={getMisesAccount(accountList, address)?.misesId}
+                name={identities[address]?.name}
                 onAccountPress={onAccountPress}
                 onAccountLongPress={onAccountLongPress}
                 testID={'account-identity'}
@@ -278,7 +279,7 @@ class AddressList extends PureComponent {
               <AddressElement
                 key={address}
                 address={address}
-                name={identities[address].name}
+                name={identities[address]?.name}
                 onAccountPress={onAccountPress}
                 onAccountLongPress={onAccountLongPress}
                 testID={'account-identity'}
@@ -304,7 +305,7 @@ class AddressList extends PureComponent {
       <MisesIdElement
         key={element.address}
         address={element.address}
-        misesId={accountList[element.address].misesId}
+        misesId={getMisesAccount(accountList, element.address)?.misesId}
         name={element.name}
         onAccountLongPress={onAccountLongPress}
         testID={'account-identity'}
@@ -347,9 +348,7 @@ class AddressList extends PureComponent {
           addressBook.address.toLowerCase() === address.toLowerCase(),
       )?.name;
     const addressMisesId = (address) =>
-      Object.values(accountList).find(
-        (item) => item.address.toLowerCase() === address.toLowerCase(),
-      )?.misesId || address;
+      getMisesAccount(accountList, address)?.misesId || address;
     if (!recents.length || inputSearch) return;
     const isMises = type === 'mises';
     return (

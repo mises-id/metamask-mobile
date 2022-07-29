@@ -38,6 +38,7 @@ import {
 import { shouldShowWhatsNewModal } from '../../../util/onboarding';
 import Logger from '../../../util/Logger';
 import Routes from '../../../constants/navigation/Routes';
+import { getMisesAccount } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
@@ -240,15 +241,28 @@ const Wallet = ({ navigation }: any) => {
   }, []);
   const { MisesController } = Engine.context as any;
   const isMises = useMisesNetwork(Engine);
+  let timer: any = null;
+  const getMisesBalance = () => {
+    if (isMises) {
+      timer = setTimeout(() => {
+        MisesController.getAccountMisesBalance();
+        getMisesBalance();
+      }, 10000);
+    }
+  };
   useEffect(() => {
-    MisesController.getAccountMisesBalance();
+    getMisesBalance();
+    return () => {
+      clearTimeout(timer);
+    };
     // eslint-disable-next-line
   }, []);
   const renderContent = useCallback(() => {
     let balance: any = 0;
     let assets = tokens;
     if (isMises) {
-      balance = misesAccounts[selectedAddress]?.misesBalance?.amount;
+      const misesAccount = getMisesAccount(misesAccounts, selectedAddress);
+      balance = misesAccount.misesBalance?.amount;
       assets = [
         {
           name: 'Mises',
@@ -285,11 +299,11 @@ const Wallet = ({ navigation }: any) => {
       assets = tokens;
     }
 
+    const misesAccount = getMisesAccount(misesAccounts, selectedAddress);
     const account = {
-      address: selectedAddress,
       ...identities[selectedAddress],
       ...accounts[selectedAddress],
-      ...misesAccounts[selectedAddress],
+      ...misesAccount,
     };
     return (
       <View style={styles.wrapper}>

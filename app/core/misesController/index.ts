@@ -13,6 +13,7 @@ import {
 } from 'mises-js-sdk';
 import {
   getBaseApi,
+  getMisesAccount,
   misesAPi,
   MISES_TRUNCATED_ADDRESS_START_CHARS,
   request,
@@ -43,12 +44,11 @@ export interface misesAccount {
   transactions?: indexed[];
   height?: number;
 }
-interface accounts {
+export interface accounts {
   [key: string]: misesAccount;
 }
 interface misesState extends BaseState {
   accountList: accounts;
-  transformFlag: 'loading' | 'error' | 'success';
 }
 interface misesGasfee {
   gasWanted: string | undefined;
@@ -103,7 +103,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     };
     this.defaultState = {
       accountList: {},
-      transformFlag: 'loading',
     };
     onPreferencesStateChange(async (preferencesState) => {
       try {
@@ -219,6 +218,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const balanceLong = await user.getBalanceUMIS();
       if (user && balanceLong) {
         const balanceObj = this.#coinDefine.toCoinMIS(balanceLong);
+        console.log(balanceObj, '=======');
         return {
           ...balanceObj,
           denom: balanceObj.denom.toUpperCase(),
@@ -371,9 +371,9 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           avatarUrl: userInfo?.avatarUrl,
         };
       }
-      accountList[account?.address] = account;
       this.update({
-        accountList,
+        [account?.address]: account,
+        ...accountList,
       });
       return account;
     } catch (error) {
@@ -439,7 +439,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     let address = '';
     for (const key in accountList) {
       const item = accountList[key];
-      if (item.misesId === misesId) {
+      if (item.misesId.toLowerCase() === misesId.toLowerCase()) {
         address = key;
       }
     }
@@ -458,10 +458,9 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const accountList = this.getAccountList();
       const misesId = activeUser?.address() || '';
       const address = this.misesIdFindEthAddress(misesId);
-      const account = this.addressFindItem(address);
+      const account = getMisesAccount(accountList, address);
       if (account) {
-        console.log('setinfo for account', account);
-        const { token } = account;
+        const { token } = account || {};
         const updateUserInfo = {
           nickname:
             data.name ||
@@ -472,17 +471,16 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         };
         token && this.setToMisesPrivate(updateUserInfo); // set mises userInfo to browser
         // set mises to chrome extension
-        accountList[address].userInfo = {
+        account.userInfo = {
           name: updateUserInfo.nickname,
           avatarUrl: updateUserInfo.avatar,
         };
         // update accountList
         this.update({
-          accountList,
+          [address]: account,
+          ...accountList,
         });
-        AnalyticsV2.trackEvent('update userinfo cache ', accountList[address]);
-      } else {
-        console.log('setinfo but no account');
+        AnalyticsV2.trackEvent('update userinfo cache ', account);
       }
       AnalyticsV2.trackEvent('setinfo success ', { ...info });
       
@@ -613,12 +611,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       };
       return Promise.resolve(this.#misesGasfee);
     }
-  }
-
-  resetTranstionFlag() {
-    this.update({
-      transformFlag: 'loading',
-    });
   }
 
   parseAmountItem(item: { value: string }) {
@@ -868,7 +860,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           return result.concat(this.parseTxEvents(activeUser?.address(), item));
         }, [])
         .filter((val) => val);
-
+      list.sort((a, b) => a.height - b.height);
       for (const key in accountList) {
         if (accountList[key].misesId === activeUser?.address()) {
           accountList[key].transactions = list || [];
@@ -890,7 +882,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   async setAccountTransactionsHeight(selectedAddress: string) {
     // const selectedAddress = this.getSelectedAddress();
     const accountList = this.getAccountList();
-    const { transactions = [] } = accountList[selectedAddress];
+    const { transactions = [] } = getMisesAccount(accountList, selectedAddress);
     const last = transactions[0] || {};
     accountList[selectedAddress].height = last.height + 1;
     // console.log(last.height, accountList, 'setAccountTransactionsHeight');

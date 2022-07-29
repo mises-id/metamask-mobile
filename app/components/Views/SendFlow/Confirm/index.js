@@ -91,6 +91,7 @@ import GlobalAlert from '../../../UI/GlobalAlert';
 import { allowedToBuy } from '../../../UI/FiatOrders';
 import TransactionReviewMises from '../../../UI/TransactionReview/TransactionReviewMises';
 import { uuid } from '@walletconnect/utils';
+import { getMisesAccount } from '../../../../core/misesController/misesNetwork.util';
 
 const EDIT = 'edit';
 const EDIT_NONCE = 'edit_nonce';
@@ -705,7 +706,11 @@ class Confirm extends PureComponent {
     const parsedTicker = getTicker(ticker);
     if (selectedAsset.isETH) {
       if (providerType === 'mises') {
-        fromAccountBalance = `${accountList[fromSelectedAddress]?.misesBalance?.amount} ${parsedTicker}`;
+        const selectedAccount = getMisesAccount(
+          accountList,
+          fromSelectedAddress,
+        );
+        fromAccountBalance = `${selectedAccount?.misesBalance?.amount} ${parsedTicker}`;
         transactionValue = `${renderFromWei(value)} ${parsedTicker}`;
         transactionValueFiat = weiToFiat(
           valueBN,
