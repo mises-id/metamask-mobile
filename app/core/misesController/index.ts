@@ -8,8 +8,13 @@ import {
 import BigNumber from 'bignumber.js';
 import { DeliverTxResponse, IndexedTx } from '@cosmjs/stargate';
 import {
-  MSdk,MAppMgr, MUserMgr, MUser,
-  MisesCoin, MisesConfig, MsgReader 
+  MSdk,
+  MAppMgr,
+  MUserMgr,
+  MUser,
+  MisesCoin,
+  MisesConfig,
+  MsgReader,
 } from 'mises-js-sdk';
 import {
   getBaseApi,
@@ -91,9 +96,9 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     // init Mises sdk
     this.#config = MSdk.newConfig();
     this.exportAccount = exportAccount;
-    this.#misesSdk =  MSdk.newSdk(this.#config);
-    this.#coinDefine =  MSdk.newCoinDefine();
-    this.#msgReader =  MSdk.newMsgReader();
+    this.#misesSdk = MSdk.newSdk(this.#config);
+    this.#coinDefine = MSdk.newCoinDefine();
+    this.#msgReader = MSdk.newMsgReader();
     this.#coinDefine.load();
     this.#config.setLCDEndpoint(MISES_POINT);
     this.#misesUser = this.#misesSdk.userMgr();
@@ -109,12 +114,8 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         const key = await exportAccount(preferencesState.selectedAddress); // get priKeyHex
         await this.activate(key); // set activity user
         const lowerAddress = preferencesState.selectedAddress.toLowerCase();
-        const userInfo = await this.ensureMisesAccessToken(
-          lowerAddress,
-        ); // get activity user
-        const misesAccount = await this.refreshMisesBalance(
-          lowerAddress,
-        ); // get mises balance
+        const userInfo = await this.ensureMisesAccessToken(lowerAddress); // get activity user
+        const misesAccount = await this.refreshMisesBalance(lowerAddress); // get mises balance
         misesAccount.token = userInfo?.token;
         const accountList = this.getAccountList();
         if (!accountList[lowerAddress]) {
@@ -151,13 +152,12 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       );
       const res = await Promise.all(promiseAccount);
       const accounts = this.getAccountList();
-      res.forEach((val) =>  {
+      res.forEach((val) => {
         if (val.address in accounts) {
           accounts[val.address].misesBalance = val.misesBalance;
         } else {
-          accounts[val.address] = val
+          accounts[val.address] = val;
         }
-        
       });
       this.update({
         accountList: accounts,
@@ -173,16 +173,17 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     try {
       const lowerAddress = address.toLowerCase();
       const accountList = this.getAccountList();
-      const misesBalance: misesBalance = await this.getUserBalance(lowerAddress);
+      const misesBalance: misesBalance = await this.getUserBalance(
+        lowerAddress,
+      );
       const user = await this.getMisesUser(lowerAddress);
       const cacheObj = accountList[lowerAddress] || {};
-      const ret =  {
+      const ret = {
         ...cacheObj,
         address: lowerAddress,
         misesBalance,
         misesId: user.address(),
       };
-      console.log("refreshMisesBalance",ret);
       return ret;
     } catch (error) {
       return Promise.reject(error);
@@ -218,7 +219,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const balanceLong = await user.getBalanceUMIS();
       if (user && balanceLong) {
         const balanceObj = this.#coinDefine.toCoinMIS(balanceLong);
-        console.log(balanceObj, '=======');
         return {
           ...balanceObj,
           denom: balanceObj.denom.toUpperCase(),
@@ -327,8 +327,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     const misesId = activeUser ? activeUser.address() : '';
     const account = this.addressFindItem(address);
     const nowTimeStamp = new Date().getTime();
-    console.log("misesUserInfo found account ", account);
-    if (account && account.auth) return account;
+    if (account?.auth) return account;
     try {
       const { auth } = await this.generateAuth(`${nowTimeStamp}`);
       const misesBalance = await this.getUserBalance(address);
@@ -405,7 +404,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         misesId,
         token: account.token || '',
       };
-      console.log("ensureMisesAccessToken", userinfo);
       return userinfo;
     } catch (error) {
       console.warn('ensureMisesAccessToken:Error==================', error);
@@ -483,7 +481,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         AnalyticsV2.trackEvent('update userinfo cache ', account);
       }
       AnalyticsV2.trackEvent('setinfo success ', { ...info });
-      
+
       return info;
     } catch (error) {
       console.warn(error, 'error');
