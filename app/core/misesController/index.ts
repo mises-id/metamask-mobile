@@ -872,8 +872,9 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       return Promise.reject(error);
     }
   }
-  getAccountFlag() {
-    return true;
+  findAccountLength() {
+    const accountList = this.getAccountList();
+    return Object.keys(accountList).length;
   }
 
   async setAccountTransactionsHeight(selectedAddress: string) {

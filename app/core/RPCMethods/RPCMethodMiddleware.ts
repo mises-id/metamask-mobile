@@ -109,7 +109,6 @@ export const checkActiveAccountAndChainId = ({
     }
   }
 };
-
 /**
  * Handle RPC methods called by dapps
  */
@@ -131,8 +130,6 @@ export const getRpcMethodMiddleware = ({
   toggleUrlModal,
   // Wizard
   wizardScrollAdjusted,
-  // For the browser
-  tabId,
   // For WalletConnect
   isWalletConnect,
   injectHomePageScripts,
@@ -260,7 +257,6 @@ export const getRpcMethodMiddleware = ({
 
             res.result = selectedAddress ? [selectedAddress] : [];
           } catch (e) {
-            console.log(e)
             throw ethErrors.provider.userRejectedRequest(
               'User denied account authorization.',
             );
@@ -644,9 +640,8 @@ export const getRpcMethodMiddleware = ({
         const {
           privacy: { privacyMode },
         } = store.getState();
-
-        let { selectedAddress } = Engine.context.PreferencesController.state;
-
+        const { PreferencesController, MisesController } = Engine.context;
+        let { selectedAddress } = PreferencesController.state;
         selectedAddress = selectedAddress?.toLowerCase();
         const nonce = new Date().getTime();
         if (
@@ -654,11 +649,11 @@ export const getRpcMethodMiddleware = ({
           !privacyMode ||
           ((!params || !params.force) && getApprovedHosts()[hostname])
         ) {
-          const key = await Engine.context.MisesController.exportAccount(
-            selectedAddress,
-          );
-          const { auth, misesId } =
-            await Engine.context.MisesController.generateAuth(nonce, key); // get mises auth
+          const key = await MisesController.exportAccount(selectedAddress);
+          const { auth, misesId } = await MisesController.generateAuth(
+            nonce,
+            key,
+          ); // get mises auth
           res.result = {
             accounts: [selectedAddress],
             auth,
@@ -703,7 +698,7 @@ export const getRpcMethodMiddleware = ({
       },
       mises_getMisesAccount: async () => {
         try {
-          const data = await Engine.context.MisesController.getAccountFlag();
+          const data = await Engine.context.MisesController.findAccountLength();
           res.result = data;
         } catch (error) {
           throw ethErrors.provider.userRejectedRequest(
