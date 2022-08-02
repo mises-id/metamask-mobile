@@ -364,7 +364,7 @@ export class BackgroundBridge extends EventEmitter {
     const { network, selectedAddress } = Engine.datamodel.flatState;
     return {
       isInitialized: !!vault,
-      isUnlocked: this.isUnlocked(),
+      isUnlocked: true,
       network,
       selectedAddress,
     };

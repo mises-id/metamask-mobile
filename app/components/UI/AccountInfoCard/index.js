@@ -166,7 +166,7 @@ class AccountInfoCard extends PureComponent {
     const isMises = isMisesChain(type);
     const balance = `(${
       isMises ? misesAccount.misesBalance.amount : renderFromWei(weiBalance)
-    } ${getTicker(ticker)})`;
+    } ${isMises ? 'MIS' : getTicker(ticker)})`;
     const accountLabel = renderAccountName(selectedAddress, identities);
     const address = isMises
       ? shortenAddress(misesAccount?.misesId)

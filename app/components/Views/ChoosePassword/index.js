@@ -361,7 +361,7 @@ class ChoosePassword extends PureComponent {
     try {
       this.setState({ loading: true });
       const previous_screen = this.props.route.params?.[PREVIOUS_SCREEN];
-
+      console.warn(previous_screen, 'previous_screen:warning');
       if (previous_screen === ONBOARDING) {
         await this.createNewVaultAndKeychain(password);
         this.props.seedphraseNotBackedUp();

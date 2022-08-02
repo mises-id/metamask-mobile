@@ -1,18 +1,13 @@
-import { fontStyles } from '../../../styles/common';
+import { baseStyles, fontStyles } from '../../../styles/common';
 import { strings } from '../../../../locales/i18n';
 import React, { useEffect, useState } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Device from '../../../util/device';
-import ActionView from '../ActionView';
 import PropTypes from 'prop-types';
 import { mockTheme, useAppThemeFromContext } from '../../../util/theme';
 import Engine from '../../../core/Engine';
+import { ScrollView } from 'react-native-gesture-handler';
+import StyledButton from '../StyledButton';
 const createStyles = (colors) =>
   StyleSheet.create({
     root: {
@@ -20,11 +15,11 @@ const createStyles = (colors) =>
       borderTopLeftRadius: 10,
       borderTopRightRadius: 10,
       paddingBottom: Device.isIphoneX() ? 20 : 0,
-      minHeight: '50%',
+      minHeight: '70%',
     },
     title: {
       textAlign: 'center',
-      fontSize: 18,
+      fontSize: 16,
       marginVertical: 12,
       marginHorizontal: 20,
       color: colors.text.default,
@@ -49,6 +44,7 @@ const createStyles = (colors) =>
       paddingBottom: 12,
       paddingHorizontal: 10,
       width: '90%',
+      fontSize: 14,
     },
     information: {
       borderWidth: 1,
@@ -61,9 +57,27 @@ const createStyles = (colors) =>
       width: '100%',
     },
     showValue: {
+      display: 'flex',
       borderTopWidth: 1,
       borderTopColor: colors.border.muted,
       padding: 10,
+      fontSize: 12,
+    },
+
+    actionContainer: {
+      flex: 0,
+      flexDirection: 'row',
+      paddingVertical: 16,
+      paddingHorizontal: 24,
+    },
+    button: {
+      flex: 1,
+    },
+    cancel: {
+      marginRight: 8,
+    },
+    confirm: {
+      marginLeft: 8,
     },
   });
 const MisesPostTx = (props) => {
@@ -86,8 +100,12 @@ const MisesPostTx = (props) => {
       <View style={styles.titleWrapper}>
         <Text style={styles.title}>Post Tx</Text>
       </View>
-      <ActionView onCancelPress={onCancel} onConfirmPress={onConfirm}>
-        <View style={styles.children}>
+      <View
+        style={baseStyles.flexGrow}
+        ref={this.scrollViewContainer}
+        collapsable={false}
+      >
+        <ScrollView>
           <View style={styles.informationWrapper}>
             {msg.map((item, index) => (
               <View key={index} style={styles.information}>
@@ -116,8 +134,25 @@ const MisesPostTx = (props) => {
               </View>
             ))}
           </View>
+        </ScrollView>
+        <View style={styles.actionContainer}>
+          <StyledButton
+            type={'cancel'}
+            onPress={onCancel}
+            containerStyle={[styles.button, styles.cancel]}
+          >
+            {strings('accountApproval.cancel')}
+          </StyledButton>
+          <StyledButton
+            type={'confirm'}
+            onPress={onConfirm}
+            containerStyle={[styles.button, styles.confirm]}
+            testID={'connect-approve-button'}
+          >
+            Comfirm
+          </StyledButton>
         </View>
-      </ActionView>
+      </View>
     </View>
   );
 };

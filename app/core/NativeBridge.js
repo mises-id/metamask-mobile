@@ -1,9 +1,8 @@
 import BackgroundBridge from './BackgroundBridge';
-import getRpcMethodMiddleware, {
-  checkActiveAccountAndChainId,
-} from './RPCMethods/RPCMethodMiddleware';
+import getRpcMethodMiddleware from './RPCMethods/RPCMethodMiddleware';
 import { NativeModules } from 'react-native';
 import { EventEmitter } from 'events';
+import Engine from './Engine';
 import Logger from '../util/Logger';
 
 const { MisesModule } = NativeModules;
@@ -26,6 +25,25 @@ const tabId = () => 1;
 const toggleUrlModal = () => null;
 const injectHomePageScripts = async (bookmarks) => {};
 
+const ensureUnlock = async () => {
+  const { KeyringController } = Engine.context;
+  if (!KeyringController.isUnlocked()) {
+    MisesModule.popup();
+    const unlocked = new Promise((resolve, reject) => {
+      KeyringController.onUnlock(() => {
+        console.log('unlocked');
+        resolve('unlocked');
+      });
+      bridge.onWindowHide(() => {
+        console.log('dismissed');
+        reject('dismissed');
+      });
+    });
+    await unlocked;
+    console.log('continue after unlocked');
+  }
+};
+
 class NativePort extends EventEmitter {
   constructor(url, isMainFrame) {
     super();
@@ -38,9 +56,9 @@ class NativePort extends EventEmitter {
   };
 }
 
-class NativeBridge {
-  backgroundBridges = [];
+class NativeBridge extends EventEmitter {
   constructor(options) {
+    super();
     this.backgroundBridges = [];
   }
   postMessage(data) {
@@ -79,6 +97,22 @@ class NativeBridge {
     this.initializeBackgroundBridge(origin, true);
   }
 
+  windowStatusChanged(params) {
+    console.log('metamask window status ', params);
+    if (params && params === 'show') {
+      this.emit('window_show');
+    } else if (params && params === 'hide') {
+      this.emit('window_hide');
+    }
+  }
+  onWindowHide(listener) {
+    return this.once('window_hide', listener);
+  }
+
+  onWindowShow(listener) {
+    return this.once('window_show', listener);
+  }
+
   initializeBackgroundBridge(urlBridge, isMainFrame) {
     const newBridge = new BackgroundBridge({
       webview: null,
@@ -104,6 +138,7 @@ class NativeBridge {
           wizardScrollAdjusted,
           tabId,
           injectHomePageScripts,
+          ensureUnlock,
         }),
       isMainFrame,
       port: new NativePort(urlBridge, isMainFrame),
@@ -123,6 +158,9 @@ const instance = {
       },
       loadStarted(data) {
         bridge.loadStarted(data);
+      },
+      windowStatusChanged(data) {
+        bridge.windowStatusChanged(data);
       },
     });
   },
