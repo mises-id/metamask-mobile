@@ -47,6 +47,7 @@ import withQRHardwareAwareness from '../QRHardware/withQRHardwareAwareness';
 import {
   findMisesAccount,
   isMisesChain,
+  misesExplorer,
 } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
@@ -269,18 +270,15 @@ class Transactions extends PureComponent {
     }
   }
   getMisesTransactions() {
-    const isMises = isMisesChain(this.props.networkType);
-    if (isMises) {
-      const { MisesController } = Engine.context;
-      const { selectedAddress } = this.props;
-      return MisesController.recentTransactions(false, selectedAddress).then(
-        (res) => {
-          this.setState({
-            transactions: res,
-          });
-        },
-      );
-    }
+    const { MisesController } = Engine.context;
+    const { selectedAddress } = this.props;
+    return MisesController.recentTransactions(false, selectedAddress).then(
+      (res) => {
+        this.setState({
+          transactions: res,
+        });
+      },
+    );
   }
   scrollToIndex = (index) => {
     if (!this.scrolling && (this.props.headerHeight || index)) {
@@ -375,14 +373,21 @@ class Transactions extends PureComponent {
       },
       selectedAddress,
       close,
+      accountList,
     } = this.props;
     const { rpcBlockExplorer } = this.state;
     try {
       let url;
       let title;
+      const isMises = isMisesChain(this.props.networkType);
       if (type === RPC) {
         url = `${rpcBlockExplorer}/address/${selectedAddress}`;
         title = new URL(rpcBlockExplorer).hostname;
+      } else if (isMises) {
+        url = `${misesExplorer}holders/${
+          findMisesAccount(accountList, selectedAddress).misesId
+        }`;
+        title = new URL(url).hostname;
       } else {
         const networkResult = getNetworkTypeById(network);
         url = getEtherscanAddressUrl(networkResult, selectedAddress);
@@ -407,7 +412,7 @@ class Transactions extends PureComponent {
   renderViewMore = () => {
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
+    const isMises = isMisesChain(this.props.networkType);
     return (
       <View style={styles.viewMoreBody}>
         <TouchableOpacity
@@ -419,7 +424,9 @@ class Transactions extends PureComponent {
               `${strings(
                 'transactions.view_full_history_on',
               )} ${getBlockExplorerName(this.state.rpcBlockExplorer)}`) ||
-              strings('transactions.view_full_history_on_etherscan')}
+            isMises
+              ? 'View full history on block explorer'
+              : strings('transactions.view_full_history_on_etherscan')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -749,10 +756,9 @@ class Transactions extends PureComponent {
     );
   };
   renderTransactions = () => {
-    const length =
-      this.props.networkType !== 'mises'
-        ? this.props.transactions.length
-        : this.state.transactions.length;
+    const length = !isMisesChain(this.props.networkType)
+      ? this.props.transactions.length
+      : this.state.transactions.length;
     return !length ? this.renderEmpty() : this.renderList();
   };
   render = () => {

@@ -20,6 +20,11 @@ import Device from '../../../../util/device';
 import { mockTheme, useAppThemeFromContext } from '../../../../util/theme';
 import AccountDetails from '../AccountDetails';
 import StyledButton from '../../../UI/StyledButton';
+import {
+  findMisesAccount,
+  isMisesChain,
+  misesExplorer,
+} from '../../../../core/misesController/misesNetwork.util';
 
 interface ISelectQRAccountsProps {
   canUnlock: boolean;
@@ -106,16 +111,23 @@ const SelectQRAccounts = (props: ISelectQRAccountsProps) => {
     (state: any) =>
       state.engine.backgroundState.PreferencesController.frequentRpcList,
   );
-
+  const accountList = useSelector(
+    (state: any) => state.engine.backgroundState.MisesController.accountList,
+  );
   const toBlockExplorer = useCallback(
     (address: string) => {
       const { type, rpcTarget } = provider;
       let accountLink: string;
+      const isMises = isMisesChain(type);
       if (type === RPC) {
         const blockExplorer =
           findBlockExplorerForRpc(rpcTarget, frequentRpcList) ||
           NO_RPC_BLOCK_EXPLORER;
         accountLink = `${blockExplorer}/address/${address}`;
+      } else if (isMises) {
+        accountLink = `${misesExplorer}holders/${
+          findMisesAccount(accountList, address).misesId
+        }`;
       } else {
         accountLink = getEtherscanAddressUrl(type, address);
       }
@@ -126,7 +138,7 @@ const SelectQRAccounts = (props: ISelectQRAccountsProps) => {
         },
       });
     },
-    [frequentRpcList, navigation, provider],
+    [accountList, frequentRpcList, navigation, provider],
   );
 
   return (

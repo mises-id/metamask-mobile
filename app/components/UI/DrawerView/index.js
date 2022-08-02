@@ -811,7 +811,6 @@ class DrawerView extends PureComponent {
       const url = `${misesExplorer}holders/${
         findMisesAccount(accountList, selectedAddress).misesId
       }`;
-      console.warn(url);
       const title = new URL(url).hostname;
       this.goToBrowserUrl(url, title);
     } else {
