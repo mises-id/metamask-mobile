@@ -26,6 +26,8 @@ import DetailsModal from '../../../Base/DetailsModal';
 import { RPC, NO_RPC_BLOCK_EXPLORER } from '../../../../constants/network';
 import { withNavigation } from '@react-navigation/compat';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
+import MisesAddress from '../../MisesAddress';
+import { isMisesChain } from '../../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -134,6 +136,17 @@ class TransactionDetails extends PureComponent {
     } = this.props;
     const { rpcBlockExplorer } = this.state;
     try {
+      const isMises = isMisesChain(type);
+      if (isMises) {
+        const url = `https://gw.mises.site/tx/${transactionHash}`;
+        const title = new URL(url).hostname;
+        navigation.push('Webview', {
+          screen: 'SimpleWebview',
+          params: { url, title },
+        });
+        close && close();
+        return false;
+      }
       if (type === RPC) {
         const url = `${rpcBlockExplorer}/tx/${transactionHash}`;
         const title = new URL(rpcBlockExplorer).hostname;
@@ -224,13 +237,15 @@ class TransactionDetails extends PureComponent {
     const {
       chainId,
       transactionDetails,
-      transactionObject: { status, time, transaction },
+      transactionObject: { status, time, transaction, blockNumber },
+      network: {
+        provider: { type },
+      },
     } = this.props;
     const styles = this.getStyles();
-
+    const isMises = isMisesChain(type);
     const renderTxActions = status === 'submitted' || status === 'approved';
     const { rpcBlockExplorer } = this.state;
-
     return transactionDetails ? (
       <DetailsModal.Body>
         <DetailsModal.Section borderBottom>
@@ -246,14 +261,23 @@ class TransactionDetails extends PureComponent {
               </View>
             )}
           </DetailsModal.Column>
-          <DetailsModal.Column end>
-            <DetailsModal.SectionTitle>
-              {strings('transactions.date')}
-            </DetailsModal.SectionTitle>
-            <Text small primary>
-              {toDateFormat(time)}
-            </Text>
-          </DetailsModal.Column>
+          {isMises ? (
+            <DetailsModal.Column end>
+              <DetailsModal.SectionTitle>Height</DetailsModal.SectionTitle>
+              <Text small primary>
+                {blockNumber}
+              </Text>
+            </DetailsModal.Column>
+          ) : (
+            <DetailsModal.Column end>
+              <DetailsModal.SectionTitle>
+                {strings('transactions.date')}
+              </DetailsModal.SectionTitle>
+              <Text small primary>
+                {toDateFormat(time)}
+              </Text>
+            </DetailsModal.Column>
+          )}
         </DetailsModal.Section>
         <DetailsModal.Section borderBottom={!!transaction?.nonce}>
           <DetailsModal.Column>
@@ -261,10 +285,17 @@ class TransactionDetails extends PureComponent {
               {strings('transactions.from')}
             </DetailsModal.SectionTitle>
             <Text small primary>
-              <EthereumAddress
-                type="short"
-                address={transactionDetails.renderFrom}
-              />
+              {isMises ? (
+                <MisesAddress
+                  type="short"
+                  address={transactionDetails.renderFrom}
+                />
+              ) : (
+                <EthereumAddress
+                  type="short"
+                  address={transactionDetails.renderFrom}
+                />
+              )}
             </Text>
           </DetailsModal.Column>
           <DetailsModal.Column end>
@@ -272,10 +303,17 @@ class TransactionDetails extends PureComponent {
               {strings('transactions.to')}
             </DetailsModal.SectionTitle>
             <Text small primary>
-              <EthereumAddress
-                type="short"
-                address={transactionDetails.renderTo}
-              />
+              {isMises ? (
+                <MisesAddress
+                  type="short"
+                  address={transactionDetails.renderTo}
+                />
+              ) : (
+                <EthereumAddress
+                  type="short"
+                  address={transactionDetails.renderTo}
+                />
+              )}
             </Text>
           </DetailsModal.Column>
         </DetailsModal.Section>
@@ -324,7 +362,9 @@ class TransactionDetails extends PureComponent {
                   `${strings('transactions.view_on')} ${getBlockExplorerName(
                     rpcBlockExplorer,
                   )}`) ||
-                  strings('transactions.view_on_etherscan')}
+                isMises
+                  ? 'View on Mises Explorer'
+                  : strings('transactions.view_on_etherscan')}
               </Text>
             </TouchableOpacity>
           )}

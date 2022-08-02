@@ -20,6 +20,10 @@ import {
 import { safeToChecksumAddress } from '../../../util/address';
 import { addAccountTimeFlagFilter } from '../../../util/transactions';
 import { toLowerCaseEquals } from '../../../util/general';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../core/misesController/misesNetwork.util';
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -37,6 +41,7 @@ const TransactionsView = ({
   transactions,
   chainId,
   tokens,
+  accountList,
 }) => {
   const [allTransactions, setAllTransactions] = useState([]);
   const [submittedTxs, setSubmittedTxs] = useState([]);
@@ -133,10 +138,25 @@ const TransactionsView = ({
     computing the transactions which will make the app feel more responsive. Also this takes usually less than 1 seconds
     so the effect will not be noticeable if the user is in this screen.
     */
-    InteractionManager.runAfterInteractions(() => {
-      filterTransactions();
-    });
-  }, [filterTransactions]);
+    const isMises = isMisesChain(networkType);
+    if (isMises) {
+      const misesAccount = findMisesAccount(accountList, selectedAddress);
+      if (misesAccount.transactions) {
+        setAllTransactions(misesAccount.transactions ?? []);
+        setLoading(false);
+        const { MisesController } = Engine.context;
+        MisesController.recentTransactions(false, selectedAddress).then(
+          (res) => {
+            setAllTransactions(misesAccount.transactions ?? []);
+          },
+        );
+      }
+    } else {
+      InteractionManager.runAfterInteractions(() => {
+        filterTransactions();
+      });
+    }
+  }, [accountList, filterTransactions, networkType, selectedAddress]);
 
   return (
     <View style={styles.wrapper} testID={'wallet-screen'}>
@@ -168,6 +188,10 @@ TransactionsView.propTypes = {
   /* Identities object required to get account name
   */
   identities: PropTypes.object,
+  /**
+  /* Identities object required to get account name
+  */
+  accountList: PropTypes.object,
   /**
   /* navigation object required to push new views
   */
@@ -203,6 +227,7 @@ const mapStateToProps = (state) => ({
     state.engine.backgroundState.PreferencesController.selectedAddress,
   tokens: state.engine.backgroundState.TokensController.tokens,
   identities: state.engine.backgroundState.PreferencesController.identities,
+  accountList: state.engine.backgroundState.MisesController.accountList,
   transactions: state.engine.backgroundState.TransactionController.transactions,
   networkType: state.engine.backgroundState.NetworkController.provider.type,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,

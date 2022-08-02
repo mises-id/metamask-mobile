@@ -40,7 +40,11 @@ import AssetSwapButton from '../Swaps/components/AssetSwapButton';
 import NetworkMainAssetLogo from '../NetworkMainAssetLogo';
 import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
-import { getMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+  misesKey,
+} from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -205,7 +209,7 @@ class AssetOverview extends PureComponent {
 
   onSend = async () => {
     const { asset, ticker } = this.props;
-    if (asset.isETH || asset.name === 'Mises') {
+    if (asset.isETH || asset.name.toLowerCase() === misesKey) {
       this.props.newAssetTransaction(getEther(ticker));
       this.props.navigation.navigate('SendFlowView');
     } else {
@@ -241,7 +245,8 @@ class AssetOverview extends PureComponent {
     const { tokenList, asset, type } = this.props;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-    return asset.isETH || type === 'mises' ? (
+    const isMises = isMisesChain(type);
+    return asset.isETH || isMises ? (
       <NetworkMainAssetLogo biggest style={styles.ethLogo} />
     ) : (
       <TokenImage asset={asset} tokenList={tokenList} />
@@ -311,7 +316,7 @@ class AssetOverview extends PureComponent {
     let mainBalance, secondaryBalance;
     const itemAddress = safeToChecksumAddress(address);
     let balance, balanceFiat;
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     if (isETH) {
       balance = renderFromWei(
         accounts[selectedAddress] && accounts[selectedAddress].balance,
@@ -322,7 +327,7 @@ class AssetOverview extends PureComponent {
         currentCurrency,
       );
     } else if (isMises) {
-      const selectedAccount = getMisesAccount(accountList, selectedAddress);
+      const selectedAccount = findMisesAccount(accountList, selectedAddress);
       balance = selectedAccount.misesBalance?.amount;
       balanceFiat = weiToFiat('0x0', conversionRate, currentCurrency);
     } else {

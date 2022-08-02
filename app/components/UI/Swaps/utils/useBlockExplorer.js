@@ -7,6 +7,10 @@ import {
 } from '../../../../util/networks';
 import { strings } from '../../../../../locales/i18n';
 import { getEtherscanBaseUrl } from '../../../../util/etherscan';
+import {
+  isMisesChain,
+  misesExplorer,
+} from '../../../../core/misesController/misesNetwork.util';
 
 function useBlockExplorer(provider, frequentRpcList) {
   const [explorer, setExplorer] = useState({
@@ -18,6 +22,7 @@ function useBlockExplorer(provider, frequentRpcList) {
   });
 
   useEffect(() => {
+    const isMises = isMisesChain(provider.type);
     if (provider.type === RPC) {
       try {
         const blockExplorer = findBlockExplorerForRpc(
@@ -51,6 +56,14 @@ function useBlockExplorer(provider, frequentRpcList) {
           baseUrl: '',
         });
       }
+    } else if (isMises) {
+      setExplorer({
+        name: 'Mises',
+        value: provider.chainId,
+        isValid: true,
+        isRPC: false,
+        baseUrl: misesExplorer,
+      });
     } else {
       setExplorer({
         name: 'Etherscan',

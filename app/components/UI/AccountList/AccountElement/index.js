@@ -10,7 +10,10 @@ import { strings } from '../../../../../locales/i18n';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { connect } from 'react-redux';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
-import { getMisesAccount } from '../../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../../core/misesController/misesNetwork.util';
 
 const EMPTY = '0x0';
 const BALANCE_KEY = 'balance';
@@ -154,7 +157,7 @@ class AccountElement extends PureComponent {
           </View>
         </View>
       ) : null;
-
+    const isMises = isMisesChain(providerType);
     return (
       <View onStartShouldSetResponder={() => true}>
         <TouchableOpacity
@@ -173,7 +176,7 @@ class AccountElement extends PureComponent {
               <View style={styles.accountBalanceWrapper}>
                 <Text style={styles.accountBalance}>
                   {`${
-                    providerType === 'mises'
+                    isMises
                       ? updatedBalanceFromStore
                       : renderFromWei(updatedBalanceFromStore)
                   } ${getTicker(ticker)}`}
@@ -209,7 +212,7 @@ const mapStateToProps = (
   },
   { item: { balance, address } },
 ) => {
-  const isMises = NetworkController.provider.type === 'mises';
+  const isMises = isMisesChain(NetworkController.provider.type);
   const { selectedAddress } = PreferencesController;
   if (!isMises) {
     const { accounts } = AccountTrackerController;
@@ -229,7 +232,7 @@ const mapStateToProps = (
     };
   }
 
-  const selectedAccount = getMisesAccount(
+  const selectedAccount = findMisesAccount(
     MisesController.accountList,
     selectedAddress,
   );

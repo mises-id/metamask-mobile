@@ -16,7 +16,10 @@ import { strings } from '../../../../../locales/i18n';
 import AddressElement from '../AddressElement';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
 import MisesIdElement from '../MisesIdElement';
-import { getMisesAccount } from '../../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+} from '../../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -250,7 +253,7 @@ class AddressList extends PureComponent {
     const styles = createStyles(colors);
 
     if (inputSearch) return;
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     return !myAccountsOpened ? (
       <TouchableOpacity
         style={styles.myAccountsTouchable}
@@ -268,7 +271,7 @@ class AddressList extends PureComponent {
               <MisesIdElement
                 key={address}
                 address={address}
-                misesId={getMisesAccount(accountList, address)?.misesId}
+                misesId={findMisesAccount(accountList, address)?.misesId}
                 name={identities[address]?.name}
                 onAccountPress={onAccountPress}
                 onAccountLongPress={onAccountLongPress}
@@ -300,12 +303,12 @@ class AddressList extends PureComponent {
     }
 
     const key = element.address + element.name;
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     return isMises ? (
       <MisesIdElement
         key={element.address}
         address={element.address}
-        misesId={getMisesAccount(accountList, element.address)?.misesId}
+        misesId={findMisesAccount(accountList, element.address)?.misesId}
         name={element.name}
         onAccountLongPress={onAccountLongPress}
         testID={'account-identity'}
@@ -348,9 +351,9 @@ class AddressList extends PureComponent {
           addressBook.address.toLowerCase() === address.toLowerCase(),
       )?.name;
     const addressMisesId = (address) =>
-      getMisesAccount(accountList, address)?.misesId || address;
+      findMisesAccount(accountList, address)?.misesId || address;
     if (!recents.length || inputSearch) return;
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     return (
       <>
         {LabelElement(

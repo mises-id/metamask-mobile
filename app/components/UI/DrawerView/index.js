@@ -76,7 +76,11 @@ import {
 } from '../../../actions/onboardNetwork';
 import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
-import { getMisesAccount } from '../../../core/misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  isMisesChain,
+  misesExplorer,
+} from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -791,14 +795,24 @@ class DrawerView extends PureComponent {
       selectedAddress,
       network,
       network: {
-        provider: { rpcTarget },
+        provider: { rpcTarget, type },
       },
       frequentRpcList,
+      accountList,
     } = this.props;
+
+    const isMises = isMisesChain(type);
     if (network.provider.type === RPC) {
       const blockExplorer = findBlockExplorerForRpc(rpcTarget, frequentRpcList);
       const url = `${blockExplorer}/address/${selectedAddress}`;
       const title = new URL(blockExplorer).hostname;
+      this.goToBrowserUrl(url, title);
+    } else if (isMises) {
+      const url = `${misesExplorer}holders/${
+        findMisesAccount(accountList, selectedAddress).misesId
+      }`;
+      console.warn(url);
+      const title = new URL(url).hostname;
       this.goToBrowserUrl(url, title);
     } else {
       const url = getEtherscanAddressUrl(
@@ -973,19 +987,20 @@ class DrawerView extends PureComponent {
       frequentRpcList,
     } = this.props;
     let blockExplorer, blockExplorerName;
+    const isMises = isMisesChain(type);
     if (type === RPC) {
       blockExplorer = findBlockExplorerForRpc(rpcTarget, frequentRpcList);
       blockExplorerName = getBlockExplorerName(blockExplorer);
     }
     return [
       [
-        {
-          name: strings('drawer.browser'),
-          icon: this.getIcon('globe'),
-          selectedIcon: this.getSelectedIcon('globe'),
-          action: this.goToBrowser,
-          routeNames: ['BrowserView', 'AddBookmark'],
-        },
+        // {
+        //   name: strings('drawer.browser'),
+        //   icon: this.getIcon('globe'),
+        //   selectedIcon: this.getSelectedIcon('globe'),
+        //   action: this.goToBrowser,
+        //   routeNames: ['BrowserView', 'AddBookmark'],
+        // },
         {
           name: strings('drawer.wallet'),
           icon: this.getImageIcon('wallet'),
@@ -1017,7 +1032,9 @@ class DrawerView extends PureComponent {
           name:
             (blockExplorer &&
               `${strings('drawer.view_in')} ${blockExplorerName}`) ||
-            strings('drawer.view_in_etherscan'),
+            isMises
+              ? 'View on Mises Explorer'
+              : strings('drawer.view_in_etherscan'),
           icon: this.getIcon('eye'),
           action: this.viewInEtherscan,
         },
@@ -1063,9 +1080,17 @@ class DrawerView extends PureComponent {
   };
 
   onShare = () => {
-    const { selectedAddress } = this.props;
+    const { selectedAddress, accountList, networkProvider } = this.props;
+    let shareSelectAddress = selectedAddress;
+    const isMises = isMisesChain(networkProvider.type);
+    if (isMises) {
+      shareSelectAddress = findMisesAccount(
+        accountList,
+        selectedAddress,
+      ).misesId;
+    }
     Share.open({
-      message: selectedAddress,
+      message: shareSelectAddress,
     })
       .then(() => {
         this.props.protectWalletModalVisible();
@@ -1198,7 +1223,7 @@ class DrawerView extends PureComponent {
       ens: ensFromState,
       ...identities[selectedAddress],
       ...accounts[selectedAddress],
-      ...getMisesAccount(accountList, selectedAddress),
+      ...findMisesAccount(accountList, selectedAddress),
     };
     const { name, ens } = account;
     account.balance =
@@ -1215,7 +1240,7 @@ class DrawerView extends PureComponent {
     const checkIfCustomNetworkExists = networkOnboardedState.filter(
       (item) => item.network === sanitizeUrl(networkUrl),
     );
-    const isMises = networkProvider.type === 'mises';
+    const isMises = isMisesChain(networkProvider.type);
     const networkSwitchedAndInWalletView =
       currentRoute === 'WalletView' &&
       networkStatus &&

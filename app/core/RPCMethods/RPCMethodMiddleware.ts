@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, NativeModules } from 'react-native';
 import { getVersion } from 'react-native-device-info';
 import { createAsyncMiddleware } from 'json-rpc-engine';
 import { ethErrors } from 'eth-json-rpc-errors';
@@ -17,6 +17,7 @@ import { store } from '../../store';
 import { removeBookmark } from '../../actions/bookmarks';
 import setOnboardingWizardStep from '../../actions/wizard';
 import { v1 as random } from 'uuid';
+const { MisesModule } = NativeModules;
 
 const Engine = ImportedEngine as any;
 
@@ -28,6 +29,7 @@ export enum ApprovalTypes {
   ADD_ETHEREUM_CHAIN = 'ADD_ETHEREUM_CHAIN',
   SWITCH_ETHEREUM_CHAIN = 'SWITCH_ETHEREUM_CHAIN',
   MISES_STAKINGPOSTTX = 'mises_stakingPostTx',
+  PENDINGAPPROVAL = 'pendingApproval',
 }
 
 interface RPCMethodsMiddleParameters {
@@ -109,7 +111,6 @@ export const checkActiveAccountAndChainId = ({
     }
   }
 };
-
 /**
  * Handle RPC methods called by dapps
  */
@@ -131,8 +132,6 @@ export const getRpcMethodMiddleware = ({
   toggleUrlModal,
   // Wizard
   wizardScrollAdjusted,
-  // For the browser
-  tabId,
   // For WalletConnect
   isWalletConnect,
   injectHomePageScripts,
@@ -235,7 +234,15 @@ export const getRpcMethodMiddleware = ({
           privacy: { privacyMode },
         } = store.getState();
 
-        let { selectedAddress } = Engine.context.PreferencesController.state;
+        const { PreferencesController, KeyringController } = Engine.context;
+        const { selectedAddress: hasSelectedAddress } =
+          PreferencesController.state;
+
+        if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
+          MisesModule.popup();
+          return;
+        }
+        let { selectedAddress } = PreferencesController.state;
 
         selectedAddress = selectedAddress?.toLowerCase();
 
@@ -260,7 +267,6 @@ export const getRpcMethodMiddleware = ({
 
             res.result = selectedAddress ? [selectedAddress] : [];
           } catch (e) {
-            console.log(e)
             throw ethErrors.provider.userRejectedRequest(
               'User denied account authorization.',
             );
@@ -644,9 +650,15 @@ export const getRpcMethodMiddleware = ({
         const {
           privacy: { privacyMode },
         } = store.getState();
+        const { PreferencesController, MisesController, KeyringController } =
+          Engine.context;
+        const { selectedAddress: hasSelectedAddress } =
+          PreferencesController.state;
 
-        let { selectedAddress } = Engine.context.PreferencesController.state;
-
+        if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
+          MisesModule.popup();
+        }
+        let { selectedAddress } = PreferencesController.state;
         selectedAddress = selectedAddress?.toLowerCase();
         const nonce = new Date().getTime();
         if (
@@ -654,11 +666,11 @@ export const getRpcMethodMiddleware = ({
           !privacyMode ||
           ((!params || !params.force) && getApprovedHosts()[hostname])
         ) {
-          const key = await Engine.context.MisesController.exportAccount(
-            selectedAddress,
-          );
-          const { auth, misesId } =
-            await Engine.context.MisesController.generateAuth(nonce, key); // get mises auth
+          const key = await MisesController.exportAccount(selectedAddress);
+          const { auth, misesId } = await MisesController.generateAuth(
+            nonce,
+            key,
+          ); // get mises auth
           res.result = {
             accounts: [selectedAddress],
             auth,
@@ -703,7 +715,7 @@ export const getRpcMethodMiddleware = ({
       },
       mises_getMisesAccount: async () => {
         try {
-          const data = await Engine.context.MisesController.getAccountFlag();
+          const data = await Engine.context.MisesController.findAccountLength();
           res.result = data;
         } catch (error) {
           throw ethErrors.provider.userRejectedRequest(

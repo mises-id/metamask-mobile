@@ -8,6 +8,7 @@ import { useSelector } from 'react-redux';
 import { strings } from '../../../../locales/i18n';
 import { useAppThemeFromContext, mockTheme } from '../../../util/theme';
 import useBlockExplorer from '../../../components/UI/Swaps/utils/useBlockExplorer';
+import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors: any) =>
   StyleSheet.create({
@@ -57,7 +58,8 @@ interface Props {
 }
 
 const AssetOptions = (props: Props) => {
-  const { address, isNativeCurrency } = props.route.params;
+  const { address, isNativeCurrency: isNativeCurrencyTokens } =
+    props.route.params;
   const { colors } = useAppThemeFromContext() || mockTheme;
   const styles = createStyles(colors);
   const safeAreaInsets = useSafeAreaInsets();
@@ -66,6 +68,8 @@ const AssetOptions = (props: Props) => {
   const provider = useSelector(
     (state: any) => state.engine.backgroundState.NetworkController.provider,
   );
+  const isMises = isMisesChain(provider.type);
+  const isNativeCurrency = isNativeCurrencyTokens || isMises;
   const frequentRpcList = useSelector(
     (state: any) =>
       state.engine.backgroundState.PreferencesController.frequentRpcList,

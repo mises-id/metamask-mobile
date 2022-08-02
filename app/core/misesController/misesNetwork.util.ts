@@ -94,10 +94,15 @@ export function shortenAddress(
     -TRUNCATED_ADDRESS_END_CHARS,
   )}`;
 }
-export function getMisesAccount(
+export function findMisesAccount(
   accountList: accounts,
   address: string,
 ): misesAccount {
   const key = address?.toLowerCase();
   return accountList[key] || {};
+}
+export const misesExplorer = 'https://gw.mises.site/';
+export const misesKey = 'mises';
+export function isMisesChain(type: string) {
+  return type.toLowerCase() === misesKey;
 }

@@ -17,7 +17,8 @@ import { hasZeroWidthPoints } from '../../../../util/confusables';
 import { useAppThemeFromContext, mockTheme } from '../../../../util/theme';
 import { useSelector } from 'react-redux';
 import {
-  getMisesAccount,
+  findMisesAccount,
+  isMisesChain,
   shortenAddress,
 } from '../../../../core/misesController/misesNetwork.util';
 
@@ -240,9 +241,9 @@ export const AddressTo = (props) => {
   const providerType = useSelector(
     (state) => state.engine.backgroundState.NetworkController.provider.type,
   );
-  const isMises = providerType === 'mises';
+  const isMises = isMisesChain(providerType);
 
-  const misesAccount = getMisesAccount(accountList, toSelectedAddress) || {};
+  const misesAccount = findMisesAccount(accountList, toSelectedAddress);
   if (isConfirmScreen) {
     return (
       <View style={styles.wrapper}>

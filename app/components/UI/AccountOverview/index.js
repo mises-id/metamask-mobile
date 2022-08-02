@@ -47,6 +47,7 @@ import ClipboardManager from '../../../core/ClipboardManager';
 import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
+import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 
 import { NativeModules } from 'react-native';
 const { MisesModule } = NativeModules;
@@ -299,9 +300,9 @@ class AccountOverview extends PureComponent {
       account: { misesId },
       type,
     } = this.props;
-    await ClipboardManager.setString(
-      type === 'mises' ? misesId : selectedAddress,
-    );
+
+    const isMises = isMisesChain(type);
+    await ClipboardManager.setString(isMises ? misesId : selectedAddress);
     this.props.showAlert({
       isVisible: true,
       autodismiss: 1500,
@@ -377,7 +378,7 @@ class AccountOverview extends PureComponent {
     const { accountLabelEditable, accountLabel, ens } = this.state;
 
     const isQRHardwareWalletAccount = isQRHardwareAccount(address);
-    const isMises = type === 'mises';
+    const isMises = isMisesChain(type);
     return (
       <View
         style={baseStyles.flexGrow}
