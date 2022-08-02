@@ -751,7 +751,7 @@ export const getRpcMethodMiddleware = ({
       mises_getActive: async () => {
         try {
           const data = await Engine.context.MisesController.getActive();
-          res.result = data;
+          res.result = !!data;
         } catch (error) {
           throw ethErrors.provider.userRejectedRequest(
             'mises GetActive Failure',

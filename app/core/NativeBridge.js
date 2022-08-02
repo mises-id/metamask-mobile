@@ -167,3 +167,4 @@ const instance = {
 };
 
 export default instance;
+export { bridge };
