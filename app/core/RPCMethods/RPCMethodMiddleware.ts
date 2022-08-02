@@ -240,7 +240,6 @@ export const getRpcMethodMiddleware = ({
 
         if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
           MisesModule.popup();
-          return;
         }
         let { selectedAddress } = PreferencesController.state;
 
@@ -753,7 +752,9 @@ export const getRpcMethodMiddleware = ({
           const data = await Engine.context.MisesController.getActive();
           res.result = data;
         } catch (error) {
-          throw ethErrors.provider.userRejectedRequest('User follow Failure');
+          throw ethErrors.provider.userRejectedRequest(
+            'mises GetActive Failure',
+          );
         }
       },
       mises_openRestore: async () => {

@@ -1,58 +1,16 @@
-diff --git a/node_modules/pbkdf2/package.json b/node_modules/pbkdf2/package.json
-index 30a322e..9004119 100644
---- a/node_modules/pbkdf2/package.json
-+++ b/node_modules/pbkdf2/package.json
-@@ -15,8 +15,24 @@
-   "license": "MIT",
-   "author": "Daniel Cousens",
-   "browser": {
--    "./index.js": "./browser.js",
--    "./lib/sync.js": "./lib/sync-browser.js"
-+    "./lib/sync.js": "./lib/sync-browser.js",
-+    "zlib": "browserify-zlib",
-+    "crypto": "react-native-crypto",
-+    "net": "react-native-tcp",
-+    "http": "@tradle/react-native-http",
-+    "https": "https-browserify",
-+    "os": "react-native-os",
-+    "fs": "react-native-level-fs",
-+    "_stream_transform": "readable-stream/transform",
-+    "_stream_readable": "readable-stream/readable",
-+    "_stream_writable": "readable-stream/writable",
-+    "_stream_duplex": "readable-stream/duplex",
-+    "_stream_passthrough": "readable-stream/passthrough",
-+    "stream": "stream-browserify",
-+    "tty": "tty-browserify",
-+    "vm": "vm-browserify",
-+    "tls": false,
-+    "index.js": "./browser.js"
-   },
-   "files": [
-     "browser.js",
-@@ -66,5 +82,25 @@
-       "lib/async.js",
-       "test/bundle.js"
-     ]
-+  },
-+  "react-native": {
-+    "./lib/sync.js": "./lib/sync-browser.js",
-+    "zlib": "browserify-zlib",
-+    "crypto": "react-native-crypto",
-+    "net": "react-native-tcp",
-+    "http": "@tradle/react-native-http",
-+    "https": "https-browserify",
-+    "os": "react-native-os",
-+    "fs": "react-native-level-fs",
-+    "_stream_transform": "readable-stream/transform",
-+    "_stream_readable": "readable-stream/readable",
-+    "_stream_writable": "readable-stream/writable",
-+    "_stream_duplex": "readable-stream/duplex",
-+    "_stream_passthrough": "readable-stream/passthrough",
-+    "stream": "stream-browserify",
-+    "tty": "tty-browserify",
-+    "vm": "vm-browserify",
-+    "tls": false,
-+    "index.js": "./browser.js"
-   }
- }
-\ No newline at end of file
+diff --git a/node_modules/pbkdf2/lib/default-encoding.js b/node_modules/pbkdf2/lib/default-encoding.js
+index 3042099..dea882c 100644
+--- a/node_modules/pbkdf2/lib/default-encoding.js
++++ b/node_modules/pbkdf2/lib/default-encoding.js
+@@ -1,8 +1,9 @@
+ var defaultEncoding
++var globalProcess = global.process
+ /* istanbul ignore next */
+-if (global.process && global.process.browser) {
++if (globalProcess && globalProcess.browser) {
+   defaultEncoding = 'utf-8'
+-} else if (global.process && global.process.version) {
++} else if (globalProcess && globalProcess.version) {
+   var pVersionMajor = parseInt(process.version.split('.')[0].slice(1), 10)
+ 
+   defaultEncoding = pVersionMajor >= 6 ? 'utf-8' : 'binary'

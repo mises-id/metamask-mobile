@@ -202,7 +202,6 @@ export class BackgroundBridge extends EventEmitter {
     const isInitialNetwork =
       networkType && getAllNetworks().includes(networkType);
     let chainId;
-    console.warn(networkType, 'networkType');
     if (isInitialNetwork) {
       chainId = NetworksChainId[networkType];
       const isMises = isMisesChain(networkType);
@@ -221,7 +220,6 @@ export class BackgroundBridge extends EventEmitter {
       networkVersion: network,
       chainId,
     };
-    console.warn(result, 'result:networkType');
     return result;
   }
 
