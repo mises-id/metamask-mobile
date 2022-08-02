@@ -48,6 +48,9 @@ import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
 
+import { NativeModules } from 'react-native';
+const { MisesModule } = NativeModules;
+
 const createStyles = (colors) =>
   StyleSheet.create({
     scrollView: {
@@ -320,6 +323,7 @@ class AccountOverview extends PureComponent {
   };
   staking = () => {
     console.warn('navigate to staking');
+    MisesModule.openUrl('https://portal.mises.site');
   };
   onBuy = () => {
     this.props.navigation.navigate(Routes.FIAT_ON_RAMP_AGGREGATOR.ID);
