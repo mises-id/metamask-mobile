@@ -50,7 +50,6 @@
     "update-changelog": "./scripts/auto-changelog.sh",
     "prestorybook": "rnstl",
     "create-release": "./scripts/set-versions.sh && yarn update-changelog",
-    "patch": "./scripts/postinstallPatch.sh",
     "jsbundle:ios": "./scripts/build.sh ios bundle"
   },
   "husky": {

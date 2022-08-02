@@ -833,6 +833,9 @@ const RootRPCMethodsUI = (props) => {
       },
     );
 
+    const { ApprovalController } = Engine.context;
+    handlePendingApprovals(ApprovalController.state);
+
     return function cleanup() {
       Engine.context.PersonalMessageManager.hub.removeAllListeners();
       Engine.context.TypedMessageManager.hub.removeAllListeners();

@@ -17,7 +17,6 @@ import { store } from '../../store';
 import { removeBookmark } from '../../actions/bookmarks';
 import setOnboardingWizardStep from '../../actions/wizard';
 import { v1 as random } from 'uuid';
-const { MisesModule } = NativeModules;
 
 const Engine = ImportedEngine as any;
 
@@ -57,6 +56,8 @@ interface RPCMethodsMiddleParameters {
   // For WalletConnect
   isWalletConnect: boolean;
   injectHomePageScripts: (bookmarks?: []) => void;
+
+  ensureUnlock: () => void;
 }
 
 export const checkActiveAccountAndChainId = ({
@@ -135,6 +136,9 @@ export const getRpcMethodMiddleware = ({
   // For WalletConnect
   isWalletConnect,
   injectHomePageScripts,
+
+  ensureUnlock,
+  
 }: RPCMethodsMiddleParameters) =>
   // all user facing RPC calls not implemented by the provider
   createAsyncMiddleware(async (req: any, res: any, next: any) => {
@@ -239,8 +243,7 @@ export const getRpcMethodMiddleware = ({
           PreferencesController.state;
 
         if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
-          MisesModule.popup();
-          return;
+          await ensureUnlock();
         }
         let { selectedAddress } = PreferencesController.state;
 
@@ -656,8 +659,10 @@ export const getRpcMethodMiddleware = ({
           PreferencesController.state;
 
         if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
-          MisesModule.popup();
+
+          await ensureUnlock();
         }
+
         let { selectedAddress } = PreferencesController.state;
         selectedAddress = selectedAddress?.toLowerCase();
         const nonce = new Date().getTime();
@@ -711,7 +716,9 @@ export const getRpcMethodMiddleware = ({
               'User denied account authorization.',
             );
           }
+
         }
+
       },
       mises_getMisesAccount: async () => {
         try {
@@ -753,7 +760,9 @@ export const getRpcMethodMiddleware = ({
           const data = await Engine.context.MisesController.getActive();
           res.result = data;
         } catch (error) {
-          throw ethErrors.provider.userRejectedRequest('User follow Failure');
+          throw ethErrors.provider.userRejectedRequest(
+            'mises GetActive Failure',
+          );
         }
       },
       mises_openRestore: async () => {
