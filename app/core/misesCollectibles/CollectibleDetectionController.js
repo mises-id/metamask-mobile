@@ -2,7 +2,11 @@ import {
   CollectibleDetectionController,
   NetworksChainId,
 } from '@metamask/controllers';
-import { getBaseApi, request } from '../misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  getBaseApi,
+  request,
+} from '../misesController/misesNetwork.util';
 
 export default class MisesCollectibleDetectionController extends CollectibleDetectionController {
   offset = '';
@@ -15,7 +19,7 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
       ![NetworksChainId.mainnet].includes(this.config.chainId);
     options.onNetworkStateChange(async ({ provider }) => {
       if (
-        ![NetworksChainId.mainnet].includes(provider.chainId) &&
+        ![NetworksChainId.mises].includes(provider.chainId) &&
         options.isUnlocked() &&
         !this.requestLock
       ) {
@@ -41,12 +45,11 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
   }
 
   startPolling() {
-    this.detectCollectibles();
+    return this.detectCollectibles();
   }
 
   async getOwnerCollectibles(address) {
-    // const { token } = this.getMisesAccount(address);
-    const misesAccount = this.getMisesAccount()[address];
+    const misesAccount = findMisesAccount(this.getMisesAccount(), address);
     if (!misesAccount?.token) {
       return Promise.resolve([]);
     }

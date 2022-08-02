@@ -1,5 +1,9 @@
 import { CollectiblesController, NetworksChainId } from '@metamask/controllers';
-import { getBaseApi, request } from '../misesController/misesNetwork.util';
+import {
+  findMisesAccount,
+  getBaseApi,
+  request,
+} from '../misesController/misesNetwork.util';
 
 export default class MisesCollectiblesController extends CollectiblesController {
   constructor(options, config, state) {
@@ -140,7 +144,10 @@ export default class MisesCollectiblesController extends CollectiblesController 
    * @returns Promise resolving to the current collectible name and image.
    */
   getCollectibleContractInformationFromApi(contractAddress) {
-    const misesAccount = this.getMisesAccount()[contractAddress];
+    const misesAccount = findMisesAccount(
+      this.getMisesAccount(),
+      contractAddress,
+    );
     if (!misesAccount?.token) {
       return Promise.resolve(new Error('No token found'));
     }
