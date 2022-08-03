@@ -149,7 +149,7 @@ const MisesPostTx = (props) => {
             containerStyle={[styles.button, styles.confirm]}
             testID={'connect-approve-button'}
           >
-            Comfirm
+            {strings('enter_password.confirm_button')}
           </StyledButton>
         </View>
       </View>

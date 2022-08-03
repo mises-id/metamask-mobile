@@ -346,6 +346,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         },
       };
     } catch (error) {
+      console.warn('misesUserInfo', error);
       return Promise.reject(error);
     }
   }
@@ -470,7 +471,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           name: updateUserInfo.nickname,
           avatarUrl: updateUserInfo.avatar,
         };
-        console.log(account.userInfo, 'setUserInfo');
+        // console.warn(account.userInfo, 'setUserInfo');
         // update accountList
         this.update({
           [address]: account,

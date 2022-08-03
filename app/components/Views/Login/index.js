@@ -267,7 +267,6 @@ class Login extends PureComponent {
       });
       if (shouldHandleInitialAuth) {
         bridge?.onWindowShow(async () => {
-          console.log(1111111)
           try {
             if (enabled && !previouslyDisabled) {
               await this.tryBiometric();
