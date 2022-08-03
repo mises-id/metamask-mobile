@@ -62,6 +62,16 @@ class NativeBridge extends EventEmitter {
   constructor(options) {
     super();
     this.backgroundBridges = [];
+    this.pendingUrl = null;
+    this.inited = false;
+  }
+  init() {
+    console.log('NativeBridge.init');
+    this.inited = true;
+    if (this.pendingUrl) {
+      this.resetBridge(url);
+      this.pendingUrl = null;
+    }
   }
   postMessage(data) {
     try {
@@ -92,18 +102,24 @@ class NativeBridge extends EventEmitter {
     if (url === 'about://newtab/') {
       return;
     }
-    const bridge = this;
-    async function _resetBridge() {
-      console.log('NativeBridge _resetBridge');
-
-      bridge.backgroundBridges.length &&
-      bridge.backgroundBridges.forEach((bridge) => bridge.onDisconnect());
-      bridge.backgroundBridges = [];
-      const origin = new URL(url).origin;
-      bridge.initializeBackgroundBridge(origin, true);
-      
+    if (!this.inited) {
+      this.pendingUrl = url;
+      return;
     }
-    _resetBridge();
+    
+    this.resetBridge(url);
+  }
+
+  
+  resetBridge(url) {
+    console.log('NativeBridge.resetBridge',url );
+
+    this.backgroundBridges.length &&
+    this.backgroundBridges.forEach((bridge) => bridge.onDisconnect());
+    this.backgroundBridges = [];
+    const origin = new URL(url).origin;
+    this.initializeBackgroundBridge(origin, true);
+    
   }
 
   windowStatusChanged(params) {
