@@ -700,11 +700,14 @@ export const getRpcMethodMiddleware = ({
                 misesId,
               };
             } else {
-              res.result = {
-                accounts: [],
-                auth: '',
-                misesId: '',
-              };
+              // res.result = {
+              //   accounts: [],
+              //   auth: '',
+              //   misesId: '',
+              // };
+              throw ethErrors.provider.userRejectedRequest(
+                'User denied account authorization.',
+              );
             }
           } catch (e) {
             throw ethErrors.provider.userRejectedRequest(
@@ -785,7 +788,9 @@ export const getRpcMethodMiddleware = ({
           await Engine.context.MisesController.addressToMisesId(req.params[0]);
           res.result = true;
         } catch (error) {
-          throw ethErrors.provider.userRejectedRequest('Disconnect Failure');
+          throw ethErrors.provider.userRejectedRequest(
+            'getAddressToMisesId Failure',
+          );
         }
       },
       mises_getCollectibles: async () => {

@@ -16,7 +16,7 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
   constructor(options, config, state) {
     super(options, config, state);
     this.isMainnet = () =>
-      ![NetworksChainId.mainnet].includes(this.config.chainId);
+      ![NetworksChainId.mises].includes(this.config.chainId);
     options.onNetworkStateChange(async ({ provider }) => {
       if (
         ![NetworksChainId.mises].includes(provider.chainId) &&
@@ -24,13 +24,11 @@ export default class MisesCollectibleDetectionController extends CollectibleDete
         !this.requestLock
       ) {
         this.requestLock = true;
-        try {
-          await this.startPolling();
-        } finally {
-          setTimeout(() => {
-            this.requestLock = false;
-          }, 100);
-        }
+        this.startPolling();
+        console.log('startPolling');
+        setTimeout(() => {
+          this.requestLock = false;
+        }, 100);
       }
     });
     this.getNetwork = options.getNetwork;

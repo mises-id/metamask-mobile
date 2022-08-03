@@ -26,14 +26,19 @@ const toggleUrlModal = () => null;
 const injectHomePageScripts = async (bookmarks) => {};
 
 const ensureUnlock = async () => {
-  const { KeyringController } = Engine.context;
+  const { KeyringController, PreferencesController } = Engine.context;
   if (!KeyringController.isUnlocked()) {
     MisesModule.popup();
     const unlocked = new Promise((resolve, reject) => {
-      KeyringController.onUnlock(() => {
-        console.log('unlocked');
-        resolve('unlocked');
+      PreferencesController.subscribe((res) => {
+        if (res.selectedAddress) {
+          console.log('unlocked');
+          resolve('unlocked');
+        }
       });
+      // KeyringController.onUnlock(() => {
+
+      // });
       bridge.onWindowHide(() => {
         console.log('dismissed');
         reject('dismissed');
