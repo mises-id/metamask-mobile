@@ -94,15 +94,22 @@ class NativeBridge extends EventEmitter  {
     if (url === 'about://newtab/') {
       return;
     }
-    this.backgroundBridges.length &&
-      this.backgroundBridges.forEach((bridge) => bridge.onDisconnect());
-    this.backgroundBridges = [];
-    const origin = new URL(url).origin;
-    this.initializeBackgroundBridge(origin, true);
+    const bridge = this;
+    async function _resetBridge() {
+      console.log('NativeBridge _resetBridge');
+
+      bridge.backgroundBridges.length &&
+      bridge.backgroundBridges.forEach((bridge) => bridge.onDisconnect());
+      bridge.backgroundBridges = [];
+      const origin = new URL(url).origin;
+      bridge.initializeBackgroundBridge(origin, true);
+      
+    }
+    _resetBridge();
   }
 
   windowStatusChanged(params) {
-    console.log("metamask window status ", params)
+    console.log("metamask window status", params)
     if (params && params === 'show') {
       this.emit('window_show');
     } else if (params && params === 'hide')  {
