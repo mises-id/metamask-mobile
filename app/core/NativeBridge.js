@@ -74,7 +74,7 @@ class NativeBridge extends EventEmitter {
     console.log('NativeBridge.init');
     this.inited = true;
     if (this.pendingUrl) {
-      this.resetBridge(url);
+      this.resetBridge(this.pendingUrl);
       this.pendingUrl = null;
     }
   }
