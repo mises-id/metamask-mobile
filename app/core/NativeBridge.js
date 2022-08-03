@@ -1,7 +1,5 @@
 import BackgroundBridge from './BackgroundBridge';
-import getRpcMethodMiddleware, {
-  checkActiveAccountAndChainId,
-} from './RPCMethods/RPCMethodMiddleware';
+import getRpcMethodMiddleware from './RPCMethods/RPCMethodMiddleware';
 import { NativeModules } from 'react-native';
 import { EventEmitter } from 'events';
 import Engine from './Engine';
@@ -60,7 +58,7 @@ class NativePort extends EventEmitter {
   };
 }
 
-class NativeBridge extends EventEmitter  {
+class NativeBridge extends EventEmitter {
   constructor(options) {
     super();
     this.backgroundBridges = [];
@@ -125,6 +123,22 @@ class NativeBridge extends EventEmitter  {
     return this.once('window_show', listener);
   }
 
+  windowStatusChanged(params) {
+    console.log('metamask window status ', params);
+    if (params && params === 'show') {
+      this.emit('window_show');
+    } else if (params && params === 'hide') {
+      this.emit('window_hide');
+    }
+  }
+  onWindowHide(listener) {
+    return this.once('window_hide', listener);
+  }
+
+  onWindowShow(listener) {
+    return this.once('window_show', listener);
+  }
+
   initializeBackgroundBridge(urlBridge, isMainFrame) {
     const newBridge = new BackgroundBridge({
       webview: null,
@@ -179,3 +193,4 @@ const instance = {
 };
 
 export default instance;
+export { bridge };

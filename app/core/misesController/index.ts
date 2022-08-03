@@ -330,12 +330,20 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     if (account?.auth) return account;
     try {
       const { auth } = await this.generateAuth(`${nowTimeStamp}`);
+
+      const userInfo = await activeUser?.info();
       const misesBalance = await this.getUserBalance(address);
       return {
         address,
         misesId,
         misesBalance,
         auth,
+        userInfo: {
+          name:
+            userInfo?.name ||
+            shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS),
+          avatarUrl: userInfo?.avatarUrl,
+        },
       };
     } catch (error) {
       return Promise.reject(error);
@@ -376,7 +384,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       });
       return account;
     } catch (error) {
-      console.warn(error, '===================');
+      console.warn(error, 'reloadAccessTokenAndUserInfo');
       return account;
     }
   }
@@ -406,7 +414,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       };
       return userinfo;
     } catch (error) {
-      console.warn('ensureMisesAccessToken:Error==================', error);
+      console.warn('ensureMisesAccessToken', error);
     }
   }
   /**
@@ -462,6 +470,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           name: updateUserInfo.nickname,
           avatarUrl: updateUserInfo.avatar,
         };
+        console.log(account.userInfo, 'setUserInfo');
         // update accountList
         this.update({
           [address]: account,

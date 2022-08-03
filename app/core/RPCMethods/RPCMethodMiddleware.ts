@@ -1,4 +1,4 @@
-import { Alert, NativeModules } from 'react-native';
+import { Alert } from 'react-native';
 import { getVersion } from 'react-native-device-info';
 import { createAsyncMiddleware } from 'json-rpc-engine';
 import { ethErrors } from 'eth-json-rpc-errors';
@@ -56,7 +56,6 @@ interface RPCMethodsMiddleParameters {
   // For WalletConnect
   isWalletConnect: boolean;
   injectHomePageScripts: (bookmarks?: []) => void;
-
   ensureUnlock: () => void;
 }
 
@@ -136,9 +135,7 @@ export const getRpcMethodMiddleware = ({
   // For WalletConnect
   isWalletConnect,
   injectHomePageScripts,
-
   ensureUnlock,
-  
 }: RPCMethodsMiddleParameters) =>
   // all user facing RPC calls not implemented by the provider
   createAsyncMiddleware(async (req: any, res: any, next: any) => {
@@ -659,7 +656,6 @@ export const getRpcMethodMiddleware = ({
           PreferencesController.state;
 
         if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
-
           await ensureUnlock();
         }
 
@@ -758,7 +754,7 @@ export const getRpcMethodMiddleware = ({
       mises_getActive: async () => {
         try {
           const data = await Engine.context.MisesController.getActive();
-          res.result = data;
+          res.result = !!data;
         } catch (error) {
           throw ethErrors.provider.userRejectedRequest(
             'mises GetActive Failure',

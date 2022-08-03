@@ -49,6 +49,7 @@ import {
   LOGIN_PASSWORD_ERROR,
   RESET_WALLET_ID,
 } from '../../../constants/test-ids';
+import { bridge } from '../../../core/NativeBridge';
 
 const deviceHeight = Device.getDeviceHeight();
 const breakPoint = deviceHeight < 700;
@@ -265,16 +266,19 @@ class Login extends PureComponent {
         biometryPreviouslyDisabled: !!previouslyDisabled,
       });
       if (shouldHandleInitialAuth) {
-        try {
-          if (enabled && !previouslyDisabled) {
-            await this.tryBiometric();
+        bridge?.onWindowShow(async () => {
+          console.log(1111111)
+          try {
+            if (enabled && !previouslyDisabled) {
+              await this.tryBiometric();
+            }
+          } catch (e) {
+            console.warn(e);
           }
-        } catch (e) {
-          console.warn(e);
-        }
-        if (!enabled) {
-          await this.checkIfRememberMeEnabled();
-        }
+          if (!enabled) {
+            await this.checkIfRememberMeEnabled();
+          }
+        });
       }
     } else {
       shouldHandleInitialAuth && (await this.checkIfRememberMeEnabled());
