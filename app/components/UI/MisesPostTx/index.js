@@ -60,6 +60,7 @@ const createStyles = (colors) =>
       display: 'flex',
       borderTopWidth: 1,
       borderTopColor: colors.border.muted,
+      color: colors.text.default,
       padding: 10,
       fontSize: 12,
     },
@@ -146,6 +147,7 @@ const MisesPostTx = (props) => {
           <StyledButton
             type={'confirm'}
             onPress={onConfirm}
+            disabled={props.loading}
             containerStyle={[styles.button, styles.confirm]}
             testID={'connect-approve-button'}
           >
@@ -160,5 +162,6 @@ MisesPostTx.propTypes = {
   postTx: PropTypes.object,
   onCancel: PropTypes.func,
   onConfirm: PropTypes.func,
+  loading: PropTypes.bool,
 };
 export default MisesPostTx;

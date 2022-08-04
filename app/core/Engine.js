@@ -49,6 +49,7 @@ import {
   MisesCollectibleDetectionController,
   MisesCollectiblesController,
 } from './misesCollectibles';
+import { isMisesChain } from './misesController/misesNetwork.util';
 
 const NON_EMPTY = 'NON_EMPTY';
 
@@ -130,6 +131,7 @@ class Engine {
           },
         },
       });
+      console.log(networkController.state.provider);
       const assetsContractController = new AssetsContractController({
         onPreferencesStateChange: (listener) =>
           preferencesController.subscribe(listener),
@@ -387,6 +389,12 @@ class Engine {
           initialState[controller.name] &&
           controller.subscribe !== undefined
         ) {
+          if (
+            controller.name === 'NetworkController' &&
+            isMisesChain(initialState[controller.name].provider.type)
+          ) {
+            initialState[controller.name].provider.ticker = 'MIS';
+          }
           controller.update(initialState[controller.name]);
         }
       }
@@ -404,7 +412,6 @@ class Engine {
         NetworkController: network,
         TransactionController: transaction,
       } = this.context;
-
       collectibles.setApiKey(process.env.MM_OPENSEA_KEY);
       network.refreshNetwork();
       transaction.configure({ sign: keyring.signTransaction.bind(keyring) });
@@ -695,7 +702,6 @@ class Engine {
       TransactionController,
       TokensController,
     } = this.context;
-
     // Select same network ?
     await NetworkController.setProviderType(network.provider.type);
 
