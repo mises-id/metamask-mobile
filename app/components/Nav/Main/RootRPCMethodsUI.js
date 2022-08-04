@@ -389,10 +389,15 @@ const RootRPCMethodsUI = (props) => {
     ],
   );
 
-  const onSignAction = () => setShowPendingApproval(false);
+  const onSignAction = () => {
+    setShowPendingApproval(false);
+    MisesModule.dismiss();
+  };
 
-  const toggleExpandedMessage = () =>
+  const toggleExpandedMessage = () => {
     setShowExpandedMessage(!showExpandedMessage);
+    MisesModule.dismiss();
+  };
 
   const renderSigningModal = () => (
     <Modal
@@ -699,22 +704,34 @@ const RootRPCMethodsUI = (props) => {
 
   const onPostTxReject = () => {
     setShowPendingApproval(false);
-    rejectPendingApproval(postTx.id, ethErrors.provider.userRejectedRequest());
+    rejectPendingApproval(
+      postTx.id,
+      ethErrors.provider.userRejectedRequest('User rejected the request.'),
+    );
   };
-
+  const [requestLock, setRequestLock] = useState(false);
   const onPostTxConfirm = () => {
     const { MisesController } = Engine.context;
     const { data } = postTx;
+    if (requestLock) {
+      return;
+    }
+    setRequestLock(true);
     MisesController.postTx({
       msgs: data.tx,
       gasLimit: data.gasLimit,
       gasFee: data.gasFee,
-    }).then((res) => {
-      setShowPendingApproval(false);
-      acceptPendingApproval(postTx.id, {
-        txHash: res.transactionHash,
+    })
+      .then((res) => {
+        setShowPendingApproval(false);
+        acceptPendingApproval(postTx.id, {
+          txHash: res.transactionHash,
+        });
+        setRequestLock(false);
+      })
+      .catch(() => {
+        setRequestLock(false);
       });
-    });
   };
   const renderPostPxModal = () => (
     <Modal
@@ -735,6 +752,7 @@ const RootRPCMethodsUI = (props) => {
       <MisesPostTx
         onCancel={onPostTxReject}
         onConfirm={onPostTxConfirm}
+        loading={requestLock}
         postTx={postTx?.data}
       />
     </Modal>
@@ -798,7 +816,6 @@ const RootRPCMethodsUI = (props) => {
       MisesModule.popup();
     } else {
       setShowPendingApproval(false);
-
       MisesModule.dismiss();
     }
   };

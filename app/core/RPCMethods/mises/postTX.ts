@@ -22,7 +22,7 @@ const postTX = async ({ req, res, requestUserApproval }: any) => {
     }
   } catch (error) {
     throw ethErrors.rpc.invalidParams({
-      message: 'Error',
+      message: 'User rejected the request.',
     });
   }
 };
