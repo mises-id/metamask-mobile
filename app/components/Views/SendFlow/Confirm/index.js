@@ -379,6 +379,7 @@ class Confirm extends PureComponent {
      * Triggers global alert
      */
     showAlert: PropTypes.func,
+    selectedAddress: PropTypes.string,
   };
 
   state = {
@@ -1026,6 +1027,7 @@ class Confirm extends PureComponent {
           verifiedOnBlockchain: false,
         };
         await KeyringController.resetQRKeyringState();
+        MisesController.refreshTransactions(this.props.selectedAddress);
       } else {
         let error;
         if (gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
@@ -1763,6 +1765,8 @@ const mapStateToProps = (state) => ({
     state.engine.backgroundState.GasFeeController.gasEstimateType,
   isPaymentRequest: state.transaction.paymentRequest,
   networkType: state.engine.backgroundState.NetworkController.provider.type,
+  selectedAddress:
+    state.engine.backgroundState.PreferencesController.selectedAddress,
 });
 
 const mapDispatchToProps = (dispatch) => ({

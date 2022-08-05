@@ -365,9 +365,11 @@ class AssetOverview extends PureComponent {
               <Text style={styles.amount} testID={'token-amount'}>
                 {mainBalance}
               </Text>
-              {secondaryBalance && (
-                <Text style={styles.amountFiat}>{secondaryBalance}</Text>
-              )}
+              {isMises
+                ? null
+                : secondaryBalance && (
+                    <Text style={styles.amountFiat}>{secondaryBalance}</Text>
+                  )}
             </>
           )}
         </View>

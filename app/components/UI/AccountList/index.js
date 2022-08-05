@@ -256,7 +256,18 @@ class AccountList extends PureComponent {
       AnalyticsV2.ANALYTICS_EVENTS.CONNECT_HARDWARE_WALLET,
     );
   };
-
+  findNotImportIdentity = () => {
+    const { identities, keyrings } = this.props;
+    const allKeyrings =
+      keyrings && keyrings.length
+        ? keyrings
+        : Engine.context.KeyringController.state.keyrings;
+    const identitieList = Object.keys(identities);
+    const keys = identitieList.filter(
+      (val) => !this.isImported(allKeyrings, val),
+    );
+    return keys;
+  };
   addAccount = async () => {
     if (this.state.loading) return;
     this.mounted && this.setState({ loading: true });
@@ -265,10 +276,12 @@ class AccountList extends PureComponent {
       try {
         await KeyringController.addNewAccount();
         const { PreferencesController } = Engine.context;
-        const newIndex = Object.keys(this.props.identities).length - 1;
-        PreferencesController.setSelectedAddress(
-          Object.keys(this.props.identities)[newIndex],
+        const identities = Object.keys(this.props.identities);
+        const allIdentities = this.findNotImportIdentity();
+        const newIndex = identities.findIndex(
+          (val) => val === allIdentities[allIdentities.length - 1],
         );
+        PreferencesController.setSelectedAddress(identities[newIndex]);
         this.mounted && this.setState({ selectedAccountIndex: newIndex });
         setTimeout(() => {
           this.flatList &&
@@ -368,9 +381,13 @@ class AccountList extends PureComponent {
         ? keyrings
         : Engine.context.KeyringController.state.keyrings;
 
-    const accountsOrdered = allKeyrings.reduce(
-      (list, keyring) => list.concat(keyring.accounts),
-      [],
+    const accountsOrdered = Array.from(
+      new Set(
+        allKeyrings.reduce(
+          (list, keyring) => list.concat(keyring.accounts),
+          [],
+        ),
+      ),
     );
     return accountsOrdered
       .filter((address) => !!identities[toChecksumAddress(address)])

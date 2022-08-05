@@ -50,7 +50,8 @@
     "update-changelog": "./scripts/auto-changelog.sh",
     "prestorybook": "rnstl",
     "create-release": "./scripts/set-versions.sh && yarn update-changelog",
-    "jsbundle:ios": "./scripts/build.sh ios bundle"
+    "jsbundle:ios": "./scripts/build.sh ios bundle",
+    "patch-reactnative": "yarn patch-package react-native --include 'ReactAndroid/.*|React/.*' --case-sensitive-path-filtering"
   },
   "husky": {
     "hooks": {

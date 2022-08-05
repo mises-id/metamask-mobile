@@ -460,7 +460,9 @@ class AccountOverview extends PureComponent {
                 </View>
               )}
             </View>
-            <Text style={styles.amountFiat}>{fiatBalance}</Text>
+            {isMises ? null : (
+              <Text style={styles.amountFiat}>{fiatBalance}</Text>
+            )}
             <TouchableOpacity
               style={styles.addressWrapper}
               onPress={this.copyAccountToClipboard}

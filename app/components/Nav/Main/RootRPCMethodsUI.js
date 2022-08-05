@@ -391,12 +391,16 @@ const RootRPCMethodsUI = (props) => {
 
   const onSignAction = () => {
     setShowPendingApproval(false);
-    MisesModule.dismiss();
+    InteractionManager.runAfterInteractions(() => {
+      MisesModule.dismiss();
+    });
   };
 
   const toggleExpandedMessage = () => {
     setShowExpandedMessage(!showExpandedMessage);
-    MisesModule.dismiss();
+    InteractionManager.runAfterInteractions(() => {
+      MisesModule.dismiss();
+    });
   };
 
   const renderSigningModal = () => (
