@@ -390,8 +390,11 @@ const RootRPCMethodsUI = (props) => {
   );
 
   const onSignAction = () => {
+    console.log("onSignAction");
     setShowPendingApproval(false);
-    MisesModule.dismiss();
+    InteractionManager.runAfterInteractions(() => {
+      MisesModule.dismiss();
+    });
   };
 
   const toggleExpandedMessage = () => {
