@@ -432,17 +432,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }): Promise<void> {
     AnalyticsV2.trackEvent('Ready to call setmisesid', params);
     MisesModule?.setMisesUserInfo?.(JSON.stringify(params));
-    // window.localStorage.setItem('setAccount', true);
-    // return new Promise((resolve) => {
-    //   /* global chrome */
-    //   if (chrome.misesPrivate) {
-    //     chrome.misesPrivate.setMisesId(JSON.stringify(params));
-    //     return resolve();
-    //   }
-    //   console.warn('The missesprivate object does not exist');
-    //   return resolve();
-    //   // return reject(JSON.stringify(params));
-    // });
   }
   misesIdFindEthAddress(misesId: string) {
     const accountList = this.getAccountList();

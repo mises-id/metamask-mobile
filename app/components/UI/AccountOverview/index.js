@@ -8,6 +8,7 @@ import {
   View,
   TouchableOpacity,
   InteractionManager,
+  NativeModules,
 } from 'react-native';
 import { swapsUtils } from '@metamask/swaps-controller';
 import { connect } from 'react-redux';
@@ -48,6 +49,8 @@ import { ThemeContext, mockTheme } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
 import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
+
+const { MisesModule } = NativeModules;
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -321,6 +324,7 @@ class AccountOverview extends PureComponent {
   };
   staking = () => {
     console.warn('navigate to staking');
+    MisesModule.openUrl('https://portal.mises.site');
   };
   onBuy = () => {
     this.props.navigation.navigate(Routes.FIAT_ON_RAMP_AGGREGATOR.ID);

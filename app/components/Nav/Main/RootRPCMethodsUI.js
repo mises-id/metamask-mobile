@@ -390,6 +390,7 @@ const RootRPCMethodsUI = (props) => {
   );
 
   const onSignAction = () => {
+    console.log('onSignAction');
     setShowPendingApproval(false);
     InteractionManager.runAfterInteractions(() => {
       MisesModule.dismiss();
@@ -857,8 +858,9 @@ const RootRPCMethodsUI = (props) => {
     const { ApprovalController } = Engine.context;
     const approval = ApprovalController.state;
     if (approval.pendingApprovalCount > 0) {
-      handlePendingApprovals(ApprovalController.state); // init
+      handlePendingApprovals(approval);
     }
+
     return function cleanup() {
       Engine.context.PersonalMessageManager.hub.removeAllListeners();
       Engine.context.TypedMessageManager.hub.removeAllListeners();

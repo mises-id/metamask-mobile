@@ -45,6 +45,7 @@ const ensureUnlock = async () => {
       });
     });
     await unlocked;
+
     console.log('continue after unlocked');
   }
 };
@@ -65,6 +66,16 @@ class NativeBridge extends EventEmitter {
   constructor(options) {
     super();
     this.backgroundBridges = [];
+    this.pendingUrl = null;
+    this.inited = false;
+  }
+  init() {
+    console.log('NativeBridge.init');
+    this.inited = true;
+    if (this.pendingUrl) {
+      this.resetBridge(this.pendingUrl);
+      this.pendingUrl = null;
+    }
   }
   postMessage(data) {
     try {
@@ -95,11 +106,38 @@ class NativeBridge extends EventEmitter {
     if (url === 'about://newtab/') {
       return;
     }
+    if (!this.inited) {
+      this.pendingUrl = url;
+      return;
+    }
+
+    this.resetBridge(url);
+  }
+
+  resetBridge(url) {
+    console.log('NativeBridge.resetBridge', url);
+
     this.backgroundBridges.length &&
       this.backgroundBridges.forEach((bridge) => bridge.onDisconnect());
     this.backgroundBridges = [];
     const origin = new URL(url).origin;
     this.initializeBackgroundBridge(origin, true);
+  }
+
+  windowStatusChanged(params) {
+    console.log('metamask window status', params);
+    if (params && params === 'show') {
+      this.emit('window_show');
+    } else if (params && params === 'hide') {
+      this.emit('window_hide');
+    }
+  }
+  onWindowHide(listener) {
+    return this.once('window_hide', listener);
+  }
+
+  onWindowShow(listener) {
+    return this.once('window_show', listener);
   }
 
   windowStatusChanged(params) {

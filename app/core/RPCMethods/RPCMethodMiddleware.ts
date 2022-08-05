@@ -664,8 +664,14 @@ export const getRpcMethodMiddleware = ({
         const {
           privacy: { privacyMode },
         } = store.getState();
-        const { PreferencesController, MisesController } = Engine.context;
-        await requestPromiseLock();
+        const { PreferencesController, MisesController, KeyringController } =
+          Engine.context;
+        const { selectedAddress: hasSelectedAddress } =
+          PreferencesController.state;
+
+        if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
+          await ensureUnlock();
+        }
         let { selectedAddress } = PreferencesController.state;
         selectedAddress = selectedAddress?.toLowerCase();
         const nonce = new Date().getTime();
