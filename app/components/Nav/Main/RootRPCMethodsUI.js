@@ -390,7 +390,7 @@ const RootRPCMethodsUI = (props) => {
   );
 
   const onSignAction = () => {
-    console.log("onSignAction");
+    console.log('onSignAction');
     setShowPendingApproval(false);
     InteractionManager.runAfterInteractions(() => {
       MisesModule.dismiss();
@@ -399,7 +399,9 @@ const RootRPCMethodsUI = (props) => {
 
   const toggleExpandedMessage = () => {
     setShowExpandedMessage(!showExpandedMessage);
-    MisesModule.dismiss();
+    InteractionManager.runAfterInteractions(() => {
+      MisesModule.dismiss();
+    });
   };
 
   const renderSigningModal = () => (
@@ -855,10 +857,9 @@ const RootRPCMethodsUI = (props) => {
 
     const { ApprovalController } = Engine.context;
     const approval = ApprovalController.state;
-    if (approval.pendingApprovalCount > 0) { 
+    if (approval.pendingApprovalCount > 0) {
       handlePendingApprovals(approval);
     }
-    
 
     return function cleanup() {
       Engine.context.PersonalMessageManager.hub.removeAllListeners();

@@ -8,6 +8,7 @@ import {
   View,
   TouchableOpacity,
   InteractionManager,
+  NativeModules,
 } from 'react-native';
 import { swapsUtils } from '@metamask/swaps-controller';
 import { connect } from 'react-redux';
@@ -49,7 +50,6 @@ import Routes from '../../../constants/navigation/Routes';
 import MisesAddress from '../MisesAddress';
 import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 
-import { NativeModules } from 'react-native';
 const { MisesModule } = NativeModules;
 
 const createStyles = (colors) =>
@@ -464,7 +464,9 @@ class AccountOverview extends PureComponent {
                 </View>
               )}
             </View>
-            <Text style={styles.amountFiat}>{fiatBalance}</Text>
+            {isMises ? null : (
+              <Text style={styles.amountFiat}>{fiatBalance}</Text>
+            )}
             <TouchableOpacity
               style={styles.addressWrapper}
               onPress={this.copyAccountToClipboard}

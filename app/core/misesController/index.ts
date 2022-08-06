@@ -60,6 +60,7 @@ interface misesGasfee {
 }
 interface indexed extends IndexedTx {
   raw: any[];
+  blockNumber: number;
 }
 class MisesController extends BaseController<KeyringConfig, misesState> {
   getKeyringAccounts: () => Promise<string[]>;
@@ -219,6 +220,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const balanceLong = await user.getBalanceUMIS();
       if (user && balanceLong) {
         const balanceObj = this.#coinDefine.toCoinMIS(balanceLong);
+        console.log(balanceObj);
         return {
           ...balanceObj,
           denom: balanceObj.denom.toUpperCase(),
@@ -226,6 +228,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       }
       return Promise.resolve(defaultCoin);
     } catch (error) {
+      console.warn(error, 'getUserBalanceError');
       // console.log(error);
       return Promise.resolve(defaultCoin);
     }
@@ -829,6 +832,10 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     }, []);
   }
 
+  async refreshTransactions(selectedAddress: string) {
+    this.recentTransactions('', selectedAddress);
+  }
+
   async recentTransactions(type: string, selectedAddress: string) {
     // const selectedAddress = this.getSelectedAddress();
     const lowerAddress = selectedAddress.toLowerCase();
@@ -856,7 +863,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           return result.concat(this.parseTxEvents(activeUser?.address(), item));
         }, [])
         .filter((val) => val);
-      list.sort((a, b) => a.height - b.height);
+      list.sort((a, b) => b.blockNumber - a.blockNumber);
       for (const key in accountList) {
         if (accountList[key].misesId === activeUser?.address()) {
           accountList[key].transactions = list || [];

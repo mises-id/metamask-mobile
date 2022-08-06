@@ -180,7 +180,16 @@ export const getRpcMethodMiddleware = ({
       });
       return responseData;
     };
+    const requestPromiseLock = async () => {
+      const { PreferencesController, KeyringController } = Engine.context;
+      const { selectedAddress: hasSelectedAddress } =
+        PreferencesController.state;
 
+      if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
+        await ensureUnlock();
+      }
+      return Promise.resolve();
+    };
     const rpcMethods: any = {
       eth_getTransactionByHash: async () => {
         res.result = await polyfillGasPrice('getTransactionByHash', req.params);
@@ -235,13 +244,8 @@ export const getRpcMethodMiddleware = ({
           privacy: { privacyMode },
         } = store.getState();
 
-        const { PreferencesController, KeyringController } = Engine.context;
-        const { selectedAddress: hasSelectedAddress } =
-          PreferencesController.state;
-
-        if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
-          await ensureUnlock();
-        }
+        const { PreferencesController } = Engine.context;
+        await requestPromiseLock();
         let { selectedAddress } = PreferencesController.state;
 
         selectedAddress = selectedAddress?.toLowerCase();
@@ -306,6 +310,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         checkActiveAccountAndChainId({
           address: req.params[0].from,
           activeAccounts: getAccounts(),
@@ -350,6 +355,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         checkActiveAccountAndChainId({
           address: params.from,
           activeAccounts: getAccounts(),
@@ -375,6 +381,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         checkActiveAccountAndChainId({
           address: req.params[1],
           activeAccounts: getAccounts(),
@@ -408,6 +415,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         checkActiveAccountAndChainId({
           address: req.params[0],
           chainId,
@@ -442,6 +450,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         checkActiveAccountAndChainId({
           address: req.params[0],
           chainId,
@@ -468,8 +477,9 @@ export const getRpcMethodMiddleware = ({
         res.result = `MetaMask/${appVersion}/Mobile`;
       },
 
-      wallet_scanQRCode: () =>
-        new Promise<void>((resolve, reject) => {
+      wallet_scanQRCode: async () => {
+        await requestPromiseLock();
+        return new Promise<void>((resolve, reject) => {
           checkTabActive();
           navigation.navigate('QRScanner', {
             onScanSuccess: (data: any) => {
@@ -498,7 +508,8 @@ export const getRpcMethodMiddleware = ({
               throw ethErrors.rpc.internal(e.toString());
             },
           });
-        }),
+        });
+      },
 
       wallet_watchAsset: async () => {
         const {
@@ -511,6 +522,7 @@ export const getRpcMethodMiddleware = ({
 
         checkTabActive();
         try {
+          await requestPromiseLock();
           const watchAssetResult = await TokensController.watchAsset(
             { address, symbol, decimals, image },
             type,
@@ -626,8 +638,9 @@ export const getRpcMethodMiddleware = ({
        * the page, and we implement it as a no-op.
        */
       metamask_logWeb3ShimUsage: () => (res.result = null),
-      wallet_addEthereumChain: () => {
+      wallet_addEthereumChain: async () => {
         checkTabActive();
+        await requestPromiseLock();
         return RPCMethods.wallet_addEthereumChain({
           req,
           res,
@@ -635,8 +648,9 @@ export const getRpcMethodMiddleware = ({
         });
       },
 
-      wallet_switchEthereumChain: () => {
+      wallet_switchEthereumChain: async () => {
         checkTabActive();
+        await requestPromiseLock();
         return RPCMethods.wallet_switchEthereumChain({
           req,
           res,
@@ -658,7 +672,6 @@ export const getRpcMethodMiddleware = ({
         if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
           await ensureUnlock();
         }
-
         let { selectedAddress } = PreferencesController.state;
         selectedAddress = selectedAddress?.toLowerCase();
         const nonce = new Date().getTime();
@@ -715,9 +728,7 @@ export const getRpcMethodMiddleware = ({
               'User denied account authorization.',
             );
           }
-
         }
-
       },
       mises_getMisesAccount: async () => {
         try {
@@ -731,6 +742,7 @@ export const getRpcMethodMiddleware = ({
       },
       mises_setUserInfo: async () => {
         try {
+          await requestPromiseLock();
           await Engine.context.MisesController.setUserInfo(req.params[0]);
           res.result = true;
         } catch (error) {
@@ -740,6 +752,7 @@ export const getRpcMethodMiddleware = ({
       },
       mises_userFollow: async () => {
         try {
+          await requestPromiseLock();
           await Engine.context.MisesController.setFollow(req.params[0]);
           res.result = true;
         } catch (error) {
@@ -748,6 +761,7 @@ export const getRpcMethodMiddleware = ({
       },
       mises_userUnFollow: async () => {
         try {
+          await requestPromiseLock();
           await Engine.context.MisesController.setUnFollow(req.params[0]);
           res.result = true;
         } catch (error) {
@@ -768,7 +782,8 @@ export const getRpcMethodMiddleware = ({
         res.result = 'mises_openRestore';
       },
       mises_openNFTPage: async () => {
-        res.result = 'mises_openNFTPage';
+        navigation.navigate('WalletView');
+        res.result = true;
       },
       mises_connect: async () => {
         try {
@@ -798,14 +813,16 @@ export const getRpcMethodMiddleware = ({
       },
       mises_getCollectibles: async () => {
         try {
+          await requestPromiseLock();
           await Engine.context.MisesController.getCollectibles();
           res.result = true;
         } catch (error) {
           throw ethErrors.provider.userRejectedRequest('Disconnect Failure');
         }
       },
-      mises_stakingPostTx: () => {
+      mises_stakingPostTx: async () => {
         checkTabActive();
+        await requestPromiseLock();
         return RPCMethods.postTX({
           req,
           res,

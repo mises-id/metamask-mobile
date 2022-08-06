@@ -5,6 +5,7 @@ import {
   Text,
   View,
   TouchableOpacity,
+  NativeModules,
 } from 'react-native';
 import PropTypes from 'prop-types';
 import { swapsUtils } from '@metamask/swaps-controller';
@@ -45,7 +46,7 @@ import {
   isMisesChain,
   misesKey,
 } from '../../../core/misesController/misesNetwork.util';
-
+const { MisesModule } = NativeModules;
 const createStyles = (colors) =>
   StyleSheet.create({
     wrapper: {
@@ -219,6 +220,7 @@ class AssetOverview extends PureComponent {
   };
   staking = () => {
     console.warn('navigate to staking');
+    MisesModule.openUrl('https://portal.mises.site');
   };
   goToSwaps = () => {
     this.props.navigation.navigate('Swaps', {
@@ -365,9 +367,11 @@ class AssetOverview extends PureComponent {
               <Text style={styles.amount} testID={'token-amount'}>
                 {mainBalance}
               </Text>
-              {secondaryBalance && (
-                <Text style={styles.amountFiat}>{secondaryBalance}</Text>
-              )}
+              {isMises
+                ? null
+                : secondaryBalance && (
+                    <Text style={styles.amountFiat}>{secondaryBalance}</Text>
+                  )}
             </>
           )}
         </View>

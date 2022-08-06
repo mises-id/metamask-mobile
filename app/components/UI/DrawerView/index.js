@@ -1279,7 +1279,9 @@ class DrawerView extends PureComponent {
                   </Text>
                   <Icon name="caret-down" size={24} style={styles.caretDown} />
                 </View>
-                <Text style={styles.accountBalance}>{fiatBalanceStr}</Text>
+                {isMises ? null : (
+                  <Text style={styles.accountBalance}>{fiatBalanceStr}</Text>
+                )}
                 {isMises ? (
                   <MisesAddress
                     address={account.misesId}

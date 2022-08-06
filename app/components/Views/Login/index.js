@@ -597,7 +597,7 @@ class Login extends PureComponent {
               </View>
 
               <View style={styles.footer}>
-                <Text style={styles.cant}>{strings('login.go_back')}</Text>
+                {/* <Text style={styles.cant}>{strings('login.go_back')}</Text> */}
                 <Button
                   style={styles.goBack}
                   onPress={this.toggleWarningModal}
