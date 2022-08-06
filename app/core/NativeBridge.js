@@ -32,21 +32,21 @@ const ensureUnlock = async () => {
     const unlocked = new Promise((resolve, reject) => {
       PreferencesController.subscribe((res) => {
         if (res.selectedAddress) {
-          console.log('unlocked');
+          Logger.log('unlocked');
           resolve('unlocked');
         }
       });
       // KeyringController.onUnlock(() => {
 
       // });
-      bridge.onWindowHide(() => {
-        console.log("dismissed");
+      nativeBridge.onWindowHide(() => {
+        Logger.log("dismissed");
         reject('dismissed');
       })
     });
     await unlocked;
   
-    console.log("continue after unlocked");
+    Logger.log("continue after unlocked");
   }
   
 }
@@ -68,67 +68,95 @@ class NativeBridge extends EventEmitter {
     super();
     this.backgroundBridges = [];
     this.pendingUrl = null;
-    this.inited = false;
+    this.ready = false;
   }
-  init() {
-    console.log('NativeBridge.init');
-    this.inited = true;
+  onEngineReady() {
+    Logger.log('NativeBridge.onEngineReady');
+    this.ready = true;
     if (this.pendingUrl) {
-      this.resetBridge(this.pendingUrl);
+      const origin = new URL(this.pendingUrl).origin;
+      this.initializeBackgroundBridge(origin, true);
       this.pendingUrl = null;
     }
   }
-  postMessage(data) {
+  postMessageFromWeb(data) {
     try {
       data = typeof data === 'string' ? JSON.parse(data) : data;
       if (!data || !data.name) {
         return;
       }
-      console.log('NativeBridge.postMessage', data);
+      Logger.log('NativeBridge.postMessageFromWeb', data, this);
       if (data.name) {
-        this.backgroundBridges.length &&
-          this.backgroundBridges.forEach((bridge) => {
-            if (bridge.isMainFrame) {
-              const { origin } = data && data.origin && new URL(data.origin);
-              bridge.url === origin && bridge.onMessage(data);
-            } else {
-              bridge.url === data.origin && bridge.onMessage(data);
-            }
-          });
+        const { origin } = data && data.origin && new URL(data.origin);
+        const found = this.findBridge(origin);
+        if (found) {
+          found.onMessage(data);
+          if (data && data.data && data.data.method != "metamask_getProviderState") {
+            found.lastActiveTime = new Date().getTime();
+          }
+          
+        }
         return;
       }
     } catch (e) {
-      Logger.error(e, 'NativeBridge.postMessage fail', e);
+      Logger.error(e, 'NativeBridge.postMessageFromWeb fail', e);
     }
   }
 
   loadStarted(url) {
-    console.log('NativeBridge.loadStarted', url);
+    Logger.log('NativeBridge.loadStarted', url);
     if (url === 'about://newtab/') {
       return;
     }
-    if (!this.inited) {
+    if (!this.ready) {
       this.pendingUrl = url;
       return;
     }
-    
-    this.resetBridge(url);
-  }
-
-  
-  resetBridge(url) {
-    console.log('NativeBridge.resetBridge',url );
-
-    this.backgroundBridges.length &&
-    this.backgroundBridges.forEach((bridge) => bridge.onDisconnect());
-    this.backgroundBridges = [];
     const origin = new URL(url).origin;
-    this.initializeBackgroundBridge(origin, true);
+    const found = this.findBridge(origin);
+    if (!found) {
+      this.clearIdleBridge();
+      this.initializeBackgroundBridge(origin, true); 
+    }
+    
+  }
+  findBridge(origin) {
+    if (!origin) {
+      return null;
+    }
+    
+    const bridges = this.backgroundBridges;
+    const found = bridges.find(bridge =>  {
+      
+      return bridge.url === origin
+    }) || null;
+    
+    return found;
+
+  }
+  
+  clearIdleBridge() {
+    const bridges =  [...this.backgroundBridges];
+    const now = new Date().getTime();
+    this.backgroundBridges = bridges.filter(
+      bridge =>  {
+        if (!bridge) {
+          return false;
+        }
+        const lastActiveTime = bridge.lastActiveTime;
+        if (!lastActiveTime || (now - lastActiveTime) > 3600 * 1000) {
+          //disconnet when the bridge is idle for an hour
+          Logger.log('NativeBridge.clearIdleBridge', bridge.url );
+          bridge.onDisconnect();
+          return false;
+        }
+        return true;
+    });
     
   }
 
   windowStatusChanged(params) {
-    console.log("metamask window status", params)
+    Logger.log("metamask window status", params)
     if (params && params === 'show') {
       this.emit('window_show');
     } else if (params && params === 'hide')  {
@@ -145,7 +173,7 @@ class NativeBridge extends EventEmitter {
   }
 
   windowStatusChanged(params) {
-    console.log('metamask window status ', params);
+    Logger.log('metamask window status ', params);
     if (params && params === 'show') {
       this.emit('window_show');
     } else if (params && params === 'hide') {
@@ -161,6 +189,7 @@ class NativeBridge extends EventEmitter {
   }
 
   initializeBackgroundBridge(urlBridge, isMainFrame) {
+    Logger.log('NativeBridge.initializeBackgroundBridge',urlBridge );
     const newBridge = new BackgroundBridge({
       webview: null,
       url: urlBridge,
@@ -194,24 +223,29 @@ class NativeBridge extends EventEmitter {
   }
 }
 
-const bridge = new NativeBridge();
+const nativeBridge = new NativeBridge();
 
 const instance = {
   init() {
     const BatchedBridge = require('react-native/Libraries/BatchedBridge/BatchedBridge');
     BatchedBridge.registerCallableModule('NativeBridge', {
       postMessage(data) {
-        bridge.postMessage(data);
+        nativeBridge.postMessageFromWeb(data);
       },
       loadStarted(data) {
-        bridge.loadStarted(data);
+        nativeBridge.loadStarted(data);
       },
       windowStatusChanged(data) {
-        bridge.windowStatusChanged(data);
+        nativeBridge.windowStatusChanged(data);
       },
     });
   },
+  onEngineReady() {
+    nativeBridge.onEngineReady();
+  },
+  onWindowShow(listener) {
+    nativeBridge.onWindowShow(listener);
+  }
 };
 
 export default instance;
-export { bridge };

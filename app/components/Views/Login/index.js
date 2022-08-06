@@ -49,7 +49,7 @@ import {
   LOGIN_PASSWORD_ERROR,
   RESET_WALLET_ID,
 } from '../../../constants/test-ids';
-import { bridge } from '../../../core/NativeBridge';
+import NativeBridge from '../../../core/NativeBridge';
 
 const deviceHeight = Device.getDeviceHeight();
 const breakPoint = deviceHeight < 700;
@@ -266,7 +266,7 @@ class Login extends PureComponent {
         biometryPreviouslyDisabled: !!previouslyDisabled,
       });
       if (shouldHandleInitialAuth) {
-        bridge?.onWindowShow(async () => {
+        NativeBridge.onWindowShow(async () => {
           try {
             if (enabled && !previouslyDisabled) {
               await this.tryBiometric();

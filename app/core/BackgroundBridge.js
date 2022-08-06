@@ -31,6 +31,38 @@ const pump = require('pump');
 const EventEmitter = require('events').EventEmitter;
 const { NOTIFICATION_NAMES } = AppConstants;
 
+
+const SafeEventEmitter = require('safe-event-emitter')
+
+class EmptyBlockTracker extends SafeEventEmitter {
+
+  //
+  // public
+  //
+
+  constructor (opts = {}) {
+    super()
+  }
+
+  isRunning () {
+    return true
+  }
+
+  getCurrentBlock () {
+    return {}
+  }
+
+  async getLatestBlock () {
+   
+  }
+
+  // dont allow module consumer to remove our internal event listeners
+  removeAllListeners (eventName) {
+    // perform default behavior, preserve fn arity
+  }
+}
+
+
 /**
  * Module that listens for and responds to messages from an InpageBridge using postMessage
  */
@@ -102,6 +134,7 @@ export class BackgroundBridge extends EventEmitter {
     port,
   }) {
     super();
+    this.lastActiveTime = null;
     this.url = url;
     this.hostname = new URL(url).hostname;
     this.isMainFrame = isMainFrame;
@@ -153,10 +186,14 @@ export class BackgroundBridge extends EventEmitter {
     Engine.context.KeyringController.onLock(this.onLock.bind(this));
     Engine.context.KeyringController.onUnlock(this.onUnlock.bind(this));
 
+
     this.on('update', this.onStateUpdate);
+
   }
 
   setProviderAndBlockTracker({ provider, blockTracker }) {
+    console.log("setProviderAndBlockTracker", provider, blockTracker);
+    const tracker = blockTracker || new EmptyBlockTracker();
     // update or intialize proxies
     if (this._providerProxy) {
       this._providerProxy.setTarget(provider);
@@ -164,15 +201,15 @@ export class BackgroundBridge extends EventEmitter {
       this._providerProxy = createSwappableProxy(provider);
     }
     if (this._blockTrackerProxy) {
-      this._blockTrackerProxy.setTarget(blockTracker);
+      this._blockTrackerProxy.setTarget(tracker);
     } else {
-      this._blockTrackerProxy = createEventEmitterProxy(blockTracker, {
+      this._blockTrackerProxy = createEventEmitterProxy(tracker, {
         eventFilter: 'skipInternal',
       });
     }
     // set new provider and blockTracker
     this.provider = provider;
-    this.blockTracker = blockTracker;
+    this.blockTracker = tracker;
   }
 
   onUnlock() {
