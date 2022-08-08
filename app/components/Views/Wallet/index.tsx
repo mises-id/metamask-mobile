@@ -39,7 +39,9 @@ import { shouldShowWhatsNewModal } from '../../../util/onboarding';
 import Logger from '../../../util/Logger';
 import Routes from '../../../constants/navigation/Routes';
 import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
-
+import { bridge } from '../../../core/NativeBridge';
+let timer: any = null;
+let lock = false;
 const createStyles = (colors: any) =>
   StyleSheet.create({
     wrapper: {
@@ -241,22 +243,35 @@ const Wallet = ({ navigation }: any) => {
   }, []);
   const { MisesController } = Engine.context as any;
   const isMises = useMisesNetwork(Engine);
-  let timer: any = null;
+  // const [lock, setLock] = useState(false);
   const getMisesBalance = () => {
     if (isMises) {
       timer = setTimeout(() => {
         MisesController.getAccountMisesBalance();
         getMisesBalance();
+        lock = false;
       }, 10000);
     }
   };
-  useEffect(() => {
-    getMisesBalance();
-    return () => {
+  bridge.onWindowShow(() => {
+    if (lock) return;
+    if (timer) {
       clearTimeout(timer);
-    };
-    // eslint-disable-next-line
-  }, []);
+    }
+    lock = true;
+    getMisesBalance();
+  });
+  bridge.onWindowHide(() => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+  });
+  // useEffect(() => {
+  //   return () => {
+  //     clearTimeout(timer);
+  //   };
+  //   // eslint-disable-next-line
+  // }, []);
   const renderContent = useCallback(() => {
     let balance: any = 0;
     let assets = tokens;

@@ -645,7 +645,10 @@ function decodeConfirmTx(args) {
         conversionRate,
         currentCurrency,
       ),
-      summaryTotalAmount: `${renderFromWei(totalValue)} ${ticker}`,
+      summaryTotalAmount:
+        primaryCurrency === 'MIS'
+          ? renderTotalEth
+          : `${renderFromWei(totalValue)} ${ticker}`,
     };
   } else {
     transactionDetails = {
