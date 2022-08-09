@@ -40,16 +40,15 @@ const ensureUnlock = async () => {
 
       // });
       nativeBridge.onWindowHide(() => {
-        Logger.log("dismissed");
+        Logger.log('dismissed');
         reject('dismissed');
-      })
+      });
     });
     await unlocked;
-  
-    Logger.log("continue after unlocked");
+
+    Logger.log('continue after unlocked');
   }
-  
-}
+};
 
 class NativePort extends EventEmitter {
   constructor(url, isMainFrame) {
@@ -91,10 +90,13 @@ class NativeBridge extends EventEmitter {
         const found = this.findBridge(origin);
         if (found) {
           found.onMessage(data);
-          if (data && data.data && data.data.method != "metamask_getProviderState") {
+          if (
+            data &&
+            data.data &&
+            data.data.method != 'metamask_getProviderState'
+          ) {
             found.lastActiveTime = new Date().getTime();
           }
-          
         }
         return;
       }
@@ -116,64 +118,40 @@ class NativeBridge extends EventEmitter {
     const found = this.findBridge(origin);
     if (!found) {
       this.clearIdleBridge();
-      this.initializeBackgroundBridge(origin, true); 
+      this.initializeBackgroundBridge(origin, true);
     }
-    
   }
   findBridge(origin) {
     if (!origin) {
       return null;
     }
-    
+
     const bridges = this.backgroundBridges;
-    const found = bridges.find(bridge =>  {
-      
-      return bridge.url === origin
-    }) || null;
-    
+    const found = bridges.find((bridge) => bridge.url === origin) || null;
+
     return found;
-
   }
-  
+
   clearIdleBridge() {
-    const bridges =  [...this.backgroundBridges];
+    const bridges = [...this.backgroundBridges];
     const now = new Date().getTime();
-    this.backgroundBridges = bridges.filter(
-      bridge =>  {
-        if (!bridge) {
-          return false;
-        }
-        const lastActiveTime = bridge.lastActiveTime;
-        if (!lastActiveTime || (now - lastActiveTime) > 3600 * 1000) {
-          //disconnet when the bridge is idle for an hour
-          Logger.log('NativeBridge.clearIdleBridge', bridge.url );
-          bridge.onDisconnect();
-          return false;
-        }
-        return true;
+    this.backgroundBridges = bridges.filter((bridge) => {
+      if (!bridge) {
+        return false;
+      }
+      const lastActiveTime = bridge.lastActiveTime;
+      if (!lastActiveTime || now - lastActiveTime > 3600 * 1000) {
+        //disconnet when the bridge is idle for an hour
+        Logger.log('NativeBridge.clearIdleBridge', bridge.url);
+        bridge.onDisconnect();
+        return false;
+      }
+      return true;
     });
-    
   }
 
   windowStatusChanged(params) {
-    Logger.log("metamask window status", params)
-    if (params && params === 'show') {
-      this.emit('window_show');
-    } else if (params && params === 'hide')  {
-      this.emit('window_hide');
-    }
-
-  }
-  onWindowHide(listener) {
-    return this.once('window_hide', listener);
-  }
-
-  onWindowShow(listener) {
-    return this.once('window_show', listener);
-  }
-
-  windowStatusChanged(params) {
-    Logger.log('metamask window status ', params);
+    Logger.log('metamask window status', params);
     if (params && params === 'show') {
       this.emit('window_show');
     } else if (params && params === 'hide') {
@@ -189,7 +167,7 @@ class NativeBridge extends EventEmitter {
   }
 
   initializeBackgroundBridge(urlBridge, isMainFrame) {
-    Logger.log('NativeBridge.initializeBackgroundBridge',urlBridge );
+    Logger.log('NativeBridge.initializeBackgroundBridge', urlBridge);
     const newBridge = new BackgroundBridge({
       webview: null,
       url: urlBridge,
@@ -248,7 +226,7 @@ const instance = {
   },
   onWindowHide(listener) {
     nativeBridge.onWindowHide(listener);
-  }
+  },
 };
 
 export default instance;

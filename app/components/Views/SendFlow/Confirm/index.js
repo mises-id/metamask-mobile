@@ -95,6 +95,7 @@ import {
   findMisesAccount,
   isMisesChain,
 } from '../../../../core/misesController/misesNetwork.util';
+import { refreshTransactions } from '../../../../actions/notification';
 
 const EDIT = 'edit';
 const EDIT_NONCE = 'edit_nonce';
@@ -379,7 +380,7 @@ class Confirm extends PureComponent {
      * Triggers global alert
      */
     showAlert: PropTypes.func,
-    selectedAddress: PropTypes.string,
+    refreshTransactions: PropTypes.func,
   };
 
   state = {
@@ -1027,7 +1028,8 @@ class Confirm extends PureComponent {
           verifiedOnBlockchain: false,
         };
         await KeyringController.resetQRKeyringState();
-        MisesController.refreshTransactions(this.props.selectedAddress);
+        this.props.refreshTransactions(true);
+        // MisesController.refreshTransactions(this.props.selectedAddress);
       } else {
         let error;
         if (gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
@@ -1765,8 +1767,6 @@ const mapStateToProps = (state) => ({
     state.engine.backgroundState.GasFeeController.gasEstimateType,
   isPaymentRequest: state.transaction.paymentRequest,
   networkType: state.engine.backgroundState.NetworkController.provider.type,
-  selectedAddress:
-    state.engine.backgroundState.PreferencesController.selectedAddress,
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -1778,6 +1778,7 @@ const mapDispatchToProps = (dispatch) => ({
   removeFavoriteCollectible: (selectedAddress, chainId, collectible) =>
     dispatch(removeFavoriteCollectible(selectedAddress, chainId, collectible)),
   showAlert: (config) => dispatch(showAlert(config)),
+  refreshTransactions: (status) => dispatch(refreshTransactions(status)),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Confirm);

@@ -49,6 +49,7 @@ import {
   isMisesChain,
   misesExplorer,
 } from '../../../core/misesController/misesNetwork.util';
+import { refreshTransactions } from '../../../actions/notification';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -185,6 +186,8 @@ class Transactions extends PureComponent {
      */
     thirdPartyApiMode: PropTypes.bool,
     isSigningQRObject: PropTypes.bool,
+    refreshTransactionStatus: PropTypes.bool,
+    refreshTransactions: PropTypes.func,
   };
 
   static defaultProps = {
@@ -241,6 +244,13 @@ class Transactions extends PureComponent {
       isQRHardwareAccount: isQRHardwareAccount(this.props.selectedAddress),
     });
   };
+  componentDidUpdate(prevProps) {
+    if (prevProps.refreshTransactionStatus) {
+      this.props.refreshTransactions(false);
+      this.init();
+      console.log('refreshTransactions');
+    }
+  }
 
   componentWillUnmount() {
     this.mounted = false;
@@ -812,12 +822,14 @@ const mapStateToProps = (state) => ({
   gasEstimateType:
     state.engine.backgroundState.GasFeeController.gasEstimateType,
   networkType: state.engine.backgroundState.NetworkController.provider.type,
+  refreshTransactionStatus: state.notification.refreshTransactionStatus,
 });
 
 Transactions.contextType = ThemeContext;
 
 const mapDispatchToProps = (dispatch) => ({
   showAlert: (config) => dispatch(showAlert(config)),
+  refreshTransactions: (status) => dispatch(refreshTransactions(status)),
 });
 
 export default connect(

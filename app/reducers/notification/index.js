@@ -3,6 +3,7 @@ const { TRANSACTION, SIMPLE } = notificationTypes;
 
 export const initialState = {
   notifications: [],
+  refreshTransactionStatus: false,
 };
 
 export const ACTIONS = {
@@ -17,6 +18,7 @@ export const ACTIONS = {
   REMOVE_NOT_VISIBLE_NOTIFICATIONS: 'REMOVE_NOT_VISIBLE_NOTIFICATIONS',
   SHOW_SIMPLE_NOTIFICATION: 'SHOW_SIMPLE_NOTIFICATION',
   SHOW_TRANSACTION_NOTIFICATION: 'SHOW_TRANSACTION_NOTIFICATION',
+  REFRESH_TRANSACTIONS: 'REFRESH_TRANSACTIONS',
 };
 
 const enqueue = (notifications, notification) => [
@@ -187,6 +189,12 @@ const notificationReducer = (state = initialState, action) => {
       return {
         ...state,
         notifications: visibleNotifications,
+      };
+    }
+    case ACTIONS.REFRESH_TRANSACTIONS: {
+      return {
+        ...state,
+        refreshTransactionStatus: action.refreshTransactionStatus ?? false,
       };
     }
     default:

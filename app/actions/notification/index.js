@@ -95,3 +95,10 @@ export function removeNotVisibleNotifications() {
     type: 'REMOVE_NOT_VISIBLE_NOTIFICATIONS',
   };
 }
+
+export function refreshTransactions(status) {
+  return {
+    type: 'REFRESH_TRANSACTIONS',
+    refreshTransactionStatus: status,
+  };
+}
