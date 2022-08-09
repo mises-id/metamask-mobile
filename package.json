@@ -51,6 +51,7 @@
     "prestorybook": "rnstl",
     "create-release": "./scripts/set-versions.sh && yarn update-changelog",
     "jsbundle:ios": "./scripts/build.sh ios bundle",
+    "release:ios:device": "./scripts/build.sh ios release --device",
     "patch-reactnative": "yarn patch-package react-native --include 'ReactAndroid/.*|React/.*' --case-sensitive-path-filtering"
   },
   "husky": {
