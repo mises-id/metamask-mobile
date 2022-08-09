@@ -624,12 +624,13 @@ class SendFlow extends PureComponent {
     this.props.navigation.navigate('QRScanner', {
       onScanSuccess: (meta) => {
         if (meta.target_address) {
+          this.onToSelectedAddressChange(meta.target_address);
           const findAddress = Object.keys(this.props.accountList).find(
             (val) =>
               this.props.accountList[val].misesId.toLowerCase() ===
               meta.target_address.toLowerCase(),
           );
-          findAddress && this.onToSelectedAddressChange(findAddress);
+          this.onToSelectedAddressChange(findAddress || meta.target_address);
         }
       },
     });

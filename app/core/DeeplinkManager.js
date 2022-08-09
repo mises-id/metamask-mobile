@@ -130,7 +130,14 @@ class DeeplinkManager {
   async _handleEthereumUrl(url, origin) {
     let ethUrl = '';
     try {
-      ethUrl = parse(url);
+      const dataparse = /ethereum:([a-zA-Z0-9]{44})@(46)/.exec(url);
+      ethUrl =
+        url.indexOf('mises') > -1
+          ? {
+              scheme: dataparse[0],
+              target_address: dataparse[1],
+            }
+          : parse(url);
     } catch (e) {
       if (e) Alert.alert(strings('deeplink.invalid'), e.toString());
       return;
@@ -215,7 +222,6 @@ class DeeplinkManager {
     );
     let params;
     let wcCleanUrl;
-
     if (urlObj.query.length) {
       try {
         params = qs.parse(urlObj.query.substring(1));

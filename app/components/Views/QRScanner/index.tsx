@@ -154,14 +154,35 @@ const QRScanner = ({ navigation, route }: Props) => {
           return;
         }
         // Let ethereum:address and address go forward
+        if (content?.indexOf('mises') > -1) {
+          const handledContent =
+            content?.indexOf('ethereum:mises') === -1
+              ? `ethereum:${content}@${currentChainId}`
+              : content;
+          shouldReadBarCodeRef.current = false;
+          const dataparse = /ethereum:([a-zA-Z0-9]{44})@(46)/.exec(
+            handledContent,
+          ) as any[];
+          data = {
+            scheme: 'eth',
+            target_address: dataparse[1],
+            chain_id: dataparse[2],
+          };
+          const action = 'send-eth';
+          data = { ...data, action };
+          end();
+          onScanSuccess(data, handledContent);
+          return;
+        }
         if (
           (content.split('ethereum:').length > 1 &&
             !parse(content).function_name) ||
           (content.startsWith('0x') && isValidAddress(content))
         ) {
-          const handledContent = content.startsWith('0x')
-            ? `ethereum:${content}@${currentChainId}`
-            : content;
+          const handledContent =
+            content.startsWith('0x') || content?.indexOf('mises') > -1
+              ? `ethereum:${content}@${currentChainId}`
+              : content;
           shouldReadBarCodeRef.current = false;
           data = parse(handledContent);
           const action = 'send-eth';
@@ -170,26 +191,26 @@ const QRScanner = ({ navigation, route }: Props) => {
           onScanSuccess(data, handledContent);
           return;
         }
-        if (
-          content.split('network:').length > 1 ||
-          content.startsWith('mises')
-        ) {
-          const handledContent = content.startsWith('mises')
-            ? `network:${content}@${currentChainId}`
-            : content;
-          const dataparse = /network:([a-zA-Z0-9]{44})@(46)/.exec(
-            handledContent,
-          ) as any[];
-          data = {
-            scheme: 'mises',
-            target_address: dataparse[1],
-            chain_id: dataparse[2],
-          };
-          const action = 'send-mises';
-          data = { ...data, action };
-          end();
-          onScanSuccess(data, handledContent);
-        }
+        // if (
+        //   content.split('network:').length > 1 ||
+        //   content.startsWith('mises')
+        // ) {
+        //   const handledContent = content.startsWith('mises')
+        //     ? `network:${content}@${currentChainId}`
+        //     : content;
+        //   const dataparse = /network:([a-zA-Z0-9]{44})@(46)/.exec(
+        //     handledContent,
+        //   ) as any[];
+        //   data = {
+        //     scheme: 'mises',
+        //     target_address: dataparse[1],
+        //     chain_id: dataparse[2],
+        //   };
+        //   const action = 'send-mises';
+        //   data = { ...data, action };
+        //   end();
+        //   onScanSuccess(data, handledContent);
+        // }
         // Checking if it can be handled like deeplinks
         const handledByDeeplink = SharedDeeplinkManager.parse(content, {
           origin: AppConstants.DEEPLINKS.ORIGIN_QR_CODE,
