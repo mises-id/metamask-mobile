@@ -243,7 +243,6 @@ const Wallet = ({ navigation }: any) => {
   }, []);
   const { MisesController } = Engine.context as any;
   const isMises = useMisesNetwork(Engine);
-  // const [lock, setLock] = useState(false);
   const getMisesBalance = () => {
     if (isMises) {
       timer = setTimeout(() => {
@@ -253,25 +252,30 @@ const Wallet = ({ navigation }: any) => {
       }, 10000);
     }
   };
-  bridge.onWindowShow(() => {
-    if (lock) return;
-    if (timer) {
-      clearTimeout(timer);
-    }
-    lock = true;
+  // const [lock, setLock] = useState(false);
+  const lisenter = () => {
+    bridge.onWindowShow(() => {
+      if (lock) return;
+      if (timer) {
+        clearTimeout(timer);
+      }
+      lock = true;
+      getMisesBalance();
+    });
+    bridge.onWindowHide(() => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    });
+  };
+
+  InteractionManager.runAfterInteractions(() => {
+    lisenter();
+  });
+  useEffect(() => {
     getMisesBalance();
-  });
-  bridge.onWindowHide(() => {
-    if (timer) {
-      clearTimeout(timer);
-    }
-  });
-  // useEffect(() => {
-  //   return () => {
-  //     clearTimeout(timer);
-  //   };
-  //   // eslint-disable-next-line
-  // }, []);
+    // eslint-disable-next-line
+  }, []);
   const renderContent = useCallback(() => {
     let balance: any = 0;
     let assets = tokens;
