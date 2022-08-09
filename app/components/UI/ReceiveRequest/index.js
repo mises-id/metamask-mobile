@@ -300,11 +300,7 @@ class ReceiveRequest extends PureComponent {
                   }}
                 >
                   <QRCode
-                    value={
-                      isMises
-                        ? `network:${misesId}@${this.props.chainId}`
-                        : `ethereum:${this.props.selectedAddress}@${this.props.chainId}`
-                    }
+                    value={`ethereum:${this.props.selectedAddress}@${this.props.chainId}`}
                     size={Dimensions.get('window').width / 2}
                     color={colors.text.default}
                     backgroundColor={colors.background.default}
@@ -349,13 +345,15 @@ class ReceiveRequest extends PureComponent {
             <Text style={styles.copyButton} small>
               {strings('receive_request.copy')}
             </Text>
-            <TouchableOpacity onPress={this.onShare}>
-              <EvilIcons
-                name={Device.isIos() ? 'share-apple' : 'share-google'}
-                size={25}
-                color={colors.primary.default}
-              />
-            </TouchableOpacity>
+            {!isMises ? (
+              <TouchableOpacity onPress={this.onShare}>
+                <EvilIcons
+                  name={Device.isIos() ? 'share-apple' : 'share-google'}
+                  size={25}
+                  color={colors.primary.default}
+                />
+              </TouchableOpacity>
+            ) : null}
           </TouchableOpacity>
           <View style={styles.actionRow}>
             {allowedToBuy(this.props.network) && (
