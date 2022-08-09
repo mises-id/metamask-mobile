@@ -210,6 +210,7 @@ class AddressList extends PureComponent {
         })
         .catch(() => {
           contact.isSmartContract = false;
+          return this.setState({ checkingForSmartContracts: false });
         });
     });
 

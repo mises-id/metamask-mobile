@@ -2,7 +2,7 @@ import AppConstants from '../../core/AppConstants';
 
 const initialState = {
   searchEngine: AppConstants.DEFAULT_SEARCH_ENGINE,
-  primaryCurrency: 'ETH',
+  primaryCurrency: 'MIS',
   lockTime: -1, // Disabled by default
   useBlockieIcon: true,
   hideZeroBalanceTokens: false,
