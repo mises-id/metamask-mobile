@@ -245,6 +245,9 @@ const instance = {
   },
   onWindowShow(listener) {
     nativeBridge.onWindowShow(listener);
+  },
+  onWindowHide(listener) {
+    nativeBridge.onWindowHide(listener);
   }
 };
 

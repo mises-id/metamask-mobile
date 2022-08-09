@@ -39,7 +39,7 @@ import { shouldShowWhatsNewModal } from '../../../util/onboarding';
 import Logger from '../../../util/Logger';
 import Routes from '../../../constants/navigation/Routes';
 import { findMisesAccount } from '../../../core/misesController/misesNetwork.util';
-import { bridge } from '../../../core/NativeBridge';
+import NativeBridge from '../../../core/NativeBridge';
 let timer: any = null;
 let lock = false;
 const createStyles = (colors: any) =>
@@ -254,7 +254,7 @@ const Wallet = ({ navigation }: any) => {
   };
   // const [lock, setLock] = useState(false);
   const lisenter = () => {
-    bridge.onWindowShow(() => {
+    NativeBridge.onWindowShow(() => {
       if (lock) return;
       if (timer) {
         clearTimeout(timer);
@@ -262,7 +262,7 @@ const Wallet = ({ navigation }: any) => {
       lock = true;
       getMisesBalance();
     });
-    bridge.onWindowHide(() => {
+    NativeBridge.onWindowHide(() => {
       if (timer) {
         clearTimeout(timer);
       }
