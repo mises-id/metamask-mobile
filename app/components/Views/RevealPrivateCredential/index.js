@@ -357,15 +357,11 @@ class RevealPrivateCredential extends PureComponent {
     );
 
     const { clipboardPrivateCredential } = this.state;
-    await ClipboardManager.setStringExpire(clipboardPrivateCredential);
+    await ClipboardManager.setString(clipboardPrivateCredential);
 
     const msg = `${strings(
       `reveal_credential.${privateCredentialName}_copied_${Platform.OS}`,
-    )}${
-      Device.isIos()
-        ? strings(`reveal_credential.${privateCredentialName}_copied_time`)
-        : ''
-    }`;
+    )}`;
 
     this.props.showAlert({
       isVisible: true,

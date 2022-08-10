@@ -108,16 +108,20 @@ const RootRPCMethodsUI = (props) => {
   };
 
   const onUnapprovedMessage = (messageParams, type, origin) => {
-    setCurrentPageMeta(messageParams.meta);
-    const signMessageParams = { ...messageParams };
-    delete signMessageParams.meta;
-    setSignMessageParams(signMessageParams);
-    setSignType(type);
-    showPendingApprovalModal({
-      type: ApprovalTypes.SIGN_MESSAGE,
-      origin: signMessageParams.origin,
+    InteractionManager.runAfterInteractions(() => {
+      setTimeout(() => {
+        MisesModule.popup();
+        setCurrentPageMeta(messageParams.meta);
+        const signMessageParams = { ...messageParams };
+        delete signMessageParams.meta;
+        setSignMessageParams(signMessageParams);
+        setSignType(type);
+        showPendingApprovalModal({
+          type: ApprovalTypes.SIGN_MESSAGE,
+          origin: signMessageParams.origin,
+        });
+      }, 300);
     });
-    MisesModule.popup();
   };
 
   const initializeWalletConnect = () => {
