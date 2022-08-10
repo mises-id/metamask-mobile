@@ -476,7 +476,7 @@
     "remove_network_title": "このネットワークを削除しますか?",
     "remove_network": "削除",
     "cancel_remove_network": "キャンセル",
-    "info_title": "MetaMask のバージョン情報",
+    "info_title": "MisesWallet のバージョン情報",
     "experimental_title": "試験段階",
     "experimental_desc": "WalletConnect など...",
     "legal_title": "法的通知",

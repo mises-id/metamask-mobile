@@ -69,6 +69,7 @@ import {
 import { LEARN_MORE_URL } from '../../../../constants/urls';
 import DeleteMetaMetricsData from './Sections/DeleteMetaMetricsData';
 import DeleteWalletData from './Sections/DeleteWalletData';
+import { isMisesChain } from '../../../../core/misesController/misesNetwork.util';
 
 const isIos = Device.isIos();
 
@@ -687,7 +688,7 @@ class Settings extends PureComponent {
           </Text>
         </Text>
 
-        <SeedPhraseVideo onClose={this.onBack} />
+        {/* <SeedPhraseVideo onClose={this.onBack} /> */}
 
         <Text style={styles.desc}>
           {strings(
@@ -1172,7 +1173,7 @@ class Settings extends PureComponent {
   render = () => {
     const { biometryType, biometryChoice, loading } = this.state;
     const { styles } = this.getStyles();
-
+    const isMises = isMisesChain(this.props.type);
     if (loading)
       return (
         <View style={styles.loader}>
@@ -1198,15 +1199,17 @@ class Settings extends PureComponent {
             !biometryChoice &&
             this.renderDevicePasscodeSection()}
           {this.renderPrivateKeySection()}
-          <Heading>{strings('app_settings.privacy_heading')}</Heading>
-          {this.renderClearPrivacySection()}
-          {this.renderClearBrowserHistorySection()}
-          {this.renderClearCookiesSection()}
+          {!isMises ? (
+            <Heading>{strings('app_settings.privacy_heading')}</Heading>
+          ) : null}
+          {!isMises && this.renderClearPrivacySection()}
+          {!isMises && this.renderClearBrowserHistorySection()}
+          {!isMises && this.renderClearCookiesSection()}
           {this.renderPrivacyModeSection()}
           {this.renderMetaMetricsSection()}
           <DeleteMetaMetricsData />
           <DeleteWalletData />
-          {this.renderThirdPartySection()}
+          {!isMises && this.renderThirdPartySection()}
           {this.renderApprovalModal()}
           {this.renderHistoryModal()}
           {this.renderCookiesModal()}

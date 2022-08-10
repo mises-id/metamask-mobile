@@ -40,6 +40,7 @@ import SelectComponent from '../../../UI/SelectComponent';
 import { timeoutFetch } from '../../../../util/general';
 import Device from '../../../../util/device';
 import { ThemeContext, mockTheme } from '../../../../util/theme';
+import { isMisesChain } from '../../../../core/misesController/misesNetwork.util';
 
 const HASH_TO_TEST = 'Qmaisz6NMhDB51cCvNWa1GMS7LU1pAxdF4Ld6Ft9kZEP2a';
 const HASH_STRING = 'Hello from IPFS Gateway Checker';
@@ -152,6 +153,10 @@ class AdvancedSettings extends PureComponent {
      * ChainID of network
      */
     chainId: PropTypes.string,
+    /**
+     * ChainID of network
+     */
+    networkType: PropTypes.string,
     /**
      * Boolean that checks if token detection is enabled
      */
@@ -350,10 +355,11 @@ class AdvancedSettings extends PureComponent {
       setShowHexData,
       setShowCustomNonce,
       ipfsGateway,
+      networkType,
     } = this.props;
     const { resetModalVisible, onlineIpfsGateways } = this.state;
     const { styles, colors } = this.getStyles();
-
+    const isMises = isMisesChain(networkType);
     return (
       <SafeAreaView style={baseStyles.flexGrow}>
         <KeyboardAwareScrollView
@@ -394,87 +400,95 @@ class AdvancedSettings extends PureComponent {
                 {strings('app_settings.reset_account_button')}
               </StyledButton>
             </View>
-            <View style={[styles.setting]}>
-              <Text style={styles.title}>
-                {strings('app_settings.ipfs_gateway')}
-              </Text>
-              <Text style={styles.desc}>
-                {strings('app_settings.ipfs_gateway_desc')}
-              </Text>
-              <View style={styles.picker}>
-                {this.state.gotAvailableGateways ? (
-                  <SelectComponent
-                    selectedValue={ipfsGateway}
-                    defaultValue={strings('app_settings.ipfs_gateway_down')}
-                    onValueChange={this.setIpfsGateway}
-                    label={strings('app_settings.ipfs_gateway')}
-                    options={onlineIpfsGateways}
+            {isMises ? null : (
+              <View style={[styles.setting]}>
+                <Text style={styles.title}>
+                  {strings('app_settings.ipfs_gateway')}
+                </Text>
+                <Text style={styles.desc}>
+                  {strings('app_settings.ipfs_gateway_desc')}
+                </Text>
+                <View style={styles.picker}>
+                  {this.state.gotAvailableGateways ? (
+                    <SelectComponent
+                      selectedValue={ipfsGateway}
+                      defaultValue={strings('app_settings.ipfs_gateway_down')}
+                      onValueChange={this.setIpfsGateway}
+                      label={strings('app_settings.ipfs_gateway')}
+                      options={onlineIpfsGateways}
+                    />
+                  ) : (
+                    <View style={styles.ipfsGatewayLoadingWrapper}>
+                      <ActivityIndicator size="small" />
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+            {isMises ? null : (
+              <View style={styles.setting}>
+                <Text style={styles.title}>
+                  {strings('app_settings.show_hex_data')}
+                </Text>
+                <Text style={styles.desc}>
+                  {strings('app_settings.hex_desc')}
+                </Text>
+                <View style={styles.marginTop}>
+                  <Switch
+                    value={showHexData}
+                    onValueChange={setShowHexData}
+                    trackColor={{
+                      true: colors.primary.default,
+                      false: colors.border.muted,
+                    }}
+                    thumbColor={importedColors.white}
+                    style={styles.switch}
+                    ios_backgroundColor={colors.border.muted}
                   />
-                ) : (
-                  <View style={styles.ipfsGatewayLoadingWrapper}>
-                    <ActivityIndicator size="small" />
-                  </View>
-                )}
+                </View>
               </View>
-            </View>
-            <View style={styles.setting}>
-              <Text style={styles.title}>
-                {strings('app_settings.show_hex_data')}
-              </Text>
-              <Text style={styles.desc}>
-                {strings('app_settings.hex_desc')}
-              </Text>
-              <View style={styles.marginTop}>
-                <Switch
-                  value={showHexData}
-                  onValueChange={setShowHexData}
-                  trackColor={{
-                    true: colors.primary.default,
-                    false: colors.border.muted,
-                  }}
-                  thumbColor={importedColors.white}
-                  style={styles.switch}
-                  ios_backgroundColor={colors.border.muted}
-                />
+            )}
+            {isMises ? null : (
+              <View style={styles.setting}>
+                <Text style={styles.title}>
+                  {strings('app_settings.show_custom_nonce')}
+                </Text>
+                <Text style={styles.desc}>
+                  {strings('app_settings.custom_nonce_desc')}
+                </Text>
+                <View style={styles.marginTop}>
+                  <Switch
+                    value={showCustomNonce}
+                    onValueChange={setShowCustomNonce}
+                    trackColor={{
+                      true: colors.primary.default,
+                      false: colors.border.muted,
+                    }}
+                    thumbColor={importedColors.white}
+                    style={styles.switch}
+                    ios_backgroundColor={colors.border.muted}
+                  />
+                </View>
               </View>
-            </View>
-            <View style={styles.setting}>
-              <Text style={styles.title}>
-                {strings('app_settings.show_custom_nonce')}
-              </Text>
-              <Text style={styles.desc}>
-                {strings('app_settings.custom_nonce_desc')}
-              </Text>
-              <View style={styles.marginTop}>
-                <Switch
-                  value={showCustomNonce}
-                  onValueChange={setShowCustomNonce}
-                  trackColor={{
-                    true: colors.primary.default,
-                    false: colors.border.muted,
-                  }}
-                  thumbColor={importedColors.white}
-                  style={styles.switch}
-                  ios_backgroundColor={colors.border.muted}
-                />
-              </View>
-            </View>
+            )}
             {this.renderTokenDetectionSection()}
-            <View style={styles.setting}>
-              <Text style={styles.title}>
-                {strings('app_settings.state_logs')}
-              </Text>
-              <Text style={styles.desc}>
-                {strings('app_settings.state_logs_desc')}
-              </Text>
-              <StyledButton
-                type="info"
-                onPress={this.downloadStateLogs}
-                containerStyle={styles.marginTop}
-              >
-                {strings('app_settings.state_logs_button')}
-              </StyledButton>
-            </View>
+            {isMises ? null : (
+              <View style={styles.setting}>
+                <Text style={styles.title}>
+                  {strings('app_settings.state_logs')}
+                </Text>
+                <Text style={styles.desc}>
+                  {strings('app_settings.state_logs_desc')}
+                </Text>
+                <StyledButton
+                  type="info"
+                  onPress={this.downloadStateLogs}
+                  containerStyle={styles.marginTop}
+                >
+                  {strings('app_settings.state_logs_button')}
+                </StyledButton>
+              </View>
+            )}
           </View>
         </KeyboardAwareScrollView>
       </SafeAreaView>
@@ -492,6 +506,7 @@ const mapStateToProps = (state) => ({
   isTokenDetectionEnabled:
     state.engine.backgroundState.PreferencesController.useTokenDetection,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
+  networkType: state.engine.backgroundState.NetworkController.provider.type,
 });
 
 const mapDispatchToProps = (dispatch) => ({

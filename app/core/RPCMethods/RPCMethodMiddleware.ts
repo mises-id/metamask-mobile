@@ -340,7 +340,6 @@ export const getRpcMethodMiddleware = ({
           data: firstParam,
           from: secondParam,
         };
-
         if (resemblesAddress(firstParam) && !resemblesAddress(secondParam)) {
           params.data = secondParam;
           params.from = firstParam;
@@ -356,17 +355,19 @@ export const getRpcMethodMiddleware = ({
 
         checkTabActive();
         await requestPromiseLock();
+        console.log(1111)
         checkActiveAccountAndChainId({
           address: params.from,
           activeAccounts: getAccounts(),
         });
+        console.log(222)
 
         const rawSig = await PersonalMessageManager.addUnapprovedMessageAsync({
           ...params,
           ...pageMeta,
           origin: hostname,
         });
-
+        console.log(333)
         res.result = rawSig;
       },
 

@@ -8,6 +8,7 @@ import Analytics from '../../../core/Analytics/Analytics';
 import { ANALYTICS_EVENT_OPTS } from '../../../util/analytics';
 import { connect } from 'react-redux';
 import { ThemeContext, mockTheme } from '../../../util/theme';
+import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 
 const createStyles = (colors) =>
   StyleSheet.create({
@@ -33,6 +34,7 @@ class Settings extends PureComponent {
      * completed the seed phrase backup flow
      */
     seedphraseBackedUp: PropTypes.bool,
+    networkType: PropTypes.string,
   };
 
   updateNavBar = () => {
@@ -103,7 +105,7 @@ class Settings extends PureComponent {
     const { seedphraseBackedUp } = this.props;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
+    const isMises = isMisesChain(this.props.networkType);
     return (
       <ScrollView style={styles.wrapper}>
         <SettingsDrawer
@@ -122,21 +124,25 @@ class Settings extends PureComponent {
           onPress={this.onPressAdvanced}
           title={strings('app_settings.advanced_title')}
         />
-        <SettingsDrawer
-          description={strings('app_settings.contacts_desc')}
-          onPress={this.onPressContacts}
-          title={strings('app_settings.contacts_title')}
-        />
+        {isMises ? null : (
+          <SettingsDrawer
+            description={strings('app_settings.contacts_desc')}
+            onPress={this.onPressContacts}
+            title={strings('app_settings.contacts_title')}
+          />
+        )}
         <SettingsDrawer
           title={strings('app_settings.networks_title')}
           description={strings('app_settings.networks_desc')}
           onPress={this.onPressNetworks}
         />
-        <SettingsDrawer
-          title={strings('app_settings.experimental_title')}
-          description={strings('app_settings.experimental_desc')}
-          onPress={this.onPressExperimental}
-        />
+        {isMises ? null : (
+          <SettingsDrawer
+            title={strings('app_settings.experimental_title')}
+            description={strings('app_settings.experimental_desc')}
+            onPress={this.onPressExperimental}
+          />
+        )}
         <SettingsDrawer
           title={strings('app_settings.info_title')}
           onPress={this.onPressInfo}
@@ -150,6 +156,7 @@ Settings.contextType = ThemeContext;
 
 const mapStateToProps = (state) => ({
   seedphraseBackedUp: state.user.seedphraseBackedUp,
+  networkType: state.engine.backgroundState.NetworkController.provider.type,
 });
 
 export default connect(mapStateToProps)(Settings);

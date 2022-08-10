@@ -150,8 +150,8 @@ export default class AppInformation extends PureComponent {
   };
 
   onWebSite = () => {
-    const url = 'https://metamask.io/';
-    this.goTo(url, 'metamask.io');
+    const url = 'https://www.mises.site/';
+    this.goTo(url, 'mises.site');
   };
 
   onContactUs = () => {

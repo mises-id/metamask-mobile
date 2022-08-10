@@ -332,51 +332,59 @@ class Settings extends PureComponent {
     } = this.props;
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
-
+    const isMises = isMisesChain(this.props.type);
     return (
       <ScrollView style={styles.wrapper}>
         <View style={styles.inner}>
-          <View style={[styles.setting, styles.firstSetting]}>
-            <Text style={styles.title}>
-              {strings('app_settings.conversion_title')}
-            </Text>
-            <Text style={styles.desc}>
-              {strings('app_settings.conversion_desc')}
-            </Text>
-            <View style={styles.picker}>
-              <SelectComponent
-                selectedValue={currentCurrency}
-                onValueChange={this.selectCurrency}
-                label={strings('app_settings.current_conversion')}
-                options={infuraCurrencyOptions}
-              />
-            </View>
-          </View>
-          <View style={styles.setting}>
-            <Text style={styles.title}>
-              {strings('app_settings.primary_currency_title')}
-            </Text>
-            <Text style={styles.desc}>
-              {strings('app_settings.primary_currency_desc')}
-            </Text>
-            <View style={styles.simplePicker}>
-              {this.primaryCurrencyOptions && (
-                <PickComponent
-                  pick={this.selectPrimaryCurrency}
-                  textFirst={strings(
-                    'app_settings.primary_currency_text_first',
+          {isMises ? null : (
+            <>
+              <View style={[styles.setting, styles.firstSetting]}>
+                <Text style={styles.title}>
+                  {strings('app_settings.conversion_title')}
+                </Text>
+                <Text style={styles.desc}>
+                  {strings('app_settings.conversion_desc')}
+                </Text>
+                <View style={styles.picker}>
+                  <SelectComponent
+                    selectedValue={currentCurrency}
+                    onValueChange={this.selectCurrency}
+                    label={strings('app_settings.current_conversion')}
+                    options={infuraCurrencyOptions}
+                  />
+                </View>
+              </View>
+              <View style={styles.setting}>
+                <Text style={styles.title}>
+                  {strings('app_settings.primary_currency_title')}
+                </Text>
+                <Text style={styles.desc}>
+                  {strings('app_settings.primary_currency_desc')}
+                </Text>
+                <View style={styles.simplePicker}>
+                  {this.primaryCurrencyOptions && (
+                    <PickComponent
+                      pick={this.selectPrimaryCurrency}
+                      textFirst={strings(
+                        'app_settings.primary_currency_text_first',
+                      )}
+                      valueFirst={this.primaryCurrencyOptions[0].value}
+                      textSecond={strings(
+                        'app_settings.primary_currency_text_second',
+                      )}
+                      valueSecond={'Fiat'}
+                      selectedValue={primaryCurrency}
+                    />
                   )}
-                  valueFirst={this.primaryCurrencyOptions[0].value}
-                  textSecond={strings(
-                    'app_settings.primary_currency_text_second',
-                  )}
-                  valueSecond={'Fiat'}
-                  selectedValue={primaryCurrency}
-                />
-              )}
-            </View>
-          </View>
-          <View style={styles.setting}>
+                </View>
+              </View>
+            </>
+          )}
+          <View
+            style={
+              isMises ? [styles.setting, styles.firstSetting] : styles.setting
+            }
+          >
             <Text style={styles.title}>
               {strings('app_settings.current_language')}
             </Text>
@@ -394,24 +402,26 @@ class Settings extends PureComponent {
               )}
             </View>
           </View>
-          <View style={styles.setting}>
-            <Text style={styles.title}>
-              {strings('app_settings.search_engine')}
-            </Text>
-            <Text style={styles.desc}>
-              {strings('app_settings.engine_desc')}
-            </Text>
-            <View style={styles.picker}>
-              {this.searchEngineOptions && (
-                <SelectComponent
-                  selectedValue={this.props.searchEngine}
-                  onValueChange={this.selectSearchEngine}
-                  label={strings('app_settings.search_engine')}
-                  options={this.searchEngineOptions}
-                />
-              )}
+          {isMises ? null : (
+            <View style={styles.setting}>
+              <Text style={styles.title}>
+                {strings('app_settings.search_engine')}
+              </Text>
+              <Text style={styles.desc}>
+                {strings('app_settings.engine_desc')}
+              </Text>
+              <View style={styles.picker}>
+                {this.searchEngineOptions && (
+                  <SelectComponent
+                    selectedValue={this.props.searchEngine}
+                    onValueChange={this.selectSearchEngine}
+                    label={strings('app_settings.search_engine')}
+                    options={this.searchEngineOptions}
+                  />
+                )}
+              </View>
             </View>
-          </View>
+          )}
           <View style={styles.setting}>
             <Text style={styles.title}>
               {strings('app_settings.hide_zero_balance_tokens_title')}
