@@ -214,7 +214,7 @@ class AccountInfoCard extends PureComponent {
               ]}
             >
               {strings('signature_request.balance_title')}{' '}
-              {showFiatBalance ? dollarBalance : ''} {balance}
+              {showFiatBalance && !isMises ? dollarBalance : ''} {balance}
             </Text>
           )}
         </View>

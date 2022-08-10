@@ -394,7 +394,6 @@ const RootRPCMethodsUI = (props) => {
   );
 
   const onSignAction = () => {
-    console.log('onSignAction');
     setShowPendingApproval(false);
     InteractionManager.runAfterInteractions(() => {
       MisesModule.dismiss();
