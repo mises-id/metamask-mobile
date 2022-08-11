@@ -374,10 +374,10 @@ class SendFlow extends PureComponent {
     const { identities, ticker, accounts, providerType, accountList } =
       this.props;
     const { name } = identities[accountAddress];
-    const { PreferencesController } = Engine.context;
+    const { MisesController } = Engine.context;
     const ens = await doENSReverseLookup(accountAddress);
     const fromAccountName = ens || name;
-    PreferencesController.setSelectedAddress(accountAddress);
+    MisesController.setSelectedAddress(accountAddress);
     // If new account doesn't have the asset
     this.props.setSelectedAsset(getEther(ticker));
     const isMises = isMisesChain(providerType);
@@ -646,7 +646,7 @@ class SendFlow extends PureComponent {
       fromAccountName,
       toEnsAddressResolved,
     } = this.state;
-    if (!this.isAddressSaved() && providerType !== 'mises') {
+    if (!this.isAddressSaved() && !isMisesChain(providerType)) {
       const addressError = await this.validateToAddress();
       if (addressError) return;
     }

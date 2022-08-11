@@ -465,7 +465,8 @@ class ChoosePassword extends PureComponent {
    * @param password - Password to recreate and set the vault with
    */
   recreateVault = async (password) => {
-    const { KeyringController, PreferencesController } = Engine.context;
+    const { KeyringController, PreferencesController, MisesController } =
+      Engine.context;
     const seedPhrase = await this.getSeedPhrase();
 
     let importedAccounts = [];
@@ -530,9 +531,9 @@ class ChoosePassword extends PureComponent {
     await PreferencesController.update(preferencesControllerState);
     // Reselect previous selected account if still available
     if (hdKeyring.accounts.includes(selectedAddress)) {
-      PreferencesController.setSelectedAddress(selectedAddress);
+      MisesController.setSelectedAddress(selectedAddress);
     } else {
-      PreferencesController.setSelectedAddress(hdKeyring.accounts[0]);
+      MisesController.setSelectedAddress(hdKeyring.accounts[0]);
     }
   };
 

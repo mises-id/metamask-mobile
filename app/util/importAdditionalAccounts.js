@@ -31,7 +31,8 @@ const getBalance = async (address, ethQuery) =>
  * @param {array} accounts - an array of addresses
  */
 const updateIdentities = async (accounts) => {
-  const { KeyringController, PreferencesController } = Engine.context;
+  const { KeyringController, PreferencesController, MisesController } =
+    Engine.context;
   const newAccounts = await KeyringController.getAccounts();
   PreferencesController.updateIdentities(newAccounts);
   newAccounts.forEach((selectedAddress) => {
@@ -41,7 +42,7 @@ const updateIdentities = async (accounts) => {
   });
 
   // setSelectedAddress to the initial account
-  PreferencesController.setSelectedAddress(accounts[0]);
+  MisesController.setSelectedAddress(accounts[0]);
 };
 
 /**

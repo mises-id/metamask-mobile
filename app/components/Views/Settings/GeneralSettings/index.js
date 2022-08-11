@@ -193,10 +193,6 @@ class Settings extends PureComponent {
     /**
      * Network ticker
      */
-    ticker: PropTypes.string,
-    /**
-     * Network ticker
-     */
     type: PropTypes.string,
     /**
      * App theme
@@ -510,7 +506,6 @@ const mapStateToProps = (state) => ({
   selectedAddress:
     state.engine.backgroundState.PreferencesController.selectedAddress,
   hideZeroBalanceTokens: state.settings.hideZeroBalanceTokens,
-  ticker: state.engine.backgroundState.NetworkController.provider.ticker,
   type: state.engine.backgroundState.NetworkController.provider.type,
   // appTheme: state.user.appTheme,
 });

@@ -274,17 +274,16 @@ export class BackgroundBridge extends EventEmitter {
         params: publicState,
       });
     }
-
     // ONLY NEEDED FOR WC FOR NOW, THE BROWSER HANDLES THIS NOTIFICATION BY ITSELF
-    if (this.isWalletConnect) {
-      if (this.addressSent !== memState.selectedAddress) {
-        this.addressSent = memState.selectedAddress;
-        this.sendNotification({
-          method: NOTIFICATION_NAMES.accountsChanged,
-          params: [memState.selectedAddress],
-        });
-      }
+    // if (this.isWalletConnect) {
+    if (this.addressSent !== memState.selectedAddress) {
+      this.addressSent = memState.selectedAddress;
+      this.sendNotification({
+        method: NOTIFICATION_NAMES.accountsChanged,
+        params: [memState.selectedAddress],
+      });
     }
+    // }
   }
 
   isUnlocked() {

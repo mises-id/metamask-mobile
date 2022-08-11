@@ -66,6 +66,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   getKeyringAccounts: () => Promise<string[]>;
   updateIdentities: PreferencesController['updateIdentities'];
   exportAccount: (address: string) => Promise<string>;
+  setPreferencesSelectedAddress: (address: string) => Promise<void>;
   #config: MisesConfig;
   #coinDefine: MisesCoin;
   #msgReader: MsgReader;
@@ -79,6 +80,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       updateIdentities,
       onPreferencesStateChange,
       exportAccount,
+      setPreferencesSelectedAddress,
     }: {
       getKeyringAccounts(): Promise<string[]>;
       updateIdentities: PreferencesController['updateIdentities'];
@@ -86,6 +88,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         listener: (preferencesState: PreferencesState) => void,
       ) => void;
       exportAccount: (address: string) => Promise<string>;
+      setPreferencesSelectedAddress: (address: string) => Promise<void>;
     },
     config?: Partial<KeyringConfig>,
     state?: Partial<misesState>,
@@ -97,6 +100,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     // init Mises sdk
     this.#config = MSdk.newConfig();
     this.exportAccount = exportAccount;
+    this.setPreferencesSelectedAddress = setPreferencesSelectedAddress;
     this.#misesSdk = MSdk.newSdk(this.#config);
     this.#coinDefine = MSdk.newCoinDefine();
     this.#msgReader = MSdk.newMsgReader();
@@ -110,28 +114,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     this.defaultState = {
       accountList: {},
     };
-    onPreferencesStateChange(async (preferencesState) => {
-      try {
-        const key = await exportAccount(preferencesState.selectedAddress); // get priKeyHex
-        await this.activate(key); // set activity user
-        const lowerAddress = preferencesState.selectedAddress.toLowerCase();
-        const userInfo = await this.ensureMisesAccessToken(lowerAddress); // get activity user
-        const misesAccount = await this.refreshMisesBalance(lowerAddress); // get mises balance
-        misesAccount.token = userInfo?.token;
-        const accountList = this.getAccountList();
-        if (!accountList[lowerAddress]) {
-          this.update({
-            accountList: {
-              ...accountList,
-              [lowerAddress]: misesAccount,
-            },
-          });
-        }
-        userInfo && (await this.setToMisesPrivate(userInfo));
-      } catch (error) {
-        console.warn(error, preferencesState.selectedAddress);
-      }
-    });
     this.initialize();
   }
   /**
@@ -161,7 +143,9 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         }
       });
       this.update({
-        accountList: accounts,
+        accountList: {
+          ...accounts,
+        },
       });
     } catch (error) {
       Analytics.trackEventWithParameters('getAccountMisesBalanceError', {
@@ -185,6 +169,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         misesBalance,
         misesId: user.address(),
       };
+      console.log(cacheObj, 'refreshMisesBalance');
       return ret;
     } catch (error) {
       return Promise.reject(error);
@@ -292,6 +277,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         misesId: activeUser?.address() || '',
       };
     } catch (error) {
+      console.warn('generateAuth', error);
       // return error;
       return Promise.reject(error);
     }
@@ -333,8 +319,8 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     if (account?.auth) return account;
     try {
       const { auth } = await this.generateAuth(`${nowTimeStamp}`);
-
-      const userInfo = await activeUser?.info();
+      const isRegistered = await activeUser?.isRegistered();
+      const userInfo = isRegistered ? await activeUser?.info() : ({} as any);
       const misesBalance = await this.getUserBalance(address);
       return {
         address,
@@ -382,9 +368,12 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           avatarUrl: userInfo?.avatarUrl,
         };
       }
+      console.log(account, 'reloadAccessTokenAndUserInfo');
       this.update({
-        [account?.address]: account,
-        ...accountList,
+        accountList: {
+          ...accountList,
+          [account?.address]: account,
+        },
       });
       return account;
     } catch (error) {
@@ -416,6 +405,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         misesId,
         token: account.token || '',
       };
+      console.log('ensureMisesAccessToken', userinfo);
       return userinfo;
     } catch (error) {
       console.warn('ensureMisesAccessToken', error);
@@ -459,26 +449,28 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const address = this.misesIdFindEthAddress(misesId);
       const account = findMisesAccount(accountList, address);
       if (account) {
-        const { token } = account || {};
         const updateUserInfo = {
           nickname:
             data.name ||
             shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS),
           avatar: data.avatarUrl,
-          token: token ?? '',
+          token: account.token ?? '',
           misesId,
         };
-        token && this.setToMisesPrivate(updateUserInfo); // set mises userInfo to browser
-        // set mises to chrome extension
-        account.userInfo = {
-          name: updateUserInfo.nickname,
-          avatarUrl: updateUserInfo.avatar,
-        };
-        // console.warn(account.userInfo, 'setUserInfo');
-        // update accountList
+        account.token && this.setToMisesPrivate(updateUserInfo); // set mises userInfo to browser
         this.update({
-          [address]: account,
-          ...accountList,
+          accountList: {
+            ...accountList,
+            [address]: {
+              ...account,
+              userInfo: {
+                name:
+                  data.name ||
+                  shortenAddress(misesId, MISES_TRUNCATED_ADDRESS_START_CHARS),
+                avatarUrl: data.avatarUrl,
+              },
+            },
+          },
         });
         AnalyticsV2.trackEvent('update userinfo cache ', account);
       }
@@ -802,33 +794,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         title: formatEvent.title,
         ticker: formatEvent.amount?.denom,
       });
-      // return result.concat({
-      //   category: formatEvent.category,
-      //   date:
-      //     result.length === 0
-      //       ? `${tx.height}`
-      //       : `${tx.height}:${result.length}`,
-      //   height: tx.height,
-      //   displayedStatusKey: 'confirmed',
-      //   isPending: false,
-      //   transaction: {
-      //     to: formatEvent.recipient.value,
-      //     from: formatEvent.sender.value,
-      //   },
-      //   primaryCurrency: `${formatEvent.amount?.amount} ${formatEvent.amount?.denom}`,
-      //   recipientAddress: formatEvent.recipient?.value ?? '',
-      //   secondaryCurrency: `${formatEvent.amount?.amount} ${formatEvent.amount?.denom}`,
-      //   senderAddress: formatEvent.sender?.value ?? '',
-      //   subtitle,
-      //   subtitleContainsOrigin: false,
-      //   title: formatEvent.title,
-      //   nonce: '0x0',
-      //   transactionGroupType: formatEvent.transactionGroupType,
-      //   hasCancelled: false,
-      //   hasRetried: false,
-      //   initialTransaction: { id: '0x0', hash: tx.hash },
-      //   primaryTransaction: { err: {}, status: '', hash: tx.hash },
-      // });
     }, []);
   }
 
@@ -915,6 +880,33 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
 
   getReader(msg: any) {
     return this.#msgReader.summary(msg);
+  }
+  async setSelectedAddress(address: string) {
+    this.setPreferencesSelectedAddress(address);
+    try {
+      if (!address) return;
+      const key = await this.exportAccount(address); // get priKeyHex
+      await this.activate(key); // set activity user
+      const lowerAddress = address.toLowerCase();
+      const userInfo = await this.ensureMisesAccessToken(lowerAddress); // get activity user
+      const misesAccount = await this.refreshMisesBalance(lowerAddress); // get mises balance
+      misesAccount.token = userInfo?.token;
+      const accountList = this.getAccountList();
+      // if (!accountList[lowerAddress]) {
+      this.update({
+        accountList: {
+          ...accountList,
+          [lowerAddress]: {
+            ...accountList[lowerAddress],
+            ...misesAccount,
+          },
+        },
+      });
+      // }
+      userInfo && (await this.setToMisesPrivate(userInfo));
+    } catch (error) {
+      console.warn(error, address, 'onPreferencesStateChange');
+    }
   }
 }
 
