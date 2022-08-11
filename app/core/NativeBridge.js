@@ -84,7 +84,7 @@ class NativeBridge extends EventEmitter {
       if (!data || !data.name) {
         return;
       }
-      Logger.log('NativeBridge.postMessageFromWeb', data, this);
+      Logger.log('NativeBridge.postMessageFromWeb', data);
       if (data.name) {
         const { origin } = data && data.origin && new URL(data.origin);
         const found = this.findBridge(origin);
