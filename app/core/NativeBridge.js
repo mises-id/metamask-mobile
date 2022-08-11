@@ -149,6 +149,15 @@ class NativeBridge extends EventEmitter {
       return true;
     });
   }
+  sendNotification(payload) {
+    this.clearIdleBridge();
+    const bridges = [...this.backgroundBridges];
+    bridges.forEach((bridge) => {
+      if (approvedHosts[bridge.hostname]) {
+        bridge.sendNotification(payload);
+      }
+    });
+  }
 
   windowStatusChanged(params) {
     Logger.log('metamask window status', params);
@@ -217,6 +226,9 @@ const instance = {
         nativeBridge.windowStatusChanged(data);
       },
     });
+  },
+  sendNotification(payload) {
+    nativeBridge.sendNotification(payload);
   },
   onEngineReady() {
     nativeBridge.onEngineReady();
