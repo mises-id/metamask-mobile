@@ -1,5 +1,6 @@
+import { isMisesChain } from '../../core/misesController/misesNetwork.util';
 import AppConstants from '../../core/AppConstants';
-
+import Engine from '../../core/Engine';
 const initialState = {
   searchEngine: AppConstants.DEFAULT_SEARCH_ENGINE,
   primaryCurrency: 'MIS',
@@ -46,7 +47,16 @@ const settingsReducer = (state = initialState, action) => {
         primaryCurrency: action.primaryCurrency,
       };
     default:
-      return state;
+      return {
+        ...state,
+        primaryCurrency:
+          Engine.context?.NetworkController.internalState.provider.type &&
+          isMisesChain(
+            Engine.context?.NetworkController.internalState.provider.type,
+          )
+            ? 'MIS'
+            : state.primaryCurrency,
+      };
   }
 };
 export default settingsReducer;
