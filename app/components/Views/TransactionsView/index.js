@@ -20,10 +20,7 @@ import {
 import { safeToChecksumAddress } from '../../../util/address';
 import { addAccountTimeFlagFilter } from '../../../util/transactions';
 import { toLowerCaseEquals } from '../../../util/general';
-import {
-  findMisesAccount,
-  isMisesChain,
-} from '../../../core/misesController/misesNetwork.util';
+import { isMisesChain } from '../../../core/misesController/misesNetwork.util';
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -139,22 +136,12 @@ const TransactionsView = ({
     so the effect will not be noticeable if the user is in this screen.
     */
     const isMises = isMisesChain(networkType);
-    if (isMises) {
-      const misesAccount = findMisesAccount(accountList, selectedAddress);
-      if (misesAccount.transactions) {
-        setAllTransactions(misesAccount.transactions ?? []);
-        setLoading(false);
-        const { MisesController } = Engine.context;
-        MisesController.recentTransactions(false, selectedAddress).then(
-          (res) => {
-            setAllTransactions(misesAccount.transactions ?? []);
-          },
-        );
-      }
-    } else {
+    if (!isMises) {
       InteractionManager.runAfterInteractions(() => {
         filterTransactions();
       });
+    } else {
+      setLoading(false);
     }
   }, [accountList, filterTransactions, networkType, selectedAddress]);
 

@@ -499,23 +499,23 @@ class Login extends PureComponent {
   tryBiometric = async (e) => {
     if (e) e.preventDefault();
     const { current: field } = this.fieldRef;
-    field.blur();
+    field?.blur();
     try {
       const credentials = await SecureKeychain.getGenericPassword();
       if (!credentials) {
         this.setState({ hasBiometricCredentials: false });
         return;
       }
-      field.blur();
+      field?.blur();
       this.setState({ password: credentials.password });
       field.setValue(credentials.password);
-      field.blur();
+      field?.blur();
       await this.onLogin(true);
     } catch (error) {
       this.setState({ hasBiometricCredentials: true });
       Logger.log(error);
     }
-    field.blur();
+    field?.blur();
   };
 
   render = () => {

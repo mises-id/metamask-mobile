@@ -31,37 +31,32 @@ const pump = require('pump');
 const EventEmitter = require('events').EventEmitter;
 const { NOTIFICATION_NAMES } = AppConstants;
 
-
-const SafeEventEmitter = require('safe-event-emitter')
+const SafeEventEmitter = require('safe-event-emitter');
 
 class EmptyBlockTracker extends SafeEventEmitter {
-
   //
   // public
   //
 
-  constructor (opts = {}) {
-    super()
+  constructor(opts = {}) {
+    super();
   }
 
-  isRunning () {
-    return true
+  isRunning() {
+    return true;
   }
 
-  getCurrentBlock () {
-    return {}
+  getCurrentBlock() {
+    return {};
   }
 
-  async getLatestBlock () {
-   
-  }
+  async getLatestBlock() {}
 
   // dont allow module consumer to remove our internal event listeners
-  removeAllListeners (eventName) {
+  removeAllListeners(eventName) {
     // perform default behavior, preserve fn arity
   }
 }
-
 
 /**
  * Module that listens for and responds to messages from an InpageBridge using postMessage
@@ -186,13 +181,11 @@ export class BackgroundBridge extends EventEmitter {
     Engine.context.KeyringController.onLock(this.onLock.bind(this));
     Engine.context.KeyringController.onUnlock(this.onUnlock.bind(this));
 
-
     this.on('update', this.onStateUpdate);
-
   }
 
   setProviderAndBlockTracker({ provider, blockTracker }) {
-    console.log("setProviderAndBlockTracker", provider, blockTracker);
+    console.log('setProviderAndBlockTracker', provider, blockTracker);
     const tracker = blockTracker || new EmptyBlockTracker();
     // update or intialize proxies
     if (this._providerProxy) {
@@ -244,7 +237,6 @@ export class BackgroundBridge extends EventEmitter {
       const isMises = isMisesChain(networkType);
       if (isMises) {
         chainId = networkProvider.chainId;
-        network = '1';
       }
     } else if (networkType === 'rpc') {
       chainId = networkProvider.chainId;
@@ -282,17 +274,16 @@ export class BackgroundBridge extends EventEmitter {
         params: publicState,
       });
     }
-
     // ONLY NEEDED FOR WC FOR NOW, THE BROWSER HANDLES THIS NOTIFICATION BY ITSELF
-    if (this.isWalletConnect) {
-      if (this.addressSent !== memState.selectedAddress) {
-        this.addressSent = memState.selectedAddress;
-        this.sendNotification({
-          method: NOTIFICATION_NAMES.accountsChanged,
-          params: [memState.selectedAddress],
-        });
-      }
+    // if (this.isWalletConnect) {
+    if (this.addressSent !== memState.selectedAddress) {
+      this.addressSent = memState.selectedAddress;
+      this.sendNotification({
+        method: NOTIFICATION_NAMES.accountsChanged,
+        params: [memState.selectedAddress],
+      });
     }
+    // }
   }
 
   isUnlocked() {

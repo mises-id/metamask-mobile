@@ -282,7 +282,7 @@ class Tokens extends PureComponent {
 
         <View style={styles.balances} testID={'balance'}>
           <Text style={styles.balance}>{mainBalance}</Text>
-          {secondaryBalance && primaryCurrency !== 'MIS' ? (
+          {secondaryBalance && asset.symbol !== 'MIS' ? (
             <Text
               style={[
                 styles.balanceFiat,

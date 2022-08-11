@@ -90,7 +90,7 @@ class ImportPrivateKeySuccess extends PureComponent {
   };
 
   componentDidMount = () => {
-    const { PreferencesController } = Engine.context;
+    const { MisesController } = Engine.context;
     const { keyrings } = this.props;
     try {
       const allKeyrings =
@@ -101,7 +101,7 @@ class ImportPrivateKeySuccess extends PureComponent {
         (list, keyring) => list.concat(keyring.accounts),
         [],
       );
-      PreferencesController.setSelectedAddress(
+      MisesController.setSelectedAddress(
         accountsOrdered[accountsOrdered.length - 1],
       );
     } catch (e) {

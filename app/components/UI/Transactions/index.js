@@ -245,10 +245,14 @@ class Transactions extends PureComponent {
     });
   };
   componentDidUpdate(prevProps) {
-    if (prevProps.refreshTransactionStatus) {
-      this.props.refreshTransactions(false);
-      this.init();
-      console.log('refreshTransactions');
+    if (
+      prevProps.refreshTransactionStatus ||
+      this.props.selectedAddress?.toLowerCase?.() !==
+        prevProps.selectedAddress?.toLowerCase?.()
+    ) {
+      setTimeout(() => {
+        this.init(this.props.selectedAddress);
+      }, 100);
     }
   }
 
@@ -256,7 +260,7 @@ class Transactions extends PureComponent {
     this.mounted = false;
   }
 
-  init() {
+  init(selectedAddress = this.props.selectedAddress) {
     this.mounted && this.setState({ ready: true });
     const txToView = NotificationManager.getTransactionToView();
     if (txToView) {
@@ -273,22 +277,25 @@ class Transactions extends PureComponent {
     if (isMises) {
       this.setState({
         transactions:
-          findMisesAccount(this.props.accountList, this.props.selectedAddress)
+          findMisesAccount(this.props.accountList, selectedAddress)
             .transactions || [],
       });
-      this.getMisesTransactions();
+      this.getMisesTransactions(selectedAddress);
     }
   }
-  getMisesTransactions() {
-    const { MisesController } = Engine.context;
-    const { selectedAddress } = this.props;
-    return MisesController.recentTransactions(false, selectedAddress).then(
-      (res) => {
-        this.setState({
-          transactions: res,
-        });
-      },
-    );
+  async getMisesTransactions(selectedAddress) {
+    try {
+      const { MisesController } = Engine.context;
+      await MisesController.recentTransactions(false, selectedAddress);
+      this.setState({
+        transactions:
+          findMisesAccount(this.props.accountList, selectedAddress)
+            .transactions || [],
+      });
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject();
+    }
   }
   scrollToIndex = (index) => {
     if (!this.scrolling && (this.props.headerHeight || index)) {

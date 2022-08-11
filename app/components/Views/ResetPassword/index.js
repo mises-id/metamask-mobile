@@ -450,7 +450,9 @@ class ResetPassword extends PureComponent {
    */
   recreateVault = async (password) => {
     const { originalPassword, password: newPassword } = this.state;
-    const { KeyringController, PreferencesController } = Engine.context;
+
+    const { KeyringController, PreferencesController, MisesController } =
+      Engine.context;
     const seedPhrase = await this.getSeedPhrase();
     const oldPrefs = PreferencesController.state;
 
@@ -512,9 +514,9 @@ class ResetPassword extends PureComponent {
     await PreferencesController.update(prefUpdates);
     // Reselect previous selected account if still available
     if (hdKeyring.accounts.includes(selectedAddress)) {
-      PreferencesController.setSelectedAddress(selectedAddress);
+      MisesController.setSelectedAddress(selectedAddress);
     } else {
-      PreferencesController.setSelectedAddress(hdKeyring.accounts[0]);
+      MisesController.setSelectedAddress(hdKeyring.accounts[0]);
     }
   };
 

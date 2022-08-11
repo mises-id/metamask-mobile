@@ -213,6 +213,10 @@ class Engine {
           ),
           onPreferencesStateChange: (listener) =>
             preferencesController.subscribe(listener),
+          setPreferencesSelectedAddress:
+            preferencesController.setSelectedAddress.bind(
+              preferencesController,
+            ),
         },
         {},
         initialState.MisesController,
@@ -701,6 +705,7 @@ class Engine {
       NetworkController,
       TransactionController,
       TokensController,
+      MisesController,
     } = this.context;
     // Select same network ?
     await NetworkController.setProviderType(network.provider.type);
@@ -739,9 +744,9 @@ class Engine {
     await PreferencesController.update(updatedPref);
 
     if (accounts.hd.includes(toChecksumAddress(updatedPref.selectedAddress))) {
-      PreferencesController.setSelectedAddress(updatedPref.selectedAddress);
+      MisesController.setSelectedAddress(updatedPref.selectedAddress);
     } else {
-      PreferencesController.setSelectedAddress(accounts.hd[0]);
+      MisesController.setSelectedAddress(accounts.hd[0]);
     }
 
     const mapTx = ({

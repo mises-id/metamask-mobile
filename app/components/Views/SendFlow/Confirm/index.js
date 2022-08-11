@@ -1114,10 +1114,10 @@ class Confirm extends PureComponent {
   onAccountChange = async (accountAddress) => {
     const { identities, accounts } = this.props;
     const { name } = identities[accountAddress];
-    const { PreferencesController } = Engine.context;
+    const { MisesController } = Engine.context;
     const ens = await doENSReverseLookup(accountAddress);
     const fromAccountName = ens || name;
-    PreferencesController.setSelectedAddress(accountAddress);
+    MisesController.setSelectedAddress(accountAddress);
     // If new account doesn't have the asset
     this.setState({
       fromAccountName,

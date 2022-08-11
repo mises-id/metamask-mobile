@@ -25,8 +25,12 @@ export const recreateVaultWithSamePassword = async (
   password = '',
   selectedAddress,
 ) => {
-  const { KeyringController, PreferencesController, AccountTrackerController } =
-    Engine.context;
+  const {
+    KeyringController,
+    PreferencesController,
+    AccountTrackerController,
+    MisesController,
+  } = Engine.context;
   const seedPhrase = await getSeedPhrase(password);
   const oldPrefs = PreferencesController.state;
   const oldAccounts = AccountTrackerController.accounts;
@@ -97,11 +101,11 @@ export const recreateVaultWithSamePassword = async (
   // Reselect previous selected account if still available
   for (const keyring of recreatedKeyrings) {
     if (keyring.accounts.includes(selectedAddress)) {
-      PreferencesController.setSelectedAddress(selectedAddress);
+      MisesController.setSelectedAddress(selectedAddress);
       return;
     }
   }
 
   // Default to first account as fallback
-  PreferencesController.setSelectedAddress(hdKeyring.accounts[0]);
+  MisesController.setSelectedAddress(hdKeyring.accounts[0]);
 };

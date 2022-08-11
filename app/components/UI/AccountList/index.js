@@ -188,7 +188,7 @@ class AccountList extends PureComponent {
 
   onAccountChange = async (newIndex) => {
     const previousIndex = this.state.selectedAccountIndex;
-    const { PreferencesController } = Engine.context;
+    const { MisesController } = Engine.context;
     const { keyrings, accounts } = this.props;
 
     requestAnimationFrame(async () => {
@@ -212,7 +212,7 @@ class AccountList extends PureComponent {
           return;
         }
 
-        PreferencesController.setSelectedAddress(accountsOrdered[newIndex]);
+        MisesController.setSelectedAddress(accountsOrdered[newIndex]);
 
         this.props.onAccountChange();
 
@@ -275,13 +275,13 @@ class AccountList extends PureComponent {
     requestAnimationFrame(async () => {
       try {
         await KeyringController.addNewAccount();
-        const { PreferencesController } = Engine.context;
+        const { MisesController } = Engine.context;
         const identities = Object.keys(this.props.identities);
         const allIdentities = this.findNotImportIdentity();
         const newIndex = identities.findIndex(
           (val) => val === allIdentities[allIdentities.length - 1],
         );
-        PreferencesController.setSelectedAddress(identities[newIndex]);
+        MisesController.setSelectedAddress(identities[newIndex]);
         this.mounted && this.setState({ selectedAccountIndex: newIndex });
         setTimeout(() => {
           this.flatList &&
