@@ -60,7 +60,7 @@ index 8c55e27..dfabbe7 100644
  /**
   * @type ProviderConfig
 diff --git a/node_modules/@metamask/controllers/dist/network/NetworkController.js b/node_modules/@metamask/controllers/dist/network/NetworkController.js
-index cb5c205..0441140 100644
+index cb5c205..114c6b9 100644
 --- a/node_modules/@metamask/controllers/dist/network/NetworkController.js
 +++ b/node_modules/@metamask/controllers/dist/network/NetworkController.js
 @@ -42,6 +42,7 @@ var NetworksChainId;
@@ -71,15 +71,22 @@ index cb5c205..0441140 100644
  })(NetworksChainId = exports.NetworksChainId || (exports.NetworksChainId = {}));
  const LOCALHOST_RPC_URL = 'http://localhost:8545';
  /**
-@@ -65,7 +66,7 @@ class NetworkController extends BaseController_1.BaseController {
+@@ -65,13 +66,13 @@ class NetworkController extends BaseController_1.BaseController {
          this.defaultState = {
              network: 'loading',
              isCustomNetwork: false,
 -            provider: { type: constants_1.MAINNET, chainId: NetworksChainId.mainnet },
-+            provider: { type: 'mises', chainId: NetworksChainId.mises },
++            provider: { type: 'mises', chainId: NetworksChainId.mises},
              properties: { isEIP1559Compatible: false },
          };
          this.initialize();
+         this.getEIP1559Compatibility();
+     }
+-    initializeProvider(type, rpcTarget, chainId, ticker, nickname) {
++    initializeProvider(type, rpcTarget, chainId, ticker='MIS', nickname) {
+         this.update({ isCustomNetwork: this.getIsCustomNetwork(chainId) });
+         switch (type) {
+             case 'kovan':
 @@ -81,8 +82,12 @@ class NetworkController extends BaseController_1.BaseController {
              case 'optimism':
              case 'optimismTest':
@@ -93,14 +100,47 @@ index cb5c205..0441140 100644
              case 'localhost':
                  this.setupStandardProvider(LOCALHOST_RPC_URL);
                  break;
-@@ -119,12 +124,32 @@ class NetworkController extends BaseController_1.BaseController {
+@@ -98,11 +103,13 @@ class NetworkController extends BaseController_1.BaseController {
+         this.update({ network: 'loading', properties: {} });
+         const { rpcTarget, type, chainId, ticker } = this.state.provider;
+         this.initializeProvider(type, rpcTarget, chainId, ticker);
++        console.log(this.state.provider,'this.state.provider')
+         this.lookupNetwork();
+     }
+     registerProvider() {
+         this.provider.on('error', this.verifyNetwork.bind(this));
+         this.ethQuery = new eth_query_1.default(this.provider);
++
+     }
+     setupInfuraProvider(type) {
+         const infuraProvider = (0, createProvider_1.default)({
+@@ -119,12 +126,51 @@ class NetworkController extends BaseController_1.BaseController {
          });
          this.updateProvider((0, zero_1.default)(config));
      }
 +    setupMisesProvider(type) {
 +        const provider = {
 +            on:()=>{},
-+            sendAsync:()=>{},
++            sendAsync:(opts, cb)=>{
++                console.log("mises provider sendAsync", opts)
++                if (opts.method == 'net_version') {
++                    cb(null, {result:'46'})
++                }
++                if (opts.method == 'eth_chainId') {
++                    cb(null, {result:46})
++                }
++                if (opts.method == 'eth_getBalance') {
++                    cb(null, {result:0})
++                }
++                if (opts.method == 'eth_getBlockByNumber') {
++                    cb(null, {result:{}})
++                }
++                if (opts.method == 'eth_call' || opts.method == 'eth_sendTransaction' || opts.method == 'eth_sendTransaction') {
++                    cb(new Error(
++                        `Your Metamask wallet is now connected to Mises chain, please switch to ETH chain before invoke ${req.method}`,
++                      ), null)
++                }
++            },
 +            send:()=>{},
 +            disconnect:()=>{},
 +            connect:()=>{},
@@ -126,7 +166,7 @@ index cb5c205..0441140 100644
              chainId !== NetworksChainId.localhost);
      }
      setupStandardProvider(rpcTarget, chainId, ticker, nickname) {
-@@ -193,7 +218,7 @@ class NetworkController extends BaseController_1.BaseController {
+@@ -193,7 +239,7 @@ class NetworkController extends BaseController_1.BaseController {
      setProviderType(type) {
          const _a = this.state.provider, { rpcTarget, chainId, nickname } = _a, providerState = __rest(_a, ["rpcTarget", "chainId", "nickname"]);
          this.update({
