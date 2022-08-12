@@ -998,7 +998,7 @@ export function getWalletNavbarOptions(
       <TouchableOpacity style={styles.infoButton} onPress={hiddenWallet}>
         <IonicIcon
           name={'ios-close'}
-          size={45}
+          size={38}
           color={themeColors.primary.default}
         />
       </TouchableOpacity>
