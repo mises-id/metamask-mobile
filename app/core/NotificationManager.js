@@ -271,8 +271,8 @@ class NotificationManager {
   /**
    * Navigates to a specific view
    */
-  goTo(view) {
-    this._navigation.navigate(view);
+  goTo(view, params = {}) {
+    this._navigation.navigate(view, params);
   }
 
   /**
@@ -481,5 +481,8 @@ export default {
   },
   showSimpleNotification(data) {
     return instance?.showSimpleNotification(data);
+  },
+  goTo(view, opts) {
+    return instance?.goTo(view, opts);
   },
 };

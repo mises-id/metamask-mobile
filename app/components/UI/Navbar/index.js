@@ -13,10 +13,10 @@ import {
   Image,
   Keyboard,
   InteractionManager,
+  NativeModules,
 } from 'react-native';
 import { fontStyles, colors as importedColors } from '../../../styles/common';
 import IonicIcon from 'react-native-vector-icons/Ionicons';
-import AntIcon from 'react-native-vector-icons/AntDesign';
 import EvilIcons from 'react-native-vector-icons/EvilIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import URL from 'url-parse';
@@ -30,7 +30,7 @@ import Device from '../../../util/device';
 import { isGatewayUrl } from '../../../lib/ens-ipfs/resolver';
 import { getHost } from '../../../util/browser';
 import { BACK_ARROW_BUTTON_ID } from '../../../constants/test-ids';
-
+const { MisesModule } = NativeModules;
 const { HOMEPAGE_URL } = AppConstants;
 
 const trackEvent = (event) => {
@@ -963,13 +963,15 @@ export function getWalletNavbarOptions(
     trackEvent(ANALYTICS_EVENT_OPTS.COMMON_TAPS_HAMBURGER_MENU);
   }
 
-  function openQRScanner() {
-    navigation.navigate('QRScanner', {
-      onScanSuccess,
-    });
-    trackEvent(ANALYTICS_EVENT_OPTS.WALLET_QR_SCANNER);
-  }
-
+  // function openQRScanner() {
+  //   navigation.navigate('QRScanner', {
+  //     onScanSuccess,
+  //   });
+  //   trackEvent(ANALYTICS_EVENT_OPTS.WALLET_QR_SCANNER);
+  // }
+  const hiddenWallet = () => {
+    MisesModule.dismiss();
+  };
   return {
     headerTitle: () => <NavbarTitle title={title} />,
     headerLeft: () => (
@@ -986,12 +988,19 @@ export function getWalletNavbarOptions(
       </TouchableOpacity>
     ),
     headerRight: () => (
-      <TouchableOpacity
-        style={styles.infoButton}
-        // eslint-disable-next-line
-        onPress={openQRScanner}
-      >
-        <AntIcon name="scan1" size={28} style={innerStyles.headerIcon} />
+      // <TouchableOpacity
+      //   style={styles.infoButton}
+      //   // eslint-disable-next-line
+      //   onPress={openQRScanner}
+      // >
+      //   <AntIcon name="scan1" size={28} style={innerStyles.headerIcon} />
+      // </TouchableOpacity>
+      <TouchableOpacity style={styles.infoButton} onPress={hiddenWallet}>
+        <IonicIcon
+          name={'ios-close'}
+          size={45}
+          color={themeColors.primary.default}
+        />
       </TouchableOpacity>
     ),
     headerStyle: innerStyles.headerStyle,
