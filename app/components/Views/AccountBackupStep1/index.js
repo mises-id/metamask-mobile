@@ -223,7 +223,7 @@ const AccountBackupStep1 = (props) => {
             <Text style={styles.title}>
               {strings('account_backup_step_1.title')}
             </Text>
-            <SeedPhraseVideo onClose={skip} />
+            {/* <SeedPhraseVideo onClose={skip} /> */}
             <View style={styles.text}>
               <Text style={styles.label}>
                 {strings('account_backup_step_1.info_text_1_1')}{' '}
@@ -238,7 +238,7 @@ const AccountBackupStep1 = (props) => {
             </View>
           </View>
           <View style={styles.buttonWrapper}>
-            {!hasFunds && (
+            {/* {!hasFunds && (
               <View style={styles.remindLaterContainer}>
                 <TouchableOpacity
                   style={styles.remindLaterButton}
@@ -254,7 +254,7 @@ const AccountBackupStep1 = (props) => {
                   {strings('account_backup_step_1.remind_me_later_subtext')}
                 </Text>
               </View>
-            )}
+            )} */}
             <View style={styles.ctaContainer}>
               <StyledButton
                 containerStyle={styles.button}

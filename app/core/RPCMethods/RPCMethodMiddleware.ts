@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, NativeModules } from 'react-native';
 import { getVersion } from 'react-native-device-info';
 import { createAsyncMiddleware } from 'json-rpc-engine';
 import { ethErrors } from 'eth-json-rpc-errors';
@@ -18,7 +18,8 @@ import { removeBookmark } from '../../actions/bookmarks';
 import setOnboardingWizardStep from '../../actions/wizard';
 import { v1 as random } from 'uuid';
 import Logger from '../../util/Logger';
-
+import NotificationManager from '../NotificationManager.js';
+const { MisesModule } = NativeModules;
 const Engine = ImportedEngine as any;
 
 let appVersion = '';
@@ -194,6 +195,9 @@ export const getRpcMethodMiddleware = ({
       }
       return Promise.resolve();
     };
+    const dismiss = () => {
+      MisesModule.dismiss();
+    };
     const rpcMethods: any = {
       eth_getTransactionByHash: async () => {
         res.result = await polyfillGasPrice('getTransactionByHash', req.params);
@@ -360,19 +364,16 @@ export const getRpcMethodMiddleware = ({
 
         checkTabActive();
         await requestPromiseLock();
-        console.log(1111)
         checkActiveAccountAndChainId({
           address: params.from,
           activeAccounts: getAccounts(),
         });
-        console.log(222)
 
         const rawSig = await PersonalMessageManager.addUnapprovedMessageAsync({
           ...params,
           ...pageMeta,
           origin: hostname,
         });
-        console.log(333)
         res.result = rawSig;
       },
 
@@ -597,7 +598,7 @@ export const getRpcMethodMiddleware = ({
 
         store.dispatch(setOnboardingWizardStep(1));
 
-        navigation.navigate('WalletView');
+        NotificationManager.goTo('WalletView');
 
         res.result = true;
       },
@@ -746,6 +747,7 @@ export const getRpcMethodMiddleware = ({
       mises_setUserInfo: async () => {
         try {
           await requestPromiseLock();
+          dismiss();
           await Engine.context.MisesController.setUserInfo(req.params[0]);
           res.result = true;
         } catch (error) {
@@ -756,6 +758,7 @@ export const getRpcMethodMiddleware = ({
       mises_userFollow: async () => {
         try {
           await requestPromiseLock();
+          dismiss();
           await Engine.context.MisesController.setFollow(req.params[0]);
           res.result = true;
         } catch (error) {
@@ -765,6 +768,7 @@ export const getRpcMethodMiddleware = ({
       mises_userUnFollow: async () => {
         try {
           await requestPromiseLock();
+          dismiss();
           await Engine.context.MisesController.setUnFollow(req.params[0]);
           res.result = true;
         } catch (error) {
@@ -785,7 +789,10 @@ export const getRpcMethodMiddleware = ({
         res.result = 'mises_openRestore';
       },
       mises_openNFTPage: async () => {
-        navigation.navigate('WalletView');
+        MisesModule.popup();
+        NotificationManager.goTo('WalletView', {
+          initialPage: 1,
+        });
         res.result = true;
       },
       mises_connect: async () => {
@@ -817,6 +824,7 @@ export const getRpcMethodMiddleware = ({
       mises_getCollectibles: async () => {
         try {
           await requestPromiseLock();
+          dismiss();
           await Engine.context.MisesController.getCollectibles();
           res.result = true;
         } catch (error) {

@@ -428,7 +428,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     let address = '';
     for (const key in accountList) {
       const item = accountList[key];
-      if (item.misesId.toLowerCase() === misesId.toLowerCase()) {
+      if (item.misesId?.toLowerCase() === misesId.toLowerCase()) {
         address = key;
       }
     }
