@@ -17,6 +17,7 @@ import { store } from '../../store';
 import { removeBookmark } from '../../actions/bookmarks';
 import setOnboardingWizardStep from '../../actions/wizard';
 import { v1 as random } from 'uuid';
+import Logger from '../../util/Logger';
 
 const Engine = ImportedEngine as any;
 
@@ -162,6 +163,7 @@ export const getRpcMethodMiddleware = ({
 
     const requestUserApproval = async ({ type = '', requestData = {} }) => {
       checkTabActive();
+      console.log('requestUserApproval', type, requestData);
       await Engine.context.ApprovalController.clear(
         ethErrors.provider.userRejectedRequest(),
       );
@@ -187,6 +189,8 @@ export const getRpcMethodMiddleware = ({
 
       if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
         await ensureUnlock();
+      } else {
+        await Logger.log("requestPromiseLock", "skipped");
       }
       return Promise.resolve();
     };
@@ -246,6 +250,7 @@ export const getRpcMethodMiddleware = ({
 
         const { PreferencesController } = Engine.context;
         await requestPromiseLock();
+        Logger.log('eth_requestAccounts', 'requestPromiseLock finish');
         let { selectedAddress } = PreferencesController.state;
 
         selectedAddress = selectedAddress?.toLowerCase();
@@ -665,14 +670,9 @@ export const getRpcMethodMiddleware = ({
         const {
           privacy: { privacyMode },
         } = store.getState();
-        const { PreferencesController, MisesController, KeyringController } =
-          Engine.context;
-        const { selectedAddress: hasSelectedAddress } =
-          PreferencesController.state;
-
-        if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
-          await ensureUnlock();
-        }
+        const { PreferencesController, MisesController } = Engine.context;
+        await requestPromiseLock();
+        await Logger.log('mises_requestAccounts', 'requestPromiseLock finish');
         let { selectedAddress } = PreferencesController.state;
         selectedAddress = selectedAddress?.toLowerCase();
         const nonce = new Date().getTime();
@@ -703,6 +703,7 @@ export const getRpcMethodMiddleware = ({
               ...getApprovedHosts?.(),
               [fullHostname]: true,
             });
+            console.log("selectedAddress", selectedAddress);
             if (selectedAddress) {
               const key = await Engine.context.MisesController.exportAccount(
                 selectedAddress,
@@ -725,6 +726,7 @@ export const getRpcMethodMiddleware = ({
               );
             }
           } catch (e) {
+            console.log("mises_requestAccounts", e);
             throw ethErrors.provider.userRejectedRequest(
               'User denied account authorization.',
             );
