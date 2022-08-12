@@ -104,5 +104,5 @@ export function findMisesAccount(
 export const misesExplorer = 'https://gw.mises.site/';
 export const misesKey = 'mises';
 export function isMisesChain(type: string) {
-  return type.toLowerCase() === misesKey;
+  return type?.toLowerCase() === misesKey;
 }

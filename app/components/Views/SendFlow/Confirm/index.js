@@ -1029,7 +1029,6 @@ class Confirm extends PureComponent {
         };
         await KeyringController.resetQRKeyringState();
         this.props.refreshTransactions(true);
-        // MisesController.refreshTransactions(this.props.selectedAddress);
       } else {
         let error;
         if (gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
@@ -1048,20 +1047,20 @@ class Confirm extends PureComponent {
           this.setState({ transactionConfirmed: false, stopUpdateGas: true });
           return;
         }
-
-        const { result, transactionMetaResult } =
+        const { result, transactionMeta: transactionMetaObj } =
           await TransactionController.addTransaction(
             transaction,
             TransactionTypes.MMM,
             WalletDevice.MM_MOBILE,
           );
         await KeyringController.resetQRKeyringState();
-        await TransactionController.approveTransaction(transactionMeta.id);
+        await TransactionController.approveTransaction(transactionMetaObj.id);
         await new Promise((resolve) => resolve(result));
-        transactionMeta = transactionMetaResult;
-        if (transactionMeta.error) {
-          throw transactionMeta.error;
+
+        if (transactionMetaObj.error) {
+          throw transactionMetaObj.error;
         }
+        transactionMeta = transactionMetaObj;
       }
 
       InteractionManager.runAfterInteractions(() => {
