@@ -136,7 +136,6 @@ class NativeBridge extends EventEmitter {
           return true;
         return false;
       }) || null;
-    console.log("findBridge", found);
     return found;
   }
 
