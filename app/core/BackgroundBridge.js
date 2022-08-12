@@ -185,7 +185,6 @@ export class BackgroundBridge extends EventEmitter {
   }
 
   setProviderAndBlockTracker({ provider, blockTracker }) {
-    console.log('setProviderAndBlockTracker', provider, blockTracker);
     const tracker = blockTracker || new EmptyBlockTracker();
     // update or intialize proxies
     if (this._providerProxy) {

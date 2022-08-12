@@ -29,18 +29,19 @@ const ensureUnlock = async () => {
   const { KeyringController, PreferencesController } = Engine.context;
   if (!KeyringController.isUnlocked()) {
     MisesModule.popup();
+
     const unlocked = new Promise((resolve, reject) => {
-      PreferencesController.subscribe((res) => {
+      const listener = (res) => {
         if (res.selectedAddress) {
           Logger.log('unlocked');
+          PreferencesController.unsubscribe(listener);
           resolve('unlocked');
         }
-      });
-      // KeyringController.onUnlock(() => {
-
-      // });
+      };
+      PreferencesController.subscribe(listener);
       nativeBridge.onWindowHide(() => {
         Logger.log('dismissed');
+        PreferencesController.unsubscribe(listener);
         reject('dismissed');
       });
     });
@@ -51,14 +52,14 @@ const ensureUnlock = async () => {
 };
 
 class NativePort extends EventEmitter {
-  constructor(url, isMainFrame) {
+  constructor(webviewid, isMainFrame) {
     super();
-    this._url = window;
+    this._webviewid = webviewid;
     this._isMainFrame = isMainFrame;
   }
 
   postMessage = (msg, origin = '*') => {
-    MisesModule.postMessageFromRN(JSON.stringify(msg), origin);
+    MisesModule.postMessageFromRN(JSON.stringify(msg), origin, this._webviewid);
   };
 }
 
@@ -66,34 +67,36 @@ class NativeBridge extends EventEmitter {
   constructor(options) {
     super();
     this.backgroundBridges = [];
-    this.pendingUrl = null;
+    this.pendingMessages = [];
     this.ready = false;
   }
   onEngineReady() {
-    Logger.log('NativeBridge.onEngineReady');
+    Logger.log('NativeBridge.onEngineReady', this.pendingMessages);
     this.ready = true;
-    if (this.pendingUrl) {
-      const origin = new URL(this.pendingUrl).origin;
-      this.initializeBackgroundBridge(origin, true);
-      this.pendingUrl = null;
+    if (this.pendingMessages.length) {
+      const messages = [...this.pendingMessages];
+      messages.forEach((message) => {
+        this.postMessageFromWeb(message.data, message.bridgeInfo.webviewid);
+      });
+      this.pendingMessages = [];
     }
   }
-  postMessageFromWeb(data) {
+  postMessageFromWeb(data, webviewid) {
     try {
       data = typeof data === 'string' ? JSON.parse(data) : data;
       if (!data || !data.name) {
         return;
       }
-      Logger.log('NativeBridge.postMessageFromWeb', data, this);
+      Logger.log('NativeBridge.postMessageFromWeb', data);
       if (data.name) {
         const { origin } = data && data.origin && new URL(data.origin);
-        const found = this.findBridge(origin);
+        const found = this.activate({ webviewid, origin }, data);
         if (found) {
           found.onMessage(data);
           if (
             data &&
             data.data &&
-            data.data.method != 'metamask_getProviderState'
+            data.data.method !== 'metamask_getProviderState'
           ) {
             found.lastActiveTime = new Date().getTime();
           }
@@ -105,30 +108,35 @@ class NativeBridge extends EventEmitter {
     }
   }
 
-  loadStarted(url) {
-    Logger.log('NativeBridge.loadStarted', url);
-    if (url === 'about://newtab/') {
-      return;
-    }
+  activate(bridgeInfo, data) {
+    Logger.log('NativeBridge.activate', bridgeInfo);
     if (!this.ready) {
-      this.pendingUrl = url;
-      return;
+      this.pendingMessages = [{ bridgeInfo, data }, ...this.pendingMessages];
+      return null;
     }
-    const origin = new URL(url).origin;
-    const found = this.findBridge(origin);
+    const found = this.findBridge(bridgeInfo);
     if (!found) {
       this.clearIdleBridge();
-      this.initializeBackgroundBridge(origin, true);
+      return this.initializeBackgroundBridge(bridgeInfo, true);
     }
+    return found;
   }
-  findBridge(origin) {
-    if (!origin) {
+  findBridge(bridgeInfo) {
+    if (!bridgeInfo || !bridgeInfo.webviewid) {
       return null;
     }
 
     const bridges = this.backgroundBridges;
-    const found = bridges.find((bridge) => bridge.url === origin) || null;
-
+    const found =
+      bridges.find((bridge) => {
+        if (
+          bridge._webviewRef === bridgeInfo.webviewid &&
+          (bridge.url = bridgeInfo.origin)
+        )
+          return true;
+        return false;
+      }) || null;
+    console.log("findBridge", found);
     return found;
   }
 
@@ -175,11 +183,11 @@ class NativeBridge extends EventEmitter {
     return this.once('window_show', listener);
   }
 
-  initializeBackgroundBridge(urlBridge, isMainFrame) {
-    Logger.log('NativeBridge.initializeBackgroundBridge', urlBridge);
+  initializeBackgroundBridge(bridgeInfo, isMainFrame) {
+    Logger.log('NativeBridge.initializeBackgroundBridge', bridgeInfo.webviewid);
     const newBridge = new BackgroundBridge({
-      webview: null,
-      url: urlBridge,
+      webview: { current: bridgeInfo.webviewid },
+      url: bridgeInfo.origin,
       getRpcMethodMiddleware: ({ hostname, getProviderState }) =>
         getRpcMethodMiddleware({
           hostname,
@@ -189,7 +197,7 @@ class NativeBridge extends EventEmitter {
           setApprovedHosts,
           approveHost,
           // Website info
-          url: { current: urlBridge },
+          url: { current: bridgeInfo.origin },
           title: { current: '' },
           icon: { current: '' },
           // Bookmarks
@@ -204,9 +212,10 @@ class NativeBridge extends EventEmitter {
           ensureUnlock,
         }),
       isMainFrame,
-      port: new NativePort(urlBridge, isMainFrame),
+      port: new NativePort(bridgeInfo.webviewid, isMainFrame),
     });
     this.backgroundBridges.push(newBridge);
+    return newBridge;
   }
 }
 
@@ -216,14 +225,12 @@ const instance = {
   init() {
     const BatchedBridge = require('react-native/Libraries/BatchedBridge/BatchedBridge');
     BatchedBridge.registerCallableModule('NativeBridge', {
-      postMessage(data) {
-        nativeBridge.postMessageFromWeb(data);
+      postMessage(data, webviewid) {
+        nativeBridge.postMessageFromWeb(data, webviewid);
       },
-      loadStarted(data) {
-        nativeBridge.loadStarted(data);
-      },
-      windowStatusChanged(data) {
-        nativeBridge.windowStatusChanged(data);
+
+      windowStatusChanged(status) {
+        nativeBridge.windowStatusChanged(status);
       },
     });
   },
