@@ -63,7 +63,7 @@ import { mockTheme, useAppThemeFromContext } from '../../../util/theme';
 import withQRHardwareAwareness from '../../UI/QRHardware/withQRHardwareAwareness';
 import QRSigningModal from '../../UI/QRHardware/QRSigningModal';
 import { networkSwitched } from '../../../actions/onboardNetwork';
-
+import NativeBridge from '../../../core/NativeBridge';
 const { MisesModule } = NativeModules;
 
 const hstInterface = new ethers.utils.Interface(abi);
@@ -493,7 +493,15 @@ const RootRPCMethodsUI = (props) => {
     setWalletConnectRequestInfo({});
     WalletConnect.hub.emit('walletconnectSessionRequest::rejected', peerId);
   };
-
+  const [isPopVisible, setIsPopVisible] = useState(false);
+  useEffect(() => {
+    NativeBridge.onWindowShow(() => {
+      setIsPopVisible(true);
+    }, true);
+    NativeBridge.onWindowHide(() => {
+      setIsPopVisible(false);
+    }, true);
+  }, []);
   const renderWalletConnectSessionRequestModal = () => {
     const meta = walletConnectRequestInfo.peerMeta || null;
     return (
@@ -876,9 +884,8 @@ const RootRPCMethodsUI = (props) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  return (
-    <React.Fragment>
+  const FragmentModal = () => (
+    <>
       {renderSigningModal()}
       {renderWalletConnectSessionRequestModal()}
       {renderDappTransactionModal()}
@@ -889,7 +896,10 @@ const RootRPCMethodsUI = (props) => {
       {renderWatchAssetModal()}
       {renderQRSigningModal()}
       {renderPostPxModal()}
-    </React.Fragment>
+    </>
+  );
+  return (
+    <React.Fragment>{isPopVisible ? <FragmentModal /> : null}</React.Fragment>
   );
 };
 

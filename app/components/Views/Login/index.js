@@ -50,6 +50,7 @@ import {
   RESET_WALLET_ID,
 } from '../../../constants/test-ids';
 import NativeBridge from '../../../core/NativeBridge';
+import { getLoginNavbarOptions } from '../../../components/UI/Navbar';
 
 const deviceHeight = Device.getDeviceHeight();
 const breakPoint = deviceHeight < 700;
@@ -242,6 +243,12 @@ class Login extends PureComponent {
 
   fieldRef = React.createRef();
 
+  updateNavBar = () => {
+    const { navigation } = this.props;
+    const colors = this.context.colors || mockTheme.colors;
+    navigation.setOptions(getLoginNavbarOptions(colors));
+  };
+
   async componentDidMount() {
     const { initialScreen } = this.props;
     const { KeyringController } = Engine.context;
@@ -284,7 +291,12 @@ class Login extends PureComponent {
     }
 
     this.props.checkedAuth();
+    this.updateNavBar();
   }
+
+  componentDidUpdate = () => {
+    this.updateNavBar();
+  };
 
   componentWillUnmount() {
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackPress);

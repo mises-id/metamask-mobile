@@ -891,6 +891,51 @@ export function getOfflineModalNavbar() {
   };
 }
 
+const hiddenWallet = () => {
+  MisesModule.dismiss();
+};
+/**
+ * Function that returns the navigation options
+ * for our login screen,
+ *
+ * @returns {Object} - Corresponding navbar options containing headerTitle, headerTitle and headerTitle
+ */
+export function getLoginNavbarOptions(
+  themeColors,
+) {
+  const innerStyles = StyleSheet.create({
+    headerStyle: {
+      backgroundColor: themeColors.background.default,
+      shadowColor: importedColors.transparent,
+      elevation: 0,
+    },
+    headerIcon: {
+      color: themeColors.primary.default,
+    },
+  });
+  return {
+    headerTitle: () => <View />,
+    headerLeft: () => <View />,
+    headerRight: () => (
+      // <TouchableOpacity
+      //   style={styles.infoButton}
+      //   // eslint-disable-next-line
+      //   onPress={openQRScanner}
+      // >
+      //   <AntIcon name="scan1" size={28} style={innerStyles.headerIcon} />
+      // </TouchableOpacity>
+      <TouchableOpacity style={styles.infoButton} onPress={hiddenWallet}>
+        <IonicIcon
+          name={'ios-close'}
+          size={38}
+          color={themeColors.primary.default}
+        />
+      </TouchableOpacity>
+    ),
+    headerStyle: innerStyles.headerStyle,
+    headerTintColor: themeColors.primary.default,
+  };
+}
 /**
  * Function that returns the navigation options
  * for our wallet screen,
@@ -914,49 +959,49 @@ export function getWalletNavbarOptions(
     },
   });
 
-  const onScanSuccess = (data, content) => {
-    if (data.private_key) {
-      Alert.alert(
-        strings('wallet.private_key_detected'),
-        strings('wallet.do_you_want_to_import_this_account'),
-        [
-          {
-            text: strings('wallet.cancel'),
-            onPress: () => false,
-            style: 'cancel',
-          },
-          {
-            text: strings('wallet.yes'),
-            onPress: async () => {
-              try {
-                await importAccountFromPrivateKey(data.private_key);
-                navigation.navigate('ImportPrivateKeyView', {
-                  screen: 'ImportPrivateKeySuccess',
-                });
-              } catch (e) {
-                Alert.alert(
-                  strings('import_private_key.error_title'),
-                  strings('import_private_key.error_message'),
-                );
-              }
-            },
-          },
-        ],
-        { cancelable: false },
-      );
-    } else if (data.seed) {
-      Alert.alert(
-        strings('wallet.error'),
-        strings('wallet.logout_to_import_seed'),
-      );
-    } else {
-      setTimeout(() => {
-        DeeplinkManager.parse(content, {
-          origin: AppConstants.DEEPLINKS.ORIGIN_QR_CODE,
-        });
-      }, 500);
-    }
-  };
+  // const onScanSuccess = (data, content) => {
+  //   if (data.private_key) {
+  //     Alert.alert(
+  //       strings('wallet.private_key_detected'),
+  //       strings('wallet.do_you_want_to_import_this_account'),
+  //       [
+  //         {
+  //           text: strings('wallet.cancel'),
+  //           onPress: () => false,
+  //           style: 'cancel',
+  //         },
+  //         {
+  //           text: strings('wallet.yes'),
+  //           onPress: async () => {
+  //             try {
+  //               await importAccountFromPrivateKey(data.private_key);
+  //               navigation.navigate('ImportPrivateKeyView', {
+  //                 screen: 'ImportPrivateKeySuccess',
+  //               });
+  //             } catch (e) {
+  //               Alert.alert(
+  //                 strings('import_private_key.error_title'),
+  //                 strings('import_private_key.error_message'),
+  //               );
+  //             }
+  //           },
+  //         },
+  //       ],
+  //       { cancelable: false },
+  //     );
+  //   } else if (data.seed) {
+  //     Alert.alert(
+  //       strings('wallet.error'),
+  //       strings('wallet.logout_to_import_seed'),
+  //     );
+  //   } else {
+  //     setTimeout(() => {
+  //       DeeplinkManager.parse(content, {
+  //         origin: AppConstants.DEEPLINKS.ORIGIN_QR_CODE,
+  //       });
+  //     }, 500);
+  //   }
+  // };
 
   function openDrawer() {
     drawerRef.current?.showDrawer?.();
@@ -969,9 +1014,6 @@ export function getWalletNavbarOptions(
   //   });
   //   trackEvent(ANALYTICS_EVENT_OPTS.WALLET_QR_SCANNER);
   // }
-  const hiddenWallet = () => {
-    MisesModule.dismiss();
-  };
   return {
     headerTitle: () => <NavbarTitle title={title} />,
     headerLeft: () => (
