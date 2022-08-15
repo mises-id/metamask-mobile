@@ -261,12 +261,12 @@ const Wallet = ({ navigation }: any) => {
       }
       lock = true;
       getMisesBalance();
-    });
+    }, true);
     NativeBridge.onWindowHide(() => {
       if (timer) {
         clearTimeout(timer);
       }
-    });
+    }, true);
   };
 
   InteractionManager.runAfterInteractions(() => {

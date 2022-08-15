@@ -781,8 +781,9 @@ const RootRPCMethodsUI = (props) => {
 
   const handlePendingApprovals = async (approval) => {
     //TODO: IF WE RECEIVE AN APPROVAL REQUEST, AND WE HAVE ONE ACTIVE, SHOULD WE HIDE THE CURRENT ONE OR NOT?
-    console.log("handlePendingApprovals", approval.pendingApprovalCount);
+    Logger.log('handlePendingApprovals', approval.pendingApprovalCount);
     if (approval.pendingApprovalCount > 0) {
+      MisesModule.popup();
       const key = Object.keys(approval.pendingApprovals)[0];
       const request = approval.pendingApprovals[key];
       const requestData = request.requestData;
@@ -821,7 +822,6 @@ const RootRPCMethodsUI = (props) => {
         default:
           break;
       }
-      MisesModule.popup();
     } else {
       setShowPendingApproval(false);
       MisesModule.dismiss();
