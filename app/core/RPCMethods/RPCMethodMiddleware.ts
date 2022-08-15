@@ -191,7 +191,7 @@ export const getRpcMethodMiddleware = ({
       if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
         await ensureUnlock();
       } else {
-        await Logger.log("requestPromiseLock", "skipped");
+        await Logger.log('requestPromiseLock', 'skipped');
       }
       return Promise.resolve();
     };
@@ -704,7 +704,7 @@ export const getRpcMethodMiddleware = ({
               ...getApprovedHosts?.(),
               [fullHostname]: true,
             });
-            console.log("selectedAddress", selectedAddress);
+            console.log('selectedAddress', selectedAddress);
             if (selectedAddress) {
               const key = await Engine.context.MisesController.exportAccount(
                 selectedAddress,
@@ -727,7 +727,7 @@ export const getRpcMethodMiddleware = ({
               );
             }
           } catch (e) {
-            console.log("mises_requestAccounts", e);
+            console.log('mises_requestAccounts', e);
             throw ethErrors.provider.userRejectedRequest(
               'User denied account authorization.',
             );
@@ -813,8 +813,10 @@ export const getRpcMethodMiddleware = ({
       },
       mises_getAddressToMisesId: async () => {
         try {
-          await Engine.context.MisesController.addressToMisesId(req.params[0]);
-          res.result = true;
+          const misesId = await Engine.context.MisesController.addressToMisesId(
+            req.params[0],
+          );
+          res.result = misesId;
         } catch (error) {
           throw ethErrors.provider.userRejectedRequest(
             'getAddressToMisesId Failure',
