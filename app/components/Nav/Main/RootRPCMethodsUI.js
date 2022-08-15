@@ -781,7 +781,7 @@ const RootRPCMethodsUI = (props) => {
 
   const handlePendingApprovals = async (approval) => {
     //TODO: IF WE RECEIVE AN APPROVAL REQUEST, AND WE HAVE ONE ACTIVE, SHOULD WE HIDE THE CURRENT ONE OR NOT?
-
+    console.log("handlePendingApprovals", approval.pendingApprovalCount);
     if (approval.pendingApprovalCount > 0) {
       const key = Object.keys(approval.pendingApprovals)[0];
       const request = approval.pendingApprovals[key];
