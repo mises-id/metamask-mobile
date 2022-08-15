@@ -828,7 +828,8 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           return result.concat(this.parseTxEvents(activeUser?.address(), item));
         }, [])
         .filter((val) => val);
-      list.sort((a, b) => b.blockNumber - a.blockNumber);
+      Array.isArray(list) &&
+        list?.sort((a, b) => b.blockNumber - a.blockNumber);
       for (const key in accountList) {
         if (accountList[key].misesId === activeUser?.address()) {
           accountList[key].transactions = list || [];
