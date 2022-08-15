@@ -176,12 +176,18 @@ class NativeBridge extends EventEmitter {
       this.emit('window_hide');
     }
   }
-  onWindowHide(listener) {
-    return this.once('window_hide', listener);
+  onWindowHide(listener, once) {
+    if (once) {
+      return this.once('window_hide', listener);
+    }
+    return this.on('window_hide', listener);
   }
 
-  onWindowShow(listener) {
-    return this.once('window_show', listener);
+  onWindowShow(listener, once) {
+    if (once) {
+      return this.once('window_show', listener);
+    }
+    return this.on('window_show', listener);
   }
 
   initializeBackgroundBridge(bridgeInfo, isMainFrame) {
@@ -242,11 +248,11 @@ const instance = {
   onEngineReady() {
     nativeBridge.onEngineReady();
   },
-  onWindowShow(listener) {
-    nativeBridge.onWindowShow(listener);
+  onWindowShow(listener, once) {
+    nativeBridge.onWindowShow(listener, once);
   },
-  onWindowHide(listener) {
-    nativeBridge.onWindowHide(listener);
+  onWindowHide(listener, once) {
+    nativeBridge.onWindowHide(listener, once);
   },
 };
 
