@@ -76,7 +76,7 @@ class NativeBridge extends EventEmitter {
     if (this.pendingMessages.length) {
       const messages = [...this.pendingMessages];
       messages.forEach((message) => {
-        this.postMessageFromWeb(message.data, message.bridgeInfo.webviewid);
+        this.postMessageFromWeb(message.data, message.webviewid);
       });
       this.pendingMessages = [];
     }
@@ -110,33 +110,34 @@ class NativeBridge extends EventEmitter {
 
   activate(bridgeInfo, data) {
     Logger.log('NativeBridge.activate', bridgeInfo);
+    const { origin, webviewid } = bridgeInfo;
     if (!this.ready) {
-      this.pendingMessages = [{ bridgeInfo, data }, ...this.pendingMessages];
+      this.pendingMessages = [
+        { origin, webviewid, data },
+        ...this.pendingMessages,
+      ];
       return null;
     }
-    const found = this.findBridge(bridgeInfo);
+    const found = this.findBridge({ origin, webviewid });
     if (!found) {
       this.clearIdleBridge();
-      return this.initializeBackgroundBridge(bridgeInfo, true);
+      return this.initializeBackgroundBridge({ origin, webviewid }, true);
     }
     return found;
   }
   findBridge(bridgeInfo) {
-    if (!bridgeInfo || !bridgeInfo.webviewid) {
+    const { origin, webviewid } = bridgeInfo;
+    if (!origin || !webviewid) {
       return null;
     }
 
-    const bridges = this.backgroundBridges;
+    const bridges = [...this.backgroundBridges];
     const found =
       bridges.find((bridge) => {
-        if (
-          bridge._webviewRef === bridgeInfo.webviewid &&
-          (bridge.url = bridgeInfo.origin)
-        )
+        if (bridge._webviewRef === webviewid && bridge.url === origin)
           return true;
         return false;
       }) || null;
-    console.log("findBridge", found);
     return found;
   }
 
@@ -175,19 +176,26 @@ class NativeBridge extends EventEmitter {
       this.emit('window_hide');
     }
   }
-  onWindowHide(listener) {
-    return this.once('window_hide', listener);
+  onWindowHide(listener, once) {
+    if (once) {
+      return this.once('window_hide', listener);
+    }
+    return this.on('window_hide', listener);
   }
 
-  onWindowShow(listener) {
-    return this.once('window_show', listener);
+  onWindowShow(listener, once) {
+    if (once) {
+      return this.once('window_show', listener);
+    }
+    return this.on('window_show', listener);
   }
 
   initializeBackgroundBridge(bridgeInfo, isMainFrame) {
-    Logger.log('NativeBridge.initializeBackgroundBridge', bridgeInfo.webviewid);
+    const { origin, webviewid } = bridgeInfo;
+    Logger.log('NativeBridge.initializeBackgroundBridge', webviewid);
     const newBridge = new BackgroundBridge({
-      webview: { current: bridgeInfo.webviewid },
-      url: bridgeInfo.origin,
+      webview: { current: webviewid },
+      url: origin,
       getRpcMethodMiddleware: ({ hostname, getProviderState }) =>
         getRpcMethodMiddleware({
           hostname,
@@ -197,7 +205,7 @@ class NativeBridge extends EventEmitter {
           setApprovedHosts,
           approveHost,
           // Website info
-          url: { current: bridgeInfo.origin },
+          url: { current: origin },
           title: { current: '' },
           icon: { current: '' },
           // Bookmarks
@@ -212,7 +220,7 @@ class NativeBridge extends EventEmitter {
           ensureUnlock,
         }),
       isMainFrame,
-      port: new NativePort(bridgeInfo.webviewid, isMainFrame),
+      port: new NativePort(webviewid, isMainFrame),
     });
     this.backgroundBridges.push(newBridge);
     return newBridge;
@@ -240,11 +248,11 @@ const instance = {
   onEngineReady() {
     nativeBridge.onEngineReady();
   },
-  onWindowShow(listener) {
-    nativeBridge.onWindowShow(listener);
+  onWindowShow(listener, once) {
+    nativeBridge.onWindowShow(listener, once);
   },
-  onWindowHide(listener) {
-    nativeBridge.onWindowHide(listener);
+  onWindowHide(listener, once) {
+    nativeBridge.onWindowHide(listener, once);
   },
 };
 
