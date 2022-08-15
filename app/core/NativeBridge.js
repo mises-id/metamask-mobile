@@ -59,6 +59,15 @@ class NativePort extends EventEmitter {
   }
 
   postMessage = (msg, origin = '*') => {
+    if (
+      msg.data &&
+      msg.data.error &&
+      msg.data.error.data &&
+      msg.data.error.data.originalError &&
+      msg.data.error.data.originalError.code === 4902
+    ) {
+      msg.data.error.code = msg.data.error.data.originalError.code;
+    }
     MisesModule.postMessageFromRN(JSON.stringify(msg), origin, this._webviewid);
   };
 }
