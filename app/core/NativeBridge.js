@@ -69,6 +69,7 @@ class NativeBridge extends EventEmitter {
     this.backgroundBridges = [];
     this.pendingMessages = [];
     this.ready = false;
+    this.windowVisible = false;
   }
   onEngineReady() {
     Logger.log('NativeBridge.onEngineReady', this.pendingMessages);
@@ -171,8 +172,10 @@ class NativeBridge extends EventEmitter {
   windowStatusChanged(params) {
     Logger.log('metamask window status', params);
     if (params && params === 'show') {
+      this.windowVisible = true;
       this.emit('window_show');
     } else if (params && params === 'hide') {
+      this.windowVisible = false;
       this.emit('window_hide');
     }
   }
@@ -188,6 +191,9 @@ class NativeBridge extends EventEmitter {
       return this.once('window_show', listener);
     }
     return this.on('window_show', listener);
+  }
+  isWindowVisible() {
+    return this.windowVisible;
   }
 
   initializeBackgroundBridge(bridgeInfo, isMainFrame) {
@@ -253,6 +259,9 @@ const instance = {
   },
   onWindowHide(listener, once) {
     nativeBridge.onWindowHide(listener, once);
+  },
+  isWindowVisible() {
+    return nativeBridge.isWindowVisible();
   },
 };
 

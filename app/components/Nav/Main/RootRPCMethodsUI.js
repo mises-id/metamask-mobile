@@ -493,14 +493,18 @@ const RootRPCMethodsUI = (props) => {
     setWalletConnectRequestInfo({});
     WalletConnect.hub.emit('walletconnectSessionRequest::rejected', peerId);
   };
-  const [isPopVisible, setIsPopVisible] = useState(false);
+  const [isPopVisible, setIsPopVisible] = useState(
+    NativeBridge.isWindowVisible(),
+  );
   useEffect(() => {
     NativeBridge.onWindowShow(() => {
+      Logger.log('setIsPopVisible', true);
       setIsPopVisible(true);
-    }, true);
+    }, false);
     NativeBridge.onWindowHide(() => {
+      Logger.log('setIsPopVisible', false);
       setIsPopVisible(false);
-    }, true);
+    }, false);
   }, []);
   const renderWalletConnectSessionRequestModal = () => {
     const meta = walletConnectRequestInfo.peerMeta || null;

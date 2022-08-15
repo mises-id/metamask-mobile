@@ -284,7 +284,7 @@ class Login extends PureComponent {
           if (!enabled) {
             await this.checkIfRememberMeEnabled();
           }
-        });
+        }, true);
       }
     } else {
       shouldHandleInitialAuth && (await this.checkIfRememberMeEnabled());
