@@ -29,6 +29,7 @@ import Analytics from '../Analytics/Analytics';
 import { uuid } from '@walletconnect/utils';
 
 import { NativeModules } from 'react-native';
+import Logger from '../../util/Logger';
 const { MisesModule } = NativeModules;
 export const MISES_POINT = 'http://127.0.0.1:26657';
 export interface misesBalance {
@@ -78,7 +79,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     {
       getKeyringAccounts,
       updateIdentities,
-      onPreferencesStateChange,
       exportAccount,
       setPreferencesSelectedAddress,
     }: {
@@ -169,7 +169,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         misesBalance,
         misesId: user.address(),
       };
-      console.log(cacheObj, 'refreshMisesBalance');
+      Logger.log(cacheObj, 'refreshMisesBalance');
       return ret;
     } catch (error) {
       return Promise.reject(error);
@@ -205,7 +205,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const balanceLong = await user.getBalanceUMIS();
       if (user && balanceLong) {
         const balanceObj = this.#coinDefine.toCoinMIS(balanceLong);
-        console.log(balanceObj);
+        Logger.log(balanceObj);
         return {
           ...balanceObj,
           denom: balanceObj.denom.toUpperCase(),
@@ -368,7 +368,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           avatarUrl: userInfo?.avatarUrl,
         };
       }
-      console.log(account, 'reloadAccessTokenAndUserInfo');
+      Logger.log(account, 'reloadAccessTokenAndUserInfo');
       this.update({
         accountList: {
           ...accountList,
@@ -405,7 +405,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         misesId,
         token: account.token || '',
       };
-      console.log('ensureMisesAccessToken', userinfo);
+      Logger.log('ensureMisesAccessToken', userinfo);
       return userinfo;
     } catch (error) {
       console.warn('ensureMisesAccessToken', error);
@@ -883,6 +883,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     return this.#msgReader.summary(msg);
   }
   async setSelectedAddress(address: string) {
+    Logger.log('mises:setSelectedAddress');
     this.setPreferencesSelectedAddress(address);
     try {
       if (!address) return;

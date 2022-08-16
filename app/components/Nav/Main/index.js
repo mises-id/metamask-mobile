@@ -47,6 +47,7 @@ import { useAppThemeFromContext, mockTheme } from '../../../util/theme';
 import RootRPCMethodsUI from './RootRPCMethodsUI';
 import usePrevious from '../../hooks/usePrevious';
 import { colors as importedColors } from '../../../styles/common';
+import Logger from '../../../util/Logger';
 
 const Stack = createStackNavigator();
 
@@ -247,7 +248,11 @@ const Main = (props) => {
         connectionChangeHandler,
       );
     }, 1000);
-
+    const { MisesController } = Engine.context;
+    if (props.selectedAddress) {
+      Logger.log(props.selectedAddress, 'main');
+      MisesController.setSelectedAddress(props.selectedAddress);
+    }
     return function cleanup() {
       AppState.removeEventListener('change', handleAppStateChange);
       lockManager.current.stopListening();
@@ -336,11 +341,14 @@ Main.propTypes = {
    * Object that represents the current route info like params passed to it
    */
   route: PropTypes.object,
+  selectedAddress: PropTypes.string,
 };
 
 const mapStateToProps = (state) => ({
   lockTime: state.settings.lockTime,
   thirdPartyApiMode: state.privacy.thirdPartyApiMode,
+  selectedAddress:
+    state.engine.backgroundState.PreferencesController.selectedAddress,
   providerType: state.engine.backgroundState.NetworkController.provider.type,
 });
 
