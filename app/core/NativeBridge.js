@@ -26,24 +26,23 @@ const toggleUrlModal = () => null;
 const injectHomePageScripts = async (bookmarks) => {};
 
 const ensureUnlock = async () => {
-  const { KeyringController, PreferencesController } = Engine.context;
+  const { KeyringController } = Engine.context;
   if (!KeyringController.isUnlocked()) {
     MisesModule.popup();
 
     const unlocked = new Promise((resolve, reject) => {
-      const listener = (res) => {
-        if (res.selectedAddress) {
-          Logger.log('unlocked');
-          PreferencesController.unsubscribe(listener);
-          resolve('unlocked');
-        }
-      };
-      PreferencesController.subscribe(listener);
-      nativeBridge.onWindowHide(() => {
+      function dismissListener() {
         Logger.log('dismissed');
-        PreferencesController.unsubscribe(listener);
+        nativeBridge.removeUnlockListener(unlockListener);
         reject('dismissed');
-      });
+      }
+      function unlockListener() {
+        Logger.log('unlocked');
+        nativeBridge.removeWindowHideListener(dismissListener);
+        resolve('unlocked');
+      }
+      nativeBridge.onUnlock(unlockListener, true);
+      nativeBridge.onWindowHide(dismissListener, true);
     });
     await unlocked;
 
@@ -73,6 +72,11 @@ class NativePort extends EventEmitter {
 }
 
 class NativeBridge extends EventEmitter {
+  prefListener = (res) => {
+    if (res.selectedAddress) {
+      this.emit('unlock');
+    }
+  };
   constructor(options) {
     super();
     this.backgroundBridges = [];
@@ -82,6 +86,8 @@ class NativeBridge extends EventEmitter {
   }
   onEngineReady() {
     Logger.log('NativeBridge.onEngineReady', this.pendingMessages);
+    const {  PreferencesController } = Engine.context;
+    PreferencesController.subscribe(this.prefListener);
     this.ready = true;
     if (this.pendingMessages.length) {
       const messages = [...this.pendingMessages];
@@ -188,11 +194,23 @@ class NativeBridge extends EventEmitter {
       this.emit('window_hide');
     }
   }
+  onUnlock(listener, once) {
+    if (once) {
+      return this.once('unlock', listener);
+    }
+    return this.on('unlock', listener);
+  }
   onWindowHide(listener, once) {
     if (once) {
       return this.once('window_hide', listener);
     }
     return this.on('window_hide', listener);
+  }
+  removeWindowHideListener(listener) {
+    this.removeListener('window_hide', listener);
+  }
+  removeUnlockListener(listener) {
+    this.removeListener('unlock', listener);
   }
 
   onWindowShow(listener, once) {
