@@ -259,7 +259,7 @@ class Login extends PureComponent {
     if (KeyringController.isUnlocked()) {
       await KeyringController.setLocked();
     }
-
+    await this.listenerOnwindowShow();
     const biometryType = await SecureKeychain.getSupportedBiometryType();
     if (biometryType) {
       const previouslyDisabled = await AsyncStorage.getItem(
@@ -273,18 +273,16 @@ class Login extends PureComponent {
         biometryPreviouslyDisabled: !!previouslyDisabled,
       });
       if (shouldHandleInitialAuth) {
-        NativeBridge.onWindowShow(async () => {
-          try {
-            if (enabled && !previouslyDisabled) {
-              await this.tryBiometric();
-            }
-          } catch (e) {
-            console.warn(e);
+        try {
+          if (enabled && !previouslyDisabled) {
+            await this.tryBiometric();
           }
-          if (!enabled) {
-            await this.checkIfRememberMeEnabled();
-          }
-        }, true);
+        } catch (e) {
+          console.warn(e);
+        }
+        if (!enabled) {
+          await this.checkIfRememberMeEnabled();
+        }
       }
     } else {
       shouldHandleInitialAuth && (await this.checkIfRememberMeEnabled());
@@ -293,7 +291,10 @@ class Login extends PureComponent {
     this.props.checkedAuth();
     this.updateNavBar();
   }
-
+  listenerOnwindowShow = () =>
+    new Promise((resolve) => {
+      NativeBridge.onWindowShow(resolve, false);
+    });
   componentDidUpdate = () => {
     this.updateNavBar();
   };
