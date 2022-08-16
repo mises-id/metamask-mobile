@@ -1,7 +1,13 @@
 import { baseStyles, fontStyles } from '../../../styles/common';
 import { strings } from '../../../../locales/i18n';
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import Device from '../../../util/device';
 import PropTypes from 'prop-types';
 import { mockTheme, useAppThemeFromContext } from '../../../util/theme';
@@ -84,6 +90,7 @@ const createStyles = (colors) =>
 const MisesPostTx = (props) => {
   const { postTx, onCancel, onConfirm } = props;
   const { MisesController } = Engine.context;
+  const [requestLock, setRequestLock] = useState(false);
   const [msg, setMsg] = useState([]);
   useEffect(() => {
     const msgs = postTx.tx.map((msg) => ({
@@ -146,12 +153,19 @@ const MisesPostTx = (props) => {
           </StyledButton>
           <StyledButton
             type={'confirm'}
-            onPress={onConfirm}
-            disabled={props.loading}
+            onPress={() => {
+              setRequestLock(true);
+              onConfirm?.();
+            }}
+            disabled={requestLock}
             containerStyle={[styles.button, styles.confirm]}
             testID={'connect-approve-button'}
           >
-            {strings('enter_password.confirm_button')}
+            {requestLock ? (
+              <ActivityIndicator size="small" color={colors.primary.inverse} />
+            ) : (
+              strings('enter_password.confirm_button')
+            )}
           </StyledButton>
         </View>
       </View>

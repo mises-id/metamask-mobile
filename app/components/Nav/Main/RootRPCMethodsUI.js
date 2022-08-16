@@ -729,14 +729,9 @@ const RootRPCMethodsUI = (props) => {
       ethErrors.provider.userRejectedRequest('User rejected the request.'),
     );
   };
-  const [requestLock, setRequestLock] = useState(false);
   const onPostTxConfirm = () => {
     const { MisesController } = Engine.context;
     const { data } = postTx;
-    if (requestLock) {
-      return;
-    }
-    setRequestLock(true);
     MisesController.postTx({
       msgs: data.tx,
       gasLimit: data.gasLimit,
@@ -747,10 +742,9 @@ const RootRPCMethodsUI = (props) => {
         acceptPendingApproval(postTx.id, {
           txHash: res.transactionHash,
         });
-        setRequestLock(false);
       })
-      .catch(() => {
-        setRequestLock(false);
+      .catch((res) => {
+        onPostTxReject();
       });
   };
   const renderPostPxModal = () => (
@@ -765,14 +759,13 @@ const RootRPCMethodsUI = (props) => {
       backdropOpacity={1}
       animationInTiming={300}
       animationOutTiming={300}
+      onSwipeComplete={onPostTxReject}
       onBackdropPress={onPostTxReject}
-      onSwipeComplete={onPostTxConfirm}
       swipeDirection={'down'}
     >
       <MisesPostTx
         onCancel={onPostTxReject}
         onConfirm={onPostTxConfirm}
-        loading={requestLock}
         postTx={postTx?.data}
       />
     </Modal>
