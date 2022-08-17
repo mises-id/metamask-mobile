@@ -294,7 +294,9 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       //   });
       //   return;
       // }
-      resolve('');
+      const ref = MisesModule.getInstallReferrer();
+      Logger.log('getInstallReferrer', ref);
+      resolve(ref);
     });
   }
   addressFindItem(address: string) {
