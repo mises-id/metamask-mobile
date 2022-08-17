@@ -210,7 +210,10 @@ export class BackgroundBridge extends EventEmitter {
 
     this.sendNotification({
       method: NOTIFICATION_NAMES.unlockStateChanged,
-      params: true,
+      params: {
+        isunlocked: true,
+        accounts: [Engine.context.PreferencesController.state.selectedAddress],
+      },
     });
   }
 
@@ -220,7 +223,9 @@ export class BackgroundBridge extends EventEmitter {
 
     this.sendNotification({
       method: NOTIFICATION_NAMES.unlockStateChanged,
-      params: false,
+      params: {
+        isunlocked: false,
+      },
     });
   }
 
@@ -275,7 +280,10 @@ export class BackgroundBridge extends EventEmitter {
     }
     // ONLY NEEDED FOR WC FOR NOW, THE BROWSER HANDLES THIS NOTIFICATION BY ITSELF
     // if (this.isWalletConnect) {
-    if (this.addressSent !== memState.selectedAddress) {
+    if (
+      this.addressSent !== memState.selectedAddress &&
+      memState.selectedAddress
+    ) {
       this.addressSent = memState.selectedAddress;
       this.sendNotification({
         method: NOTIFICATION_NAMES.accountsChanged,
