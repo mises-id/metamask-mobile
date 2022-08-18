@@ -283,7 +283,7 @@ class Transactions extends PureComponent {
       this.getMisesTransactions(selectedAddress);
     }
   }
-  async getMisesTransactions(selectedAddress) {
+  async getMisesTransactions(selectedAddress = this.props.selectedAddress) {
     try {
       const { MisesController } = Engine.context;
       await MisesController.recentTransactions(false, selectedAddress);
@@ -294,7 +294,7 @@ class Transactions extends PureComponent {
       });
       return Promise.resolve();
     } catch (error) {
-      return Promise.reject();
+      return Promise.reject(error);
     }
   }
   scrollToIndex = (index) => {
@@ -336,15 +336,20 @@ class Transactions extends PureComponent {
 
   onRefresh = async () => {
     this.setState({ refreshing: true });
-    const isMises = isMisesChain(this.props.networkType);
-    if (isMises) {
-      await this.getMisesTransactions();
-    } else {
-      this.props.thirdPartyApiMode &&
-        (await Engine.refreshTransactionHistory());
-    }
+    try {
+      const isMises = isMisesChain(this.props.networkType);
+      if (isMises) {
+        await this.getMisesTransactions();
+      } else {
+        this.props.thirdPartyApiMode &&
+          (await Engine.refreshTransactionHistory());
+      }
 
-    this.setState({ refreshing: false });
+      this.setState({ refreshing: false });
+    } catch (error) {
+      console.log(error,'errorerror')
+      this.setState({ refreshing: false });
+    }
   };
 
   renderLoader = () => {

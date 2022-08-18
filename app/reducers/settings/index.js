@@ -47,16 +47,15 @@ const settingsReducer = (state = initialState, action) => {
         primaryCurrency: action.primaryCurrency,
       };
     default:
-      return {
-        ...state,
-        primaryCurrency:
-          Engine.context?.NetworkController.internalState.provider.type &&
-          isMisesChain(
-            Engine.context?.NetworkController.internalState.provider.type,
-          )
-            ? 'MIS'
-            : state.primaryCurrency,
-      };
+      state.primaryCurrency =
+        Engine.context?.NetworkController.internalState.provider.type &&
+        isMisesChain(
+          Engine.context?.NetworkController.internalState.provider.type,
+        )
+          ? 'MIS'
+          : state.primaryCurrency;
+      console.log(state, 'settingsReducer');
+      return state;
   }
 };
 export default settingsReducer;

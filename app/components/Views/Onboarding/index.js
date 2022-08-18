@@ -73,9 +73,12 @@ const createStyles = (colors) =>
       paddingBottom: 30,
     },
     ctas: {
-      flex: 1,
+      // flex: 1,
       position: 'relative',
+    },
+    scrollView: {
       padding: 20,
+      // flex: 1,
     },
     footer: {
       marginTop: -20,
@@ -425,44 +428,48 @@ class Onboarding extends PureComponent {
 
     return (
       <View style={styles.ctas}>
-        <View style={styles.onboardingBox}>
-          <Text style={styles.title}>Already had a Metamask account?</Text>
-          <Text style={styles.boxContent}>
-            Using Secret Recovery Phrase to restore your Metamask account Then
-            the enhanced Metamask plugin will generate a Mises ID the same as
-            your Metamask account.
-          </Text>
-          <Text style={styles.title}>Created a Mises ID before? </Text>
-          <Text style={styles.boxContent}>
-            Using Secret Recovery Phrase to restore your Mises ID & Metamask
-            account.
-          </Text>
-          <View style={styles.buttonWrapper}>
-            <StyledButton
-              type={'blue'}
-              onPress={this.onPressImport}
-              testID={'import-wallet-import-from-seed-button'}
-            >
-              {strings('import_wallet.import_from_seed_button')}
-            </StyledButton>
+        <ScrollView contentContainerStyle={styles.scrollView}>
+          <View style={styles.onboardingBox}>
+            <Text style={styles.title}>Already had a Metamask account?</Text>
+            <Text style={styles.boxContent}>
+              Using Secret Recovery Phrase to restore your Metamask account Then
+              the enhanced Metamask plugin will generate a Mises ID the same as
+              your Metamask account.
+            </Text>
+            <Text style={styles.title}>Created a Mises ID before? </Text>
+            <Text style={styles.boxContent}>
+              Using Secret Recovery Phrase to restore your Mises ID & Metamask
+              account.
+            </Text>
+            <View style={styles.buttonWrapper}>
+              <StyledButton
+                type={'blue'}
+                onPress={this.onPressImport}
+                testID={'import-wallet-import-from-seed-button'}
+              >
+                {strings('import_wallet.import_from_seed_button')}
+              </StyledButton>
+            </View>
           </View>
-        </View>
-        <View style={styles.onboardingBox}>
-          <Text style={styles.title}>Don&apos;t have a Metamask account?</Text>
-          <Text style={styles.boxContent}>
-            Please click &quot;Create Mises ID&quot;, We will guide you to
-            create a Metamask account and obtain your Mises ID.
-          </Text>
-          <View style={styles.buttonWrapper}>
-            <StyledButton
-              type={'blue'}
-              onPress={this.onPressCreate}
-              testID={'create-wallet-button'}
-            >
-              {strings('onboarding.start_exploring_now')}
-            </StyledButton>
+          <View style={styles.onboardingBox}>
+            <Text style={styles.title}>
+              Don&apos;t have a Metamask account?
+            </Text>
+            <Text style={styles.boxContent}>
+              Please click &quot;Create Mises ID&quot;, We will guide you to
+              create a Metamask account and obtain your Mises ID.
+            </Text>
+            <View style={styles.buttonWrapper}>
+              <StyledButton
+                type={'blue'}
+                onPress={this.onPressCreate}
+                testID={'create-wallet-button'}
+              >
+                {strings('onboarding.start_exploring_now')}
+              </StyledButton>
+            </View>
           </View>
-        </View>
+        </ScrollView>
         {/* <Text style={styles.title} testID={'onboarding-screen-title'}>
           {strings('onboarding.title')}
         </Text>
