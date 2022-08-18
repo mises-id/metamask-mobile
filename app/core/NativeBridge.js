@@ -89,7 +89,7 @@ class NativeBridge extends EventEmitter {
   }
   onEngineReady() {
     Logger.log('NativeBridge.onEngineReady', this.pendingMessages);
-    const {  PreferencesController } = Engine.context;
+    const { PreferencesController } = Engine.context;
     PreferencesController.subscribe(this.prefListener);
     this.ready = true;
     if (this.pendingMessages.length) {
@@ -232,7 +232,7 @@ class NativeBridge extends EventEmitter {
   onAppStateChange(listener) {
     return this.on('appstate_change', listener);
   }
-  removeOnAppStateChange(listener) {
+  removeOnAppStateChangeListener(listener) {
     return this.removeListener('appstate_change', listener);
   }
 
@@ -312,7 +312,7 @@ const instance = {
     nativeBridge.onAppStateChange(listener);
   },
   removeOnAppStateChangeListener(listener) {
-    nativeBridge.removeOnAppStateChange(listener);
+    nativeBridge.removeOnAppStateChangeListener(listener);
   },
 
   isWindowVisible() {

@@ -90,7 +90,7 @@ export default class LockManager {
   };
 
   stopListening() {
-    NativeBridge.removeOnAppStateChange(this.handleAppStateChange);
+    NativeBridge.removeOnAppStateChangeListener(this.handleAppStateChange);
     NativeBridge.removeWindowShowListener(this.handleWindowShow);
     NativeBridge.removeWindowHideListener(this.handleWindowHide);
   }

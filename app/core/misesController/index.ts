@@ -169,7 +169,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         misesBalance,
         misesId: user.address(),
       };
-      Logger.log(cacheObj, 'refreshMisesBalance');
       return ret;
     } catch (error) {
       return Promise.reject(error);
