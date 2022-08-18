@@ -28,7 +28,7 @@ import branch from 'react-native-branch';
 import AppConstants from '../../../core/AppConstants';
 import Logger from '../../../util/Logger';
 import { trackErrorAsAnalytics } from '../../../util/analyticsV2';
-import { routingInstrumentation } from '../../../util/sentryUtils';
+import { routingInstrumentation, wrap } from '../../../util/sentryUtils';
 import Analytics from '../../../core/Analytics/Analytics';
 import { connect, useSelector, useDispatch } from 'react-redux';
 import {
@@ -396,4 +396,4 @@ const mapStateToProps = (state) => ({
   userLoggedIn: state.user.userLoggedIn,
 });
 
-export default connect(mapStateToProps)(App);
+export default connect(mapStateToProps)(wrap(App));

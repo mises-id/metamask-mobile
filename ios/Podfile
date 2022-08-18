@@ -4,6 +4,15 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 platform :ios, "11.0"
 
 def react_native_post_install(installer)
+	installer.pods_project.build_configurations.each do |config|
+		config.build_settings['OTHER_CPLUSPLUSFLAGS'] = '$(OTHER_CFLAGS) -nostdinc++ -isystem$(THIRD_PARTY_LIBPATH)/libc++ -isystem$(THIRD_PARTY_LIBPATH)/libc++/trunk/include -isystem$(THIRD_PARTY_LIBPATH)/libc++abi/trunk/include -D_LIBCPP_ABI_UNSTABLE -D_LIBCPP_DEBUG=0 -D_LIBCPP_ENABLE_NODISCARD -D_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS -D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS -std=c++17'
+		config.build_settings['OTHER_LDFLAGS'] = '-nostdlib++'
+		config.build_settings['THIRD_PARTY_LIBPATH'] = '/Users/baoge/Documents/work/chromium/chromium98/src/buildtools/third_party'
+		config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] =  'c++17'
+
+	end
+
+		
 	installer.pods_project.targets.each do |target|
   		target.build_configurations.each do |config|
 			if Gem::Version.new('9.0') > Gem::Version.new(config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'])

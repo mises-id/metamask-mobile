@@ -386,6 +386,7 @@ export class BackgroundBridge extends EventEmitter {
   }
 
   sendNotification(payload) {
+    Logger.log('BackgroundBridge.sendNotification', payload);
     this.engine && this.engine.emit('notification', payload);
   }
 
