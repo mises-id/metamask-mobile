@@ -250,6 +250,7 @@ class Login extends PureComponent {
   };
 
   async componentDidMount() {
+    Logger.log('Login', 'componentDidMount');
     const { initialScreen } = this.props;
     const { KeyringController } = Engine.context;
     const shouldHandleInitialAuth = initialScreen !== 'onboarding';
@@ -259,7 +260,7 @@ class Login extends PureComponent {
     if (KeyringController.isUnlocked()) {
       await KeyringController.setLocked();
     }
-    await this.listenerOnwindowShow();
+    !NativeBridge.isWindowVisible() && (await this.listenerOnWindowShow());
     const biometryType = await SecureKeychain.getSupportedBiometryType();
     if (biometryType) {
       const previouslyDisabled = await AsyncStorage.getItem(
@@ -291,9 +292,9 @@ class Login extends PureComponent {
     this.props.checkedAuth();
     this.updateNavBar();
   }
-  listenerOnwindowShow = () =>
+  listenerOnWindowShow = () =>
     new Promise((resolve) => {
-      NativeBridge.onWindowShow(resolve, false);
+      NativeBridge.onWindowShow(resolve, true);
     });
   componentDidUpdate = () => {
     this.updateNavBar();
@@ -313,12 +314,12 @@ class Login extends PureComponent {
    * into the application if it is enabled.
    */
   checkIfRememberMeEnabled = async () => {
-    const credentials = await SecureKeychain.getGenericPassword();
-    if (credentials) {
-      this.setState({ rememberMe: true });
-      // Restore vault with existing credentials
-      const { KeyringController } = Engine.context;
-      try {
+    try {
+      const credentials = await SecureKeychain.getGenericPassword();
+      if (credentials) {
+        this.setState({ rememberMe: true });
+        // Restore vault with existing credentials
+        const { KeyringController } = Engine.context;
         await KeyringController.submitPassword(credentials.password);
         const encryptionLib = await AsyncStorage.getItem(ENCRYPTION_LIB);
         if (encryptionLib !== ORIGINAL) {
@@ -339,10 +340,10 @@ class Login extends PureComponent {
         delete credentials.password;
         this.props.logIn();
         this.props.navigation.replace('HomeNav');
-      } catch (error) {
-        this.setState({ rememberMe: false });
-        Logger.error(error, 'Failed to login using Remember Me');
       }
+    } catch (error) {
+      this.setState({ rememberMe: false });
+      Logger.error(error, 'Failed to login using Remember Me');
     }
   };
 

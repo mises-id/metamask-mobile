@@ -1,32 +1,49 @@
-import { AppState } from 'react-native';
 import SecureKeychain from './SecureKeychain';
 import BackgroundTimer from 'react-native-background-timer';
 import Engine from './Engine';
 import Logger from '../util/Logger';
+import NativeBridge from './NativeBridge';
 
 export default class LockManager {
   constructor(navigation, lockTime) {
     this.navigation = navigation;
     this.lockTime = lockTime;
     this.appState = 'active';
-    AppState.addEventListener('change', this.handleAppStateChange);
+    NativeBridge.onAppStateChange(this.handleAppStateChange);
+    NativeBridge.onWindowShow(this.handleWindowShow, false);
+    NativeBridge.onWindowHide(this.handleWindowHide, false);
   }
-
   updateLockTime(lockTime) {
     this.lockTime = lockTime;
   }
+
+  handleWindowShow = () => {
+    this.handleAppStateChange('active');
+  };
+  handleWindowHide = () => {
+    this.handleAppStateChange('inactive');
+  };
 
   handleAppStateChange = async (nextAppState) => {
     // Don't auto-lock
     if (this.lockTime === -1) {
       return;
     }
+    if (nextAppState === 'active' && !NativeBridge.isWindowVisible()) {
+      return;
+    }
+
+    Logger.log('LockManager::handleAppStateChange', nextAppState);
 
     if (nextAppState !== 'active') {
       // Auto-lock immediately
       if (this.lockTime === 0) {
         this.lockApp();
       } else {
+        if (this.lockTimer) {
+          BackgroundTimer.clearTimeout(this.lockTimer);
+          this.lockTimer = null;
+        }
         // Autolock after some time
         this.lockTimer = BackgroundTimer.setTimeout(() => {
           if (this.lockTimer) {
@@ -50,11 +67,13 @@ export default class LockManager {
   };
 
   gotoLockScreen = () => {
+    Logger.log('LockManager::gotoLockScreen');
     this.navigation.navigate('LockScreen', { backgroundMode: true });
     this.locked = true;
   };
 
   lockApp = async () => {
+    Logger.log('LockManager::lockApp');
     if (!SecureKeychain.getInstance().isAuthenticating) {
       const { KeyringController } = Engine.context;
       try {
@@ -71,6 +90,8 @@ export default class LockManager {
   };
 
   stopListening() {
-    AppState.removeEventListener('change', this.handleAppStateChange);
+    NativeBridge.removeOnAppStateChange(this.handleAppStateChange);
+    NativeBridge.removeWindowShowListener(this.handleWindowShow);
+    NativeBridge.removeWindowHideListener(this.handleWindowHide);
   }
 }

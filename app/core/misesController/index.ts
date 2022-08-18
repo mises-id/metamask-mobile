@@ -288,12 +288,6 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
    */
   getinstallreferrer(): Promise<string> {
     return new Promise((resolve) => {
-      // if (chrome.misesPrivate?.getInstallReferrer) {
-      //   chrome.misesPrivate.getInstallReferrer((res: string) => {
-      //     resolve(res);
-      //   });
-      //   return;
-      // }
       const ref = MisesModule.getInstallReferrer();
       Logger.log('getInstallReferrer', ref);
       resolve(ref);

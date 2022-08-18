@@ -5,7 +5,6 @@ import {
   Dimensions,
   Animated,
   View,
-  AppState,
   Appearance,
 } from 'react-native';
 import PropTypes from 'prop-types';
@@ -23,6 +22,7 @@ import {
   ThemeContext,
 } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
+import NativeBridge from '../../../core/NativeBridge';
 
 const LOGO_SIZE = 175;
 const createStyles = (colors) =>
@@ -97,19 +97,22 @@ class LockScreen extends PureComponent {
   opacity = new Animated.Value(1);
   unlockAttempts = 0;
 
-  componentDidMount() {
+  componentDidMount = () => {
     // Check if is the app is launching or it went to background mode
     this.appState = 'background';
-    AppState.addEventListener('change', this.handleAppStateChange);
+    NativeBridge.onAppStateChange(this.handleAppStateChange);
+    NativeBridge.onWindowShow(this.handleWindowShow, false);
     this.mounted = true;
-  }
+  };
 
-  handleAppStateChange = async (nextAppState) => {
+  handleAppStateChange = (nextAppState) => {
     // Try to unlock when coming from the background
+    Logger.log('Lockscreen::handleAppStateChange', nextAppState);
     if (
       this.locked &&
       this.appState !== 'active' &&
-      nextAppState === 'active'
+      nextAppState === 'active' &&
+      NativeBridge.isWindowVisible()
     ) {
       this.firstAnimation.play();
       this.appState = nextAppState;
@@ -117,11 +120,19 @@ class LockScreen extends PureComponent {
       this.unlockKeychain();
     }
   };
+  handleWindowShow = () => {
+    Logger.log('Lockscreen::handleWindowShow');
+    if (this.locked) {
+      this.firstAnimation.play();
+      this.unlockKeychain();
+    }
+  };
 
-  componentWillUnmount() {
+  componentWillUnmount = () => {
     this.mounted = false;
-    AppState.removeEventListener('change', this.handleAppStateChange);
-  }
+    NativeBridge.removeOnAppStateChangeListener(this.handleAppStateChange);
+    NativeBridge.removeWindowShowListener(this.handleWindowShow);
+  };
 
   logOut = () => {
     this.props.navigation.navigate(Routes.ONBOARDING.LOGIN);

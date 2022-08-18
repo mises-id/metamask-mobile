@@ -1,6 +1,6 @@
 import BackgroundBridge from './BackgroundBridge';
 import getRpcMethodMiddleware from './RPCMethods/RPCMethodMiddleware';
-import { NativeModules } from 'react-native';
+import { NativeModules, AppState } from 'react-native';
 import { EventEmitter } from 'events';
 import Engine from './Engine';
 import Logger from '../util/Logger';
@@ -77,6 +77,9 @@ class NativeBridge extends EventEmitter {
       this.emit('unlock');
     }
   };
+  handleAppStateChange = (nextAppState) => {
+    this.emit('appstate_change', nextAppState);
+  };
   constructor(options) {
     super();
     this.backgroundBridges = [];
@@ -96,6 +99,7 @@ class NativeBridge extends EventEmitter {
       });
       this.pendingMessages = [];
     }
+    AppState.addEventListener('change', this.handleAppStateChange);
   }
   postMessageFromWeb(data, webviewid) {
     try {
@@ -219,8 +223,17 @@ class NativeBridge extends EventEmitter {
     }
     return this.on('window_show', listener);
   }
+  removeWindowShowListener(listener) {
+    this.removeListener('window_show', listener);
+  }
   isWindowVisible() {
     return this.windowVisible;
+  }
+  onAppStateChange(listener) {
+    return this.on('appstate_change', listener);
+  }
+  removeOnAppStateChange(listener) {
+    return this.removeListener('appstate_change', listener);
   }
 
   initializeBackgroundBridge(bridgeInfo, isMainFrame) {
@@ -287,6 +300,21 @@ const instance = {
   onWindowHide(listener, once) {
     nativeBridge.onWindowHide(listener, once);
   },
+  removeWindowShowListener(listener) {
+    nativeBridge.removeWindowShowListener(listener);
+  },
+
+  removeWindowHideListener(listener) {
+    nativeBridge.removeWindowHideListener(listener);
+  },
+
+  onAppStateChange(listener) {
+    nativeBridge.onAppStateChange(listener);
+  },
+  removeOnAppStateChangeListener(listener) {
+    nativeBridge.removeOnAppStateChange(listener);
+  },
+
   isWindowVisible() {
     return nativeBridge.isWindowVisible();
   },
