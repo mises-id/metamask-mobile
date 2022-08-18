@@ -106,3 +106,6 @@ export const misesKey = 'mises';
 export function isMisesChain(type: string) {
   return type?.toLowerCase() === misesKey;
 }
+export function isMisesId(misesId: string) {
+  return /^(mises)[a-zA-Z0-9]{39}$/.test(misesId);
+}

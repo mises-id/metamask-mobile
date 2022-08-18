@@ -393,12 +393,13 @@ class Engine {
           initialState[controller.name] &&
           controller.subscribe !== undefined
         ) {
-          if (
-            controller.name === 'NetworkController' &&
-            isMisesChain(initialState[controller.name].provider.type)
-          ) {
-            initialState[controller.name].provider.ticker = 'MIS';
-          }
+          // if (
+          //   controller.name === 'NetworkController' &&
+          //   isMisesChain(initialState[controller.name].provider.type)
+          // ) {
+          //   Logger.log(initialState[controller.name], '2132333333');
+          //   // initialState[controller.name].provider.ticker = 'MIS';
+          // }
           controller.update(initialState[controller.name]);
         }
       }
