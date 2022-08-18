@@ -130,7 +130,7 @@ class DeeplinkManager {
   async _handleEthereumUrl(url, origin) {
     let ethUrl = '';
     try {
-      const dataparse = /ethereum:([a-zA-Z0-9]{44})@(46)/.exec(url);
+      const dataparse = /^ethereum:([a-zA-Z0-9]{44})@(46)$/.exec(url);
       ethUrl =
         url.indexOf('mises') > -1
           ? {
