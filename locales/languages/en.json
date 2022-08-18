@@ -33,7 +33,7 @@
     "import": "Import an existing wallet or create a new one",
     "import_wallet_button": "Sync or import wallet",
     "new_to_crypto": "New to crypto?",
-    "start_exploring_now": "Create a new wallet",
+    "start_exploring_now": "Create Mises ID",
     "unlock": "Unlock",
     "new_to_metamask": "New to MetaMask?",
     "already_have_wallet": "Already have a wallet?",
@@ -123,7 +123,7 @@
     "sync_help_step_four": "4. Scan the QR Code to start syncing",
     "sync_from_browser_extension_button": "Sync with MetaMask extension",
     "or": "OR",
-    "import_from_seed_button": "Import using Secret Recovery Phrase"
+    "import_from_seed_button": "Restore Mises ID"
   },
   "login": {
     "title": "Welcome Back!",
