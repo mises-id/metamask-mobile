@@ -86,7 +86,7 @@ class NativeBridge extends EventEmitter {
   }
   onEngineReady() {
     Logger.log('NativeBridge.onEngineReady', this.pendingMessages);
-    const {  PreferencesController } = Engine.context;
+    const { PreferencesController } = Engine.context;
     PreferencesController.subscribe(this.prefListener);
     this.ready = true;
     if (this.pendingMessages.length) {

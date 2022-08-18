@@ -154,13 +154,16 @@ const QRScanner = ({ navigation, route }: Props) => {
           return;
         }
         // Let ethereum:address and address go forward
-        if (content?.indexOf('mises') > -1) {
+        if (
+          content?.indexOf('mises') > -1 &&
+          /^(mises|ethereum:mises)[a-zA-Z0-9]{39}$/.test(content)
+        ) {
           const handledContent =
             content?.indexOf('ethereum:mises') === -1
               ? `ethereum:${content}@${currentChainId}`
               : content;
           shouldReadBarCodeRef.current = false;
-          const dataparse = /ethereum:([a-zA-Z0-9]{44})@(46)/.exec(
+          const dataparse = /^ethereum:([a-zA-Z0-9]{44})@(46)$/.exec(
             handledContent,
           ) as any[];
           data = {
