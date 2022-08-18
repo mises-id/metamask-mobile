@@ -72,15 +72,10 @@ const createStyles = (colors) =>
     termsAndConditions: {
       paddingBottom: 30,
     },
-    title: {
-      fontSize: 24,
-      color: colors.text.default,
-      ...fontStyles.bold,
-      textAlign: 'center',
-    },
     ctas: {
       flex: 1,
       position: 'relative',
+      padding: 20,
     },
     footer: {
       marginTop: -20,
@@ -109,6 +104,7 @@ const createStyles = (colors) =>
     },
     buttonWrapper: {
       marginBottom: 16,
+      marginTop: 30,
     },
     loader: {
       marginTop: 180,
@@ -134,6 +130,27 @@ const createStyles = (colors) =>
       flex: 0.1,
       flexDirection: 'row',
       alignItems: 'flex-end',
+    },
+    onboardingBox: {
+      borderWidth: 1,
+      // backgroundColor: importedColors.black,
+      borderRadius: 10,
+      padding: 20,
+      borderColor: colors.border.default,
+      marginBottom: 20,
+    },
+    title: {
+      fontSize: 24,
+      color: colors.text.default,
+      ...fontStyles.bold,
+      textAlign: 'center',
+    },
+    boxContent: {
+      fontSize: 14,
+      color: colors.text.default,
+      textAlign: 'center',
+      // marginTop:10,
+      padding: 10,
     },
   });
 
@@ -408,37 +425,34 @@ class Onboarding extends PureComponent {
 
     return (
       <View style={styles.ctas}>
-        <Text style={styles.title} testID={'onboarding-screen-title'}>
-          {strings('onboarding.title')}
-        </Text>
-        <View style={styles.importWrapper}>
-          <Text style={styles.buttonDescription}>
-            {strings('onboarding.import')}
+        <View style={styles.onboardingBox}>
+          <Text style={styles.title}>Already had a Metamask account?</Text>
+          <Text style={styles.boxContent}>
+            Using Secret Recovery Phrase to restore your Metamask account Then
+            the enhanced Metamask plugin will generate a Mises ID the same as
+            your Metamask account.
           </Text>
-        </View>
-        <View style={styles.createWrapper}>
+          <Text style={styles.title}>Created a Mises ID before? </Text>
+          <Text style={styles.boxContent}>
+            Using Secret Recovery Phrase to restore your Mises ID & Metamask
+            account.
+          </Text>
           <View style={styles.buttonWrapper}>
             <StyledButton
-              type={'normal'}
+              type={'blue'}
               onPress={this.onPressImport}
               testID={'import-wallet-import-from-seed-button'}
             >
               {strings('import_wallet.import_from_seed_button')}
             </StyledButton>
           </View>
-          {/* Temporarily Disable Sync until the new improved version is ready for release */}
-          {__DEV__ && (
-            <View style={styles.buttonWrapper}>
-              <StyledButton
-                style={styles.button}
-                type={'normal'}
-                onPress={this.onPressSync}
-                testID={'onboarding-import-button'}
-              >
-                {strings('import_wallet.sync_from_browser_extension_button')}
-              </StyledButton>
-            </View>
-          )}
+        </View>
+        <View style={styles.onboardingBox}>
+          <Text style={styles.title}>Don&apos;t have a Metamask account?</Text>
+          <Text style={styles.boxContent}>
+            Please click &quot;Create Mises ID&quot;, We will guide you to
+            create a Metamask account and obtain your Mises ID.
+          </Text>
           <View style={styles.buttonWrapper}>
             <StyledButton
               type={'blue'}
@@ -449,6 +463,14 @@ class Onboarding extends PureComponent {
             </StyledButton>
           </View>
         </View>
+        {/* <Text style={styles.title} testID={'onboarding-screen-title'}>
+          {strings('onboarding.title')}
+        </Text>
+        <View style={styles.importWrapper}>
+          <Text style={styles.buttonDescription}>
+            {strings('onboarding.import')}
+          </Text>
+        </View> */}
       </View>
     );
   }

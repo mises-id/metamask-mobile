@@ -210,7 +210,10 @@ export class BackgroundBridge extends EventEmitter {
 
     this.sendNotification({
       method: NOTIFICATION_NAMES.unlockStateChanged,
-      params: true,
+      params: {
+        isunlocked: true,
+        accounts: [Engine.context.PreferencesController.state.selectedAddress],
+      },
     });
   }
 
@@ -220,7 +223,9 @@ export class BackgroundBridge extends EventEmitter {
 
     this.sendNotification({
       method: NOTIFICATION_NAMES.unlockStateChanged,
-      params: false,
+      params: {
+        isunlocked: false,
+      },
     });
   }
 
@@ -273,10 +278,12 @@ export class BackgroundBridge extends EventEmitter {
         params: publicState,
       });
     }
-    // ONLY NEEDED FOR WC FOR NOW, THE BROWS'R HANDLES THIS NOTIFICATION BY ITSELF
+    // ONLY NEEDED FOR WC FOR NOW, THE BROWSER HANDLES THIS NOTIFICATION BY ITSELF
     // if (this.isWalletConnect) {
-    Logger.log('onStateUpdate', this.addressSent, memState.selectedAddress);
-    if (this.addressSent !== memState.selectedAddress) {
+    if (
+      this.addressSent !== memState.selectedAddress &&
+      memState.selectedAddress
+    ) {
       this.addressSent = memState.selectedAddress;
       this.sendNotification({
         method: NOTIFICATION_NAMES.accountsChanged,
@@ -311,7 +318,6 @@ export class BackgroundBridge extends EventEmitter {
     Engine.context.NetworkController.unsubscribe(this.sendStateUpdate);
     Engine.context.PreferencesController.unsubscribe(this.sendStateUpdate);
     this.port.emit('disconnect', { name: this.port.name, data: null });
-    this.off('update', this.onStateUpdate);
   };
 
   /**
@@ -380,7 +386,6 @@ export class BackgroundBridge extends EventEmitter {
   }
 
   sendNotification(payload) {
-    Logger.log('BackgroundBridge.sendNotification', payload);
     this.engine && this.engine.emit('notification', payload);
   }
 
