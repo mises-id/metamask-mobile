@@ -1131,6 +1131,7 @@
     "pending_withdrawal_title": "提取进行中！",
     "cancelled_title": "已取消交易！",
     "success_title": "交易 #{{nonce}} 完成！",
+    "mises_success": "交易完成！",
     "speedup_title": "正在加快 #{{nonce}}！",
     "success_deposit_title": "存款完成！",
     "success_withdrawal_title": "提取完成！",

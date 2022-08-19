@@ -693,6 +693,7 @@ class Engine {
     MisesController.update({
       accountList: {},
     });
+    MisesController.setToMisesPrivate({ token: '' });
   };
 
   sync = async ({
