@@ -438,7 +438,8 @@ export async function getTransactionReviewActionKey(transaction, chainId) {
  * @returns {string} - Corresponding ticker or ETH
  */
 export function getTicker(ticker) {
-  return ticker || strings('unit.eth');
+  // const { NetworkController } = Engine.context;
+  return ticker || 'MIS';
 }
 
 /**
@@ -451,7 +452,7 @@ export function getEther(ticker) {
   return {
     name: 'Ether',
     address: '',
-    symbol: ticker || strings('unit.eth'),
+    symbol: getTicker(ticker),
     logo: '../images/eth-logo.png',
     isETH: true,
   };

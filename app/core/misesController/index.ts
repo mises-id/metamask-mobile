@@ -884,11 +884,28 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       if (!address) return;
       const key = await this.exportAccount(address); // get priKeyHex
       await this.activate(key); // set activity user
+      const getAccount = this.getActive();
+      const accountList = this.getAccountList();
       const lowerAddress = address.toLowerCase();
+      const misesId = getAccount?.address();
+      if (misesId && !accountList[lowerAddress]) {
+        accountList[lowerAddress] = {
+          misesId,
+          address: lowerAddress,
+          misesBalance: {
+            amount: '0',
+            denom: 'MIS',
+          },
+        };
+        this.update({
+          accountList: {
+            ...accountList,
+          },
+        });
+      }
       const userInfo = await this.ensureMisesAccessToken(lowerAddress); // get activity user
       const misesAccount = await this.refreshMisesBalance(lowerAddress); // get mises balance
       misesAccount.token = userInfo?.token;
-      const accountList = this.getAccountList();
       // if (!accountList[lowerAddress]) {
       this.update({
         accountList: {
