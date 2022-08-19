@@ -54,7 +54,6 @@ const settingsReducer = (state = initialState, action) => {
         )
           ? 'MIS'
           : state.primaryCurrency;
-      console.log(state, 'settingsReducer');
       return state;
   }
 };

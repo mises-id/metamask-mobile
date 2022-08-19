@@ -24,6 +24,7 @@ import { tlc } from '../../../util/general';
 import { useTheme } from '../../../util/theme';
 import Device from '../../../util/device';
 import Routes from '../../../constants/navigation/Routes';
+import NativeBridge from '../../../core/NativeBridge';
 
 const DELETE_KEYWORD = 'delete';
 
@@ -86,6 +87,7 @@ const DeleteWalletModal = () => {
     triggerClose();
     await resetWalletState();
     await deleteUser();
+    NativeBridge.clear();
     InteractionManager.runAfterInteractions(() => {
       navigateOnboardingRoot();
     });

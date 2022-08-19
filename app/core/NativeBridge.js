@@ -160,6 +160,18 @@ class NativeBridge extends EventEmitter {
       }) || null;
     return found;
   }
+  clear() {
+    const bridges = [...this.backgroundBridges];
+    this.backgroundBridges = bridges.filter((bridge) => {
+      if (!bridge) {
+        return false;
+      }
+      Logger.log('NativeBridge.cleareBridge', bridge.url);
+      bridge.onDisconnect();
+      return false;
+    });
+    this.pendingMessages = [];
+  }
 
   clearIdleBridge() {
     const bridges = [...this.backgroundBridges];
@@ -317,6 +329,10 @@ const instance = {
 
   isWindowVisible() {
     return nativeBridge.isWindowVisible();
+  },
+
+  clear() {
+    return nativeBridge.clear();
   },
 };
 
