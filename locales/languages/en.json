@@ -1407,6 +1407,7 @@
     "pending_withdrawal_title": "Withdrawal in progress!",
     "cancelled_title": "Transaction cancelled!",
     "success_title": "Transaction #{{nonce}} Complete!",
+    "mises_success": "Transaction Complete!",
     "speedup_title": "Speeding up #{{nonce}}!",
     "success_deposit_title": "Deposit Complete!",
     "success_withdrawal_title": "Withdrawal Complete!",

@@ -548,6 +548,12 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       denom: 'mis',
     });
     if (!simulate) {
+      Logger.log('setMisesBook', {
+        misesId,
+        amountLong,
+        simulate,
+        memo,
+      });
       try {
         const res: DeliverTxResponse | undefined = await activeUser?.sendUMIS(
           misesId,
@@ -792,22 +798,20 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     }, []);
   }
 
-  async refreshTransactions(selectedAddress: string) {
-    this.recentTransactions('', selectedAddress);
+  async refreshTransactions() {
+    Logger.log('refreshTransactions');
+    this.recentTransactions();
   }
 
-  async recentTransactions(type: string, selectedAddress: string) {
-    // const selectedAddress = this.getSelectedAddress();
-    const lowerAddress = selectedAddress.toLowerCase();
+  async recentTransactions() {
     const accountList = this.getAccountList();
-    const currentAddress = accountList[lowerAddress] || {};
-    if (type === 'cache') {
-      console.warn('get cache', currentAddress);
-      return currentAddress.transactions || [];
-    }
-    // console.warn('get network');
     try {
       const activeUser = this.getActive();
+      const misesId = activeUser?.address();
+      const lowerAddress = misesId && this.misesIdFindEthAddress(misesId);
+      const currentAddress =
+        (lowerAddress && accountList[lowerAddress]) || null;
+      if (!currentAddress) return;
       let list = (await activeUser?.recentTransactions(
         currentAddress.height,
       )) as indexed[];

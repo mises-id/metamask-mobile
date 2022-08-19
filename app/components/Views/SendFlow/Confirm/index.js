@@ -1028,7 +1028,6 @@ class Confirm extends PureComponent {
           verifiedOnBlockchain: false,
         };
         await KeyringController.resetQRKeyringState();
-        this.props.refreshTransactions(true);
       } else {
         let error;
         if (gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
@@ -1064,10 +1063,22 @@ class Confirm extends PureComponent {
       }
 
       InteractionManager.runAfterInteractions(() => {
-        NotificationManager.watchSubmittedTransaction({
-          ...transactionMeta,
-          assetType,
-        });
+        if (isMises) {
+          NotificationManager.showSimpleNotification({
+            status: `simple_notification`,
+            duration: 5000,
+            title: strings('notifications.wc_sent_tx_title'),
+            description: strings('notifications.mises_success'),
+          });
+          MisesController.getAccountMisesBalance();
+          // MisesController.refreshTransactions();
+          this.props.refreshTransactions(true);
+        } else {
+          NotificationManager.watchSubmittedTransaction({
+            ...transactionMeta,
+            assetType,
+          });
+        }
         this.checkRemoveCollectible();
         AnalyticsV2.trackEvent(
           AnalyticsV2.ANALYTICS_EVENTS.SEND_TRANSACTION_COMPLETED,
@@ -1085,6 +1096,7 @@ class Confirm extends PureComponent {
         );
         Logger.error(error, 'error while trying to send transaction (Confirm)');
       } else {
+        Logger.error(error, 'error while trying to send transaction (else)');
         AnalyticsV2.trackEvent(
           AnalyticsV2.ANALYTICS_EVENTS.QR_HARDWARE_TRANSACTION_CANCELED,
         );
