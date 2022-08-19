@@ -654,6 +654,7 @@ class Engine {
       CollectiblesController,
       TokenBalancesController,
       TokenRatesController,
+      MisesController,
     } = this.context;
 
     //Clear assets info
@@ -687,6 +688,10 @@ class Engine {
       swapsTransactions: {},
       methodData: {},
       transactions: [],
+    });
+
+    MisesController.update({
+      accountList: {},
     });
   };
 
