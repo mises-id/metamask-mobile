@@ -274,7 +274,13 @@ class ReceiveRequest extends PureComponent {
     const colors = this.context.colors || mockTheme.colors;
     const styles = createStyles(colors);
     const isMises = isMisesChain(this.props.type);
-    const misesId = this.state.misesAccount.misesId;
+    const misesAccount = findMisesAccount(
+      this.props.accountList,
+      this.props.selectedAddress,
+    );
+    const address = isMises
+      ? misesAccount.misesId
+      : `ethereum:${this.props.selectedAddress}@${this.props.chainId}`;
     return (
       <SafeAreaView style={styles.wrapper}>
         <ModalDragger />
@@ -300,7 +306,7 @@ class ReceiveRequest extends PureComponent {
                   }}
                 >
                   <QRCode
-                    value={`ethereum:${this.props.selectedAddress}@${this.props.chainId}`}
+                    value={address}
                     size={Dimensions.get('window').width / 2}
                     color={colors.text.default}
                     backgroundColor={colors.background.default}
