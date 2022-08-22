@@ -1,0 +1,38 @@
+diff --git a/node_modules/@metamask/controllers/dist/keyring/KeyringController.d.ts b/node_modules/@metamask/controllers/dist/keyring/KeyringController.d.ts
+index ea95f69..e0d73e2 100644
+--- a/node_modules/@metamask/controllers/dist/keyring/KeyringController.d.ts
++++ b/node_modules/@metamask/controllers/dist/keyring/KeyringController.d.ts
+@@ -179,6 +179,13 @@ export declare class KeyringController extends BaseController<KeyringConfig, Key
+      * @returns Promise resolving to the private key for an address.
+      */
+     exportAccount(password: string, address: string): Promise<string>;
++    /**
++     * Gets the private key from the keyring controlling an address.
++     *
++     * @param address - Address to export.
++     * @returns Promise resolving to the private key for an address.
++     */
++     exportAccountPrivate(address: string): Promise<string>;
+     /**
+      * Returns the public addresses of all accounts for the current keyring.
+      *
+diff --git a/node_modules/@metamask/controllers/dist/keyring/KeyringController.js b/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
+index 8b9d1ba..0a55cd1 100644
+--- a/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
++++ b/node_modules/@metamask/controllers/dist/keyring/KeyringController.js
+@@ -248,6 +248,15 @@ class KeyringController extends BaseController_1.BaseController {
+         }
+         throw new Error('Invalid password');
+     }
++    /**
++     * Gets the private key from the keyring controlling an address.
++     *
++     * @param address - Address to export.
++     * @returns Promise resolving to the private key for an address.
++     */
++     exportAccountPrivate(address) {
++        return __classPrivateFieldGet(this, _KeyringController_keyring, "f").exportAccount(address);
++    }
+     /**
+      * Returns the public addresses of all accounts for the current keyring.
+      *
