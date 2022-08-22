@@ -21,7 +21,6 @@ import {
   TokensController,
   TokenDetectionController,
   ApprovalController,
-  NetworkController,
 } from '@metamask/controllers';
 import SwapsController, { swapsUtils } from '@metamask/swaps-controller';
 import AsyncStorage from '@react-native-community/async-storage';
@@ -50,6 +49,7 @@ import {
   MisesCollectiblesController,
 } from './misesCollectibles';
 import { isMisesChain } from './misesController/misesNetwork.util';
+import NetworkController from './misesNetworkController';
 
 const NON_EMPTY = 'NON_EMPTY';
 
