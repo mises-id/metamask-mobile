@@ -18,7 +18,6 @@ import { util } from '@metamask/controllers';
 import Engine from '../../core/Engine';
 import { toLowerCaseEquals } from './../general';
 import { fastSplit } from '../../util/number';
-import { NetworksChainId } from '../../core/misesNetworkController';
 /**
  * List of the supported networks
  * including name, id, and color
@@ -30,9 +29,9 @@ const NetworkList = {
   [MISES]: {
     name: 'Mises Network',
     shortName: 'Mises',
-    networkId: NetworksChainId.mises,
-    chainId: NetworksChainId.mises,
-    hexChainId: '0xa46a',
+    networkId: 46,
+    chainId: 46,
+    hexChainId: '0x46',
     color: '#5c65f6',
     networkType: 'mises',
   },

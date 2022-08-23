@@ -18,10 +18,7 @@ import setOnboardingWizardStep from '../../actions/wizard';
 import { v1 as random } from 'uuid';
 import Logger from '../../util/Logger';
 import NotificationManager from '../NotificationManager.js';
-import {
-  NetworksChainId,
-  NetworkType,
-} from '../misesNetworkController/index.js';
+import { NetworksChainId, NetworkType } from '../misesNetworkController';
 const { MisesModule } = NativeModules;
 const Engine = ImportedEngine as any;
 
@@ -234,6 +231,9 @@ export const getRpcMethodMiddleware = ({
         if (chainId && !chainId.startsWith('0x')) {
           // Convert to hex
           res.result = `0x${parseInt(chainId, 10).toString(16)}`;
+        }
+        if (!chainId) {
+          return next();
         }
       },
       net_version: async () => {
