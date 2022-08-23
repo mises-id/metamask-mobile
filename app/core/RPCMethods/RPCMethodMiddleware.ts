@@ -759,7 +759,11 @@ export const getRpcMethodMiddleware = ({
         try {
           await requestPromiseLock();
           dismiss();
-          await Engine.context.MisesController.setFollow(req.params[0]);
+          const data = await Engine.context.MisesController.setFollow(
+            req.params[0],
+          );
+          Logger.log(data);
+          Logger.log('mises_userFollow====');
           res.result = true;
         } catch (error) {
           throw ethErrors.provider.userRejectedRequest(
@@ -771,7 +775,11 @@ export const getRpcMethodMiddleware = ({
         try {
           await requestPromiseLock();
           dismiss();
-          await Engine.context.MisesController.setUnFollow(req.params[0]);
+          const data = await Engine.context.MisesController.setUnFollow(
+            req.params[0],
+          );
+          Logger.log(data);
+          Logger.log('mises_userUnFollow====');
           res.result = true;
         } catch (error) {
           throw ethErrors.provider.userRejectedRequest(
