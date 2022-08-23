@@ -1,6 +1,5 @@
 import { InteractionManager } from 'react-native';
 import validUrl from 'valid-url';
-import { NetworksChainId } from '@metamask/controllers';
 import { jsonRpcRequest } from '../../util/jsonRpcRequest';
 import Engine from '../Engine';
 import { ethErrors } from 'eth-json-rpc-errors';
@@ -10,6 +9,7 @@ import {
 } from '../../util/networks';
 import URL from 'url-parse';
 import AnalyticsV2 from '../../util/analyticsV2';
+import { NetworksChainId } from '../misesNetworkController';
 
 const waitForInteraction = async () =>
   new Promise((resolve) => {

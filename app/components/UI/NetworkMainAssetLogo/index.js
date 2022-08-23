@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { NetworksChainId } from '@metamask/controllers';
 import { connect } from 'react-redux';
 import TokenIcon from '../Swaps/components/TokenIcon';
+import { NetworksChainId } from '../../../core/misesNetworkController';
 
 function NetworkMainAssetLogo({ chainId, ticker, style, big, biggest }) {
   if (chainId === NetworksChainId.mainnet) {
@@ -10,7 +10,7 @@ function NetworkMainAssetLogo({ chainId, ticker, style, big, biggest }) {
       <TokenIcon big={big} biggest={biggest} symbol={'ETH'} style={style} />
     );
   }
-  if (chainId === '46') {
+  if (chainId === NetworksChainId.mises) {
     return (
       <TokenIcon big={big} biggest={biggest} symbol={'MIS'} style={style} />
     );

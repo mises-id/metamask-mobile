@@ -1,9 +1,10 @@
-import { CollectiblesController, NetworksChainId } from '@metamask/controllers';
+import { CollectiblesController } from '@metamask/controllers';
 import {
   findMisesAccount,
   getBaseApi,
   request,
 } from '../misesController/misesNetwork.util';
+import { NetworksChainId } from '../misesNetworkController';
 
 export default class MisesCollectiblesController extends CollectiblesController {
   constructor(options, config, state) {

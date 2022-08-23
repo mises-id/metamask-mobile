@@ -1,12 +1,10 @@
-import {
-  CollectibleDetectionController,
-  NetworksChainId,
-} from '@metamask/controllers';
+import { CollectibleDetectionController } from '@metamask/controllers';
 import {
   findMisesAccount,
   getBaseApi,
   request,
 } from '../misesController/misesNetwork.util';
+import { NetworksChainId } from '../misesNetworkController';
 
 export default class MisesCollectibleDetectionController extends CollectibleDetectionController {
   offset = '';

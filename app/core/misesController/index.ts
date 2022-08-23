@@ -30,6 +30,7 @@ import { uuid } from '@walletconnect/utils';
 
 import { NativeModules } from 'react-native';
 import Logger from '../../util/Logger';
+import { NetworksChainId } from '../misesNetworkController';
 const { MisesModule } = NativeModules;
 export const MISES_POINT = 'http://127.0.0.1:26657';
 export interface misesBalance {
@@ -768,10 +769,10 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       }
       return result.concat({
         blockNumber: tx.height,
-        chainId: '46',
+        chainId: NetworksChainId.mises,
         id: uuid(),
         insertImportTime: true,
-        networkID: '46',
+        networkID: NetworksChainId.mises,
         status: 'confirmed',
         time: 1650959960000,
         date:
@@ -864,7 +865,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   }
 
   async postTx(params: any) {
-    console.warn(params, 'postTx:getParmas===');
+    console.warn(JSON.stringify(params), 'postTx:getParmas===');
     const activeUser = this.getActive();
     const data = await activeUser?.postTx(
       params.msgs,
