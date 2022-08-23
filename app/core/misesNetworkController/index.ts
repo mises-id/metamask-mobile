@@ -345,7 +345,8 @@ export class NetworkController extends BaseController<
    * @param type - Human readable network name.
    */
   setProviderType(type: NetworkType) {
-    const { ...providerState } = this.state.provider;
+    const { rpcTarget, chainId, nickname, ...providerState } =
+      this.state.provider;
 
     // If testnet the ticker symbol should use a testnet prefix
     const ticker =
