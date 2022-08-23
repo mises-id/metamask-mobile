@@ -211,7 +211,7 @@ export class BackgroundBridge extends EventEmitter {
     this.sendNotification({
       method: NOTIFICATION_NAMES.unlockStateChanged,
       params: {
-        isunlocked: true,
+        isUnlocked: true,
         accounts: [Engine.context.PreferencesController.state.selectedAddress],
       },
     });
@@ -224,7 +224,7 @@ export class BackgroundBridge extends EventEmitter {
     this.sendNotification({
       method: NOTIFICATION_NAMES.unlockStateChanged,
       params: {
-        isunlocked: false,
+        isUnlocked: false,
       },
     });
   }
