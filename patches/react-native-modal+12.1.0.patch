@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-native-modal/dist/modal.js b/node_modules/react-native-modal/dist/modal.js
-index ec3cc0b..bed08a4 100644
+index ec3cc0b..90783b2 100644
 --- a/node_modules/react-native-modal/dist/modal.js
 +++ b/node_modules/react-native-modal/dist/modal.js
 @@ -52,6 +52,7 @@ export class ReactNativeModal extends React.Component {
@@ -10,6 +10,17 @@ index ec3cc0b..bed08a4 100644
          this.state = {
              showContent: true,
              isVisible: false,
+@@ -65,8 +66,8 @@ export class ReactNativeModal extends React.Component {
+         this.currentSwipingDirection = null;
+         this.panResponder = null;
+         this.interactionHandle = null;
+-        this.getDeviceHeight = () => this.props.deviceHeight || this.state.deviceHeight;
+-        this.getDeviceWidth = () => this.props.deviceWidth || this.state.deviceWidth;
++        this.getDeviceHeight = () => this.props.deviceHeight || Dimensions.get('window').height;
++        this.getDeviceWidth = () => this.props.deviceWidth || Dimensions.get('window').width;
+         this.onBackButtonPress = () => {
+             if (this.props.onBackButtonPress && this.props.isVisible) {
+                 this.props.onBackButtonPress();
 @@ -448,7 +449,7 @@ export class ReactNativeModal extends React.Component {
          if (this.props.onSwipe) {
              console.warn('`<Modal onSwipe="..." />` is deprecated and will be removed starting from 13.0.0. Use `<Modal onSwipeComplete="..." />` instead.');
