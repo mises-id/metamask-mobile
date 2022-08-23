@@ -293,7 +293,7 @@ export class NetworkController extends BaseController<
     this.defaultState = {
       network: 'loading',
       isCustomNetwork: false,
-      provider: { type: MAINNET, chainId: NetworksChainId.mainnet },
+      provider: { type: 'mises', chainId: NetworksChainId.mises },
       properties: { isEIP1559Compatible: false },
     };
     this.initialize();
