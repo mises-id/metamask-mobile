@@ -216,10 +216,10 @@ export class NetworkController extends BaseController<
       on: emptyFunction,
       sendAsync: (opts: any, cb: (params: any, result: any) => void) => {
         if (opts.method === 'net_version') {
-          cb(null, { result: '46' });
+          cb(null, { result: NetworksChainId.mises });
         }
         if (opts.method === 'eth_chainId') {
-          cb(null, { result: 46 });
+          cb(null, { result: NetworksChainId.mises });
         }
         if (opts.method === 'eth_getBalance') {
           cb(null, { result: 0 });

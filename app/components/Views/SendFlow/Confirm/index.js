@@ -34,7 +34,6 @@ import StyledButton from '../../../UI/StyledButton';
 import {
   util,
   WalletDevice,
-  NetworksChainId,
   GAS_ESTIMATE_TYPES,
   BN,
 } from '@metamask/controllers';
@@ -96,6 +95,7 @@ import {
   isMisesChain,
 } from '../../../../core/misesController/misesNetwork.util';
 import { refreshTransactions } from '../../../../actions/notification';
+import { NetworksChainId } from '../../../../core/misesNetworkController';
 
 const EDIT = 'edit';
 const EDIT_NONCE = 'edit_nonce';
@@ -1009,10 +1009,10 @@ class Confirm extends PureComponent {
             .toNumber() / 1000000;
         await MisesController.setMisesBook(misesId, value, false, memo);
         transactionMeta = {
-          chainId: '46',
+          chainId: NetworksChainId.mises,
           deviceConfirmedOn: 'metamask_mobile',
           id: uuid(),
-          networkID: '46',
+          networkID: NetworksChainId.mises,
           origin: 'MetaMask Mobile',
           status: 'Confirmed',
           time: new Date().getTime(),

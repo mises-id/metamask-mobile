@@ -1,4 +1,3 @@
-import { NetworksChainId } from '@metamask/controllers';
 import AppConstants from '../core/AppConstants';
 import { getAllNetworks, isSafeChainId } from '../util/networks';
 import { toLowerCaseEquals } from '../util/general';
@@ -10,6 +9,7 @@ import {
   DENIED,
   EXPLORED,
 } from '../constants/storage';
+import { NetworksChainId } from '../core/misesNetworkController';
 
 export const migrations = {
   // Needed after https://github.com/MetaMask/controllers/pull/152

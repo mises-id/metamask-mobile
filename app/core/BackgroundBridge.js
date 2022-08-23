@@ -1,6 +1,5 @@
 /* eslint-disable import/no-commonjs */
 import URL from 'url-parse';
-import { NetworksChainId } from '@metamask/controllers';
 import { JsonRpcEngine } from 'json-rpc-engine';
 import {
   JS_POST_MESSAGE_TO_PROVIDER,
@@ -22,6 +21,7 @@ import {
   createEventEmitterProxy,
 } from 'swappable-obj-proxy';
 import { isMisesChain } from './misesController/misesNetwork.util';
+import { NetworksChainId } from './misesNetworkController';
 
 const createFilterMiddleware = require('eth-json-rpc-filters');
 const createSubscriptionManager = require('eth-json-rpc-filters/subscriptionManager');

@@ -1,4 +1,4 @@
-import { NetworksChainId } from '@metamask/controllers';
+import { NetworksChainId } from '../../core/misesNetworkController';
 import reducer, {
   ADD_FAVORITE_COLLECTIBLE,
   REMOVE_FAVORITE_COLLECTIBLE,

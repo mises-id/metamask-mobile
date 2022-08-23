@@ -4,7 +4,6 @@ import { createAsyncMiddleware } from 'json-rpc-engine';
 import { ethErrors } from 'eth-json-rpc-errors';
 import RPCMethods from './index.js';
 import { RPC } from '../../constants/network';
-import { NetworksChainId, NetworkType } from '@metamask/controllers';
 import Networks, {
   blockTagParamIndex,
   getAllNetworks,
@@ -19,6 +18,10 @@ import setOnboardingWizardStep from '../../actions/wizard';
 import { v1 as random } from 'uuid';
 import Logger from '../../util/Logger';
 import NotificationManager from '../NotificationManager.js';
+import {
+  NetworksChainId,
+  NetworkType,
+} from '../misesNetworkController/index.js';
 const { MisesModule } = NativeModules;
 const Engine = ImportedEngine as any;
 
