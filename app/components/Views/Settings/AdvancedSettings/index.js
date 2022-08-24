@@ -165,6 +165,7 @@ class AdvancedSettings extends PureComponent {
      * Object that represents the current route info like params passed to it
      */
     route: PropTypes.object,
+    selectedAddress: PropTypes.string,
   };
 
   scrollView = React.createRef();
@@ -251,9 +252,10 @@ class AdvancedSettings extends PureComponent {
   };
 
   resetAccount = () => {
-    const { TransactionController } = Engine.context;
+    const { TransactionController, MisesController } = Engine.context;
     const { navigation } = this.props;
     TransactionController.wipeTransactions(true);
+    MisesController.setAccountTransactionsHeight(this.props.selectedAddress);
     navigation.navigate('WalletView');
   };
 
@@ -507,6 +509,8 @@ const mapStateToProps = (state) => ({
     state.engine.backgroundState.PreferencesController.useTokenDetection,
   chainId: state.engine.backgroundState.NetworkController.provider.chainId,
   networkType: state.engine.backgroundState.NetworkController.provider.type,
+  selectedAddress:
+    state.engine.backgroundState.PreferencesController.selectedAddress,
 });
 
 const mapDispatchToProps = (dispatch) => ({
