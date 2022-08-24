@@ -348,7 +348,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
         user_authz: { auth: account.auth },
         referrer,
       });
-      // console.warn(referrer, 'referrer');
+      console.warn(token, 'referrer');
       account.token = token; // token;
       account.timestamp = new Date().getTime();
       const activeUser = this.getActive();
@@ -813,6 +813,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       const currentAddress =
         (lowerAddress && accountList[lowerAddress]) || null;
       if (!currentAddress) return;
+      Logger.log(currentAddress.height, misesId);
       let list = (await activeUser?.recentTransactions(
         currentAddress.height,
       )) as indexed[];
@@ -852,13 +853,11 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
   async setAccountTransactionsHeight(selectedAddress: string) {
     // const selectedAddress = this.getSelectedAddress();
     const accountList = this.getAccountList();
-    const { transactions = [] } = findMisesAccount(
-      accountList,
-      selectedAddress,
-    );
+    const misesAccount = findMisesAccount(accountList, selectedAddress);
+    const { transactions = [] } = misesAccount;
     const last = transactions[0] || {};
-    accountList[selectedAddress].height = last.height + 1;
-    // console.log(last.height, accountList, 'setAccountTransactionsHeight');
+    accountList[misesAccount.address].height = last.blockNumber + 1;
+    Logger.log(transactions[0], accountList, 'setAccountTransactionsHeight');
     this.update({
       accountList,
     });
@@ -926,6 +925,10 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
     } catch (error) {
       console.warn(error, address, 'onPreferencesStateChange');
     }
+  }
+  lockAll() {
+    Logger.log('lockall');
+    this.#misesUser.lockAll();
   }
 }
 

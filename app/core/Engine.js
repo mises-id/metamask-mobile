@@ -694,6 +694,7 @@ class Engine {
       accountList: {},
     });
     MisesController.setToMisesPrivate({ token: '' });
+    MisesController.lockAll();
   };
 
   sync = async ({
