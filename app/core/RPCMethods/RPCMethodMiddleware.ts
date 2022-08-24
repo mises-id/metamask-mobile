@@ -792,6 +792,10 @@ export const getRpcMethodMiddleware = ({
       },
       mises_getActive: async () => {
         try {
+          if (!Engine.context.KeyringController.isUnlocked()) {
+            res.result = false;
+            return;
+          }
           const misesId = req.params[0];
           const data = await Engine.context.MisesController.getActive();
           Logger.log(data?.address(), data?.misesID(), misesId);
