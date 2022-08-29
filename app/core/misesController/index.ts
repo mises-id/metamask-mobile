@@ -818,6 +818,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
       let list = (await activeUser?.recentTransactions(
         currentAddress.height,
       )) as indexed[];
+      Logger.log('await list', list.length);
       list = list
         ?.reduce((result, val) => {
           const item = { ...val };
@@ -840,6 +841,7 @@ class MisesController extends BaseController<KeyringConfig, misesState> {
           });
         }
       }
+      Logger.log(list.length, 'get recentTransactions');
       return list;
     } catch (error) {
       console.warn(error);

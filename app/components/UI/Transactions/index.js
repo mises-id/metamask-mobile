@@ -245,18 +245,17 @@ class Transactions extends PureComponent {
     });
   };
   componentDidUpdate(prevProps) {
-    this.refreshTransactionList();
+    if (
+      this.props.refreshTransactionStatus ||
+      prevProps.selectedAddress !== this.props.selectedAddress
+    ) {
+      this.refreshTransactionList();
+    }
   }
   refreshTransactionList() {
-    if (this.props.refreshTransactionStatus) {
-      Logger.log(
-        this.props.refreshTransactionStatus,
-        'prevProps.refreshTransactionStatus',
-      );
-      this.getMisesTransactions();
-      this.props.refreshTransactions(false);
-      Logger.log('refreshTransactionList success');
-    }
+    this.getMisesTransactions();
+    this.props.refreshTransactions(false);
+    Logger.log('refreshTransactionList success');
   }
 
   componentWillUnmount() {
@@ -290,6 +289,7 @@ class Transactions extends PureComponent {
     try {
       const { MisesController } = Engine.context;
       await MisesController.recentTransactions();
+      Logger.log('init mises', this.props.accountList);
       this.setState({
         transactions:
           findMisesAccount(this.props.accountList, selectedAddress)
@@ -350,7 +350,7 @@ class Transactions extends PureComponent {
 
       this.setState({ refreshing: false });
     } catch (error) {
-      console.log(error, 'errorerror');
+      Logger.log(error, 'errorerror');
       this.setState({ refreshing: false });
     }
   };
