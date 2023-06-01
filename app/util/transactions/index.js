@@ -1211,7 +1211,7 @@ export const parseTransactionLegacy = (
   const parsedTicker = getTicker(ticker);
   const transactionFee = `${renderFromWei(weiTransactionFee)} ${parsedTicker}`;
 
-  const totalHex = valueBN.add(hexToBN(weiTransactionFee));
+  const totalHex = BNToHex(valueBN.add(hexToBN(weiTransactionFee)));
 
   if (onlyGas) {
     return {

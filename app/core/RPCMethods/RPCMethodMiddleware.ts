@@ -304,6 +304,7 @@ export const getRpcMethodMiddleware = ({
           chainId: req.params[0].chainId,
           activeAccounts: getAccounts(),
         });
+        MisesModule.popup();
         next();
       },
       eth_signTransaction: async () => {
