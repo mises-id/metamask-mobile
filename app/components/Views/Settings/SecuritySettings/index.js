@@ -353,6 +353,11 @@ class Settings extends PureComponent {
       key: '600000',
     },
     {
+      value: '3600000',
+      label: strings('app_settings.autolock_after_minutes', { time: 60 }),
+      key: '3600000',
+    },
+    {
       value: '-1',
       label: strings('app_settings.autolock_never'),
       key: '-1',
