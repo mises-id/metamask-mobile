@@ -296,7 +296,7 @@ class Approval extends PureComponent {
   };
 
   onCancel = () => {
-    this.props.toggleDappTransactionModal();
+    this.props.toggleDappTransactionModal(false);
     this.state.mode === REVIEW && this.trackOnCancel();
     this.showWalletConnectNotification();
     AnalyticsV2.trackEvent(
@@ -342,7 +342,7 @@ class Approval extends PureComponent {
         (transactionMeta) => {
           if (transactionMeta.status === 'submitted') {
             this.setState({ transactionHandled: true });
-            this.props.toggleDappTransactionModal();
+            this.props.toggleDappTransactionModal(false);
             NotificationManager.watchSubmittedTransaction({
               ...transactionMeta,
               assetType: transaction.assetType,
@@ -382,6 +382,8 @@ class Approval extends PureComponent {
       this.getAnalyticsParams({ gasEstimateType, gasSelected }),
     );
     this.setState({ transactionConfirmed: false });
+
+    this.props.toggleDappTransactionModal(false);
   };
 
   /**
