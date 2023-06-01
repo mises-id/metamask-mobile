@@ -892,6 +892,7 @@
 				SWIFT_OBJC_BRIDGING_HEADER = "MetaMask-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
+				THIRD_PARTY_LIBPATH = "/Users/baoge/Documents/work/mises-browser-core/src/buildtools/third_party";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
@@ -956,6 +957,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "MetaMask-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
+				THIRD_PARTY_LIBPATH = "/Users/baoge/Documents/work/mises-browser-core/src/buildtools/third_party";
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -1000,6 +1002,7 @@
 					"$(THIRD_PARTY_LIBPATH)/libc++abi",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LIBRARY_SEARCH_PATHS = "";
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -1013,10 +1016,11 @@
 					"-D_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
 					"-D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS",
 					"-std=c++17",
+					"-DBOOST_NO_CXX98_FUNCTION_BASE",
 				);
 				OTHER_LDFLAGS = "-nostdlib++";
 				SDKROOT = iphoneos;
-				THIRD_PARTY_LIBPATH = /Users/baoge/Documents/work/chromium/chromium98/src/buildtools/third_party;
+				THIRD_PARTY_LIBPATH = "/Users/baoge/Documents/work/mises-browser-core/src/buildtools/third_party";
 			};
 			name = Debug;
 		};
@@ -1053,6 +1057,7 @@
 					"$(THIRD_PARTY_LIBPATH)/libc++abi",
 				);
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				LIBRARY_SEARCH_PATHS = "";
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_CPLUSPLUSFLAGS = (
 					"$(OTHER_CFLAGS)",
@@ -1065,10 +1070,11 @@
 					"-D_LIBCXXABI_DISABLE_VISIBILITY_ANNOTATIONS",
 					"-D_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS",
 					"-std=c++17",
+					"-DBOOST_NO_CXX98_FUNCTION_BASE",
 				);
 				OTHER_LDFLAGS = "-nostdlib++";
 				SDKROOT = iphoneos;
-				THIRD_PARTY_LIBPATH = /Users/baoge/Documents/work/chromium/chromium98/src/buildtools/third_party;
+				THIRD_PARTY_LIBPATH = "/Users/baoge/Documents/work/mises-browser-core/src/buildtools/third_party";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
