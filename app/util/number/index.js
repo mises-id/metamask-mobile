@@ -316,6 +316,7 @@ export function calcTokenValueToSend(value, decimals) {
  * @returns {Object} - A BN instance
  */
 export function hexToBN(value) {
+  if (value === undefined) return toBN(0);
   if (isBN(value)) return value;
   return util.hexToBN(value);
 }

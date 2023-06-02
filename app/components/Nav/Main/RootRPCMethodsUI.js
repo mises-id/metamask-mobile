@@ -264,7 +264,10 @@ const RootRPCMethodsUI = (props) => {
             }
           },
         );
-        await KeyringController.resetQRKeyringState();
+        const qrKeyringState = await KeyringController.getQRKeyringState();
+        if (!!qrKeyringState.sign?.request || !!qrKeyringState.sync?.reading) {
+          await KeyringController.resetQRKeyringState();
+        }
         await TransactionController.approveTransaction(transactionMeta.id);
       } catch (error) {
         if (!error?.message.startsWith(KEYSTONE_TX_CANCELED)) {

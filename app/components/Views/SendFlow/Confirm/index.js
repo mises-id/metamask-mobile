@@ -1027,7 +1027,10 @@ class Confirm extends PureComponent {
           },
           verifiedOnBlockchain: false,
         };
-        await KeyringController.resetQRKeyringState();
+        const qrKeyringState = await KeyringController.getQRKeyringState();
+        if (!!qrKeyringState.sign?.request || !!qrKeyringState.sync?.reading) {
+          await KeyringController.resetQRKeyringState();
+        }
       } else {
         let error;
         if (gasEstimateType === GAS_ESTIMATE_TYPES.FEE_MARKET) {
@@ -1052,7 +1055,10 @@ class Confirm extends PureComponent {
             TransactionTypes.MMM,
             WalletDevice.MM_MOBILE,
           );
-        await KeyringController.resetQRKeyringState();
+        const qrKeyringState = await KeyringController.getQRKeyringState();
+        if (!!qrKeyringState.sign?.request || !!qrKeyringState.sync?.reading) {
+          await KeyringController.resetQRKeyringState();
+        }
         await TransactionController.approveTransaction(transactionMetaObj.id);
         await new Promise((resolve) => resolve(result));
 

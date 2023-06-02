@@ -189,7 +189,7 @@ const UpdateEIP1559Tx = ({
     (updateTx) => {
       let error;
 
-      const updateTxCost: any = hexToBN(`0x${updateTx.totalMaxHex}`);
+      const updateTxCost: any = hexToBN(updateTx.totalMaxHex);
       const accountBalance: any = hexToBN(accounts[selectedAddress].balance);
       const isMaxFeePerGasMoreThanLegacyResult = isMaxFeePerGasMoreThanLegacy(
         new BigNumber(updateTx.suggestedMaxFeePerGas),

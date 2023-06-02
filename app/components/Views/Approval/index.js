@@ -356,7 +356,10 @@ class Approval extends PureComponent {
       const fullTx = transactions.find(({ id }) => id === transaction.id);
       const updatedTx = { ...fullTx, transaction };
       await TransactionController.updateTransaction(updatedTx);
-      await KeyringController.resetQRKeyringState();
+      const qrKeyringState = await KeyringController.getQRKeyringState();
+      if (!!qrKeyringState.sign?.request || !!qrKeyringState.sync?.reading) {
+        await KeyringController.resetQRKeyringState();
+      }
       await TransactionController.approveTransaction(transaction.id);
       this.showWalletConnectNotification(true);
     } catch (error) {
@@ -382,8 +385,6 @@ class Approval extends PureComponent {
       this.getAnalyticsParams({ gasEstimateType, gasSelected }),
     );
     this.setState({ transactionConfirmed: false });
-
-    this.props.toggleDappTransactionModal(false);
   };
 
   /**

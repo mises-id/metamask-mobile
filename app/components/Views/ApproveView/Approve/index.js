@@ -370,6 +370,7 @@ class Approve extends PureComponent {
   };
 
   handleAppStateChange = (appState) => {
+    console.log('handleAppStateChange', appState);
     if (appState !== 'active') {
       const { transaction } = this.props;
       transaction &&
@@ -513,7 +514,10 @@ class Approve extends PureComponent {
       const fullTx = transactions.find(({ id }) => id === transaction.id);
       const updatedTx = { ...fullTx, transaction };
       await TransactionController.updateTransaction(updatedTx);
-      await KeyringController.resetQRKeyringState();
+      const qrKeyringState = await KeyringController.getQRKeyringState();
+      if (!!qrKeyringState.sign?.request || !!qrKeyringState.sync?.reading) {
+        await KeyringController.resetQRKeyringState();
+      }
       await TransactionController.approveTransaction(transaction.id);
       AnalyticsV2.trackEvent(
         AnalyticsV2.ANALYTICS_EVENTS.APPROVAL_COMPLETED,
@@ -534,7 +538,7 @@ class Approve extends PureComponent {
       }
       this.setState({ transactionHandled: false });
     }
-    this.setState({ transactionConfirmed: true });
+    this.setState({ transactionConfirmed: false });
   };
 
   onCancel = () => {
