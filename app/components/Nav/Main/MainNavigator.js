@@ -58,7 +58,7 @@ import Regions from '../../UI/FiatOnRampAggregator/Views/Regions';
 import { colors as importedColors } from '../../../styles/common';
 import OrderDetails from '../../UI/FiatOnRampAggregator/Views/OrderDetails';
 import TabBar from '../../../component-library/components/Navigation/TabBar';
-import BrowserUrlModal from '../../Views/BrowserUrlModal';
+// import BrowserUrlModal from '../../Views/BrowserUrlModal';
 import Routes from '../../../constants/navigation/Routes';
 import AnalyticsV2 from '../../../util/analyticsV2';
 import { MetaMetricsEvents } from '../../../core/Analytics';
@@ -180,22 +180,22 @@ const TransactionsHome = () => (
   </Stack.Navigator>
 );
 
-const BrowserFlow = () => (
-  <Stack.Navigator
-    initialRouteName={Routes.BROWSER.VIEW}
-    mode={'modal'}
-    screenOptions={{
-      cardStyle: { backgroundColor: importedColors.transparent },
-    }}
-  >
-    <Stack.Screen name={Routes.BROWSER.VIEW} component={Browser} />
-    <Stack.Screen
-      name={Routes.BROWSER.URL_MODAL}
-      component={BrowserUrlModal}
-      options={{ animationEnabled: false, headerShown: false }}
-    />
-  </Stack.Navigator>
-);
+// const BrowserFlow = () => (
+//   <Stack.Navigator
+//     initialRouteName={Routes.BROWSER.VIEW}
+//     mode={'modal'}
+//     screenOptions={{
+//       cardStyle: { backgroundColor: importedColors.transparent },
+//     }}
+//   >
+//     <Stack.Screen name={Routes.BROWSER.VIEW} component={Browser} />
+//     <Stack.Screen
+//       name={Routes.BROWSER.URL_MODAL}
+//       component={BrowserUrlModal}
+//       options={{ animationEnabled: false, headerShown: false }}
+//     />
+//   </Stack.Navigator>
+// );
 
 export const DrawerContext = React.createContext({ drawerRef: null });
 
@@ -344,23 +344,32 @@ const HomeTabs = () => {
       },
       rootScreenName: Routes.WALLET_VIEW,
     },
+    // actions: {
+    //   tabBarIconKey: TabBarIconKey.Actions,
+    //   rootScreenName: Routes.MODAL.WALLET_ACTIONS,
+    // },
     actions: {
       tabBarIconKey: TabBarIconKey.Actions,
+      callback: () => {
+        // AnalyticsV2.trackEvent(
+        //   MetaMetricsEvents.NAVIGATION_TAPS_TRANSACTION_HISTORY,
+        // );
+      },
       rootScreenName: Routes.MODAL.WALLET_ACTIONS,
     },
-    browser: {
-      tabBarIconKey: TabBarIconKey.Browser,
-      callback: () => {
-        AnalyticsV2.trackEvent(MetaMetricsEvents.BROWSER_OPENED, {
-          number_of_accounts: accountsLength,
-          chain_id: chainId,
-          source: 'Navigation Tab',
-          active_connected_dapp: activeConnectedDapp,
-          number_of_open_tabs: amountOfBrowserOpenTabs,
-        });
-      },
-      rootScreenName: Routes.BROWSER_VIEW,
-    },
+    // browser: {
+    //   tabBarIconKey: TabBarIconKey.Browser,
+    //   callback: () => {
+    //     AnalyticsV2.trackEvent(MetaMetricsEvents.BROWSER_OPENED, {
+    //       number_of_accounts: accountsLength,
+    //       chain_id: chainId,
+    //       source: 'Navigation Tab',
+    //       active_connected_dapp: activeConnectedDapp,
+    //       number_of_open_tabs: amountOfBrowserOpenTabs,
+    //     });
+    //   },
+    //   rootScreenName: Routes.BROWSER_VIEW,
+    // },
     activity: {
       tabBarIconKey: TabBarIconKey.Activity,
       callback: () => {
@@ -427,11 +436,11 @@ const HomeTabs = () => {
             options={options.actions}
             component={WalletTabModalFlow}
           />
-          <Tab.Screen
+          {/* <Tab.Screen
             name={Routes.BROWSER.HOME}
             options={options.browser}
             component={BrowserFlow}
-          />
+          /> */}
 
           <Tab.Screen
             name={Routes.SETTINGS_VIEW}
