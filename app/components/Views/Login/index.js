@@ -65,6 +65,7 @@ import { parseVaultValue } from '../../../util/validators';
 import { getVaultFromBackup } from '../../../core/BackupVault';
 import { containsErrorMessage } from '../../../util/errorHandling';
 import { MetaMetricsEvents } from '../../../core/Analytics';
+import NativeBridge from '../../../core/BackgroundBridge/NativeBridge';
 
 const deviceHeight = Device.getDeviceHeight();
 const breakPoint = deviceHeight < 700;
@@ -259,6 +260,7 @@ class Login extends PureComponent {
 
   async componentDidMount() {
     trackEvent(MetaMetricsEvents.LOGIN_SCREEN_VIEWED);
+    !NativeBridge.isWindowVisible() && (await this.listenerOnWindowShow());
     BackHandler.addEventListener('hardwareBackPress', this.handleBackPress);
 
     const authData = await Authentication.getType();
@@ -306,6 +308,11 @@ class Login extends PureComponent {
     await Authentication.lockApp();
     return false;
   };
+
+  listenerOnwindowShow = () =>
+    new Promise((resolve) => {
+      NativeBridge.onWindowShow(resolve, true);
+    });
 
   handleVaultCorruption = async () => {
     // This is so we can log vault corruption error in sentry

@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, NativeModules } from 'react-native';
 import { getVersion } from 'react-native-device-info';
 import { createAsyncMiddleware } from 'json-rpc-engine';
 import { ethErrors } from 'eth-json-rpc-errors';
@@ -27,6 +27,9 @@ import { getPermittedAccounts } from '../Permissions';
 import AppConstants from '../AppConstants.js';
 import { isSmartContractAddress } from '../../util/transactions';
 import { TOKEN_NOT_SUPPORTED_FOR_NETWORK } from '../../constants/error';
+import Logger from '../../util/Logger';
+const { MisesModule } = NativeModules;
+
 const Engine = ImportedEngine as any;
 
 let appVersion = '';
@@ -45,6 +48,7 @@ export enum ApprovalTypes {
   TRANSACTION = 'transaction',
   RESULT_ERROR = 'result_error',
   RESULT_SUCCESS = 'result_success',
+  PENDINGAPPROVAL = 'pendingApproval',
 }
 
 interface RPCMethodsMiddleParameters {
@@ -72,6 +76,7 @@ interface RPCMethodsMiddleParameters {
   approveHost: (fullHostname: string) => void;
   injectHomePageScripts: (bookmarks?: []) => void;
   analytics: { [key: string]: string | boolean };
+  ensureUnlock: () => void;
 }
 
 // Also used by WalletConnect.js.
@@ -170,6 +175,7 @@ export const getRpcMethodMiddleware = ({
   injectHomePageScripts,
   // For analytics
   analytics,
+  ensureUnlock,
 }: RPCMethodsMiddleParameters) =>
   // all user facing RPC calls not implemented by the provider
   createAsyncMiddleware(async (req: any, res: any, next: any) => {
@@ -191,10 +197,11 @@ export const getRpcMethodMiddleware = ({
     };
 
     const checkTabActive = () => {
-      if (!tabId) return true;
-      const { browser } = store.getState();
-      if (tabId !== browser.activeTab)
-        throw ethErrors.provider.userRejectedRequest();
+      Logger.log(tabId);
+      // if (!tabId) return true;
+      // const { browser } = store.getState();
+      // if (tabId !== browser.activeTab)
+      //   throw ethErrors.provider.userRejectedRequest();
     };
 
     const getSource = () => {
@@ -248,6 +255,17 @@ export const getRpcMethodMiddleware = ({
       return responseData;
     };
 
+    const requestPromiseLock = async () => {
+      const { PreferencesController, KeyringController } = Engine.context;
+      const { selectedAddress: hasSelectedAddress } =
+        PreferencesController.state;
+
+      if (!hasSelectedAddress || !KeyringController.isUnlocked()) {
+        await ensureUnlock();
+      }
+      return Promise.resolve();
+    };
+
     const rpcMethods: any = {
       eth_getTransactionByHash: async () => {
         res.result = await polyfillGasPrice('getTransactionByHash', req.params);
@@ -281,6 +299,9 @@ export const getRpcMethodMiddleware = ({
           // Convert to hex
           res.result = `0x${parseInt(chainId, 10).toString(16)}`;
         }
+        if (!chainId) {
+          return next();
+        }
       },
       eth_hashrate: () => {
         res.result = '0x00';
@@ -306,9 +327,17 @@ export const getRpcMethodMiddleware = ({
       },
       eth_requestAccounts: async () => {
         const { params } = req;
+        // show metamask popup
+        const { PreferencesController } = Engine.context;
+        await requestPromiseLock();
+
+        let { selectedAddress } = PreferencesController.state;
+
+        selectedAddress = selectedAddress?.toLowerCase();
+
         if (isWalletConnect) {
-          let { selectedAddress } = Engine.context.PreferencesController.state;
-          selectedAddress = selectedAddress?.toLowerCase();
+          // let { selectedAddress } = Engine.context.PreferencesController.state;
+          // selectedAddress = selectedAddress?.toLowerCase();
           res.result = [selectedAddress];
         } else if (isMMSDK) {
           try {
@@ -362,6 +391,7 @@ export const getRpcMethodMiddleware = ({
       eth_sendTransaction: async () => {
         checkTabActive();
         const { TransactionController } = Engine.context;
+        MisesModule.popup();
         return RPCMethods.eth_sendTransaction({
           hostname,
           req,
@@ -413,6 +443,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
 
         if (req.params[1].length === 66 || req.params[1].length === 67) {
           await checkActiveAccountAndChainId({
@@ -461,6 +492,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         await checkActiveAccountAndChainId({
           hostname,
           address: params.from,
@@ -506,6 +538,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         await checkActiveAccountAndChainId({
           hostname,
           address: req.params[1],
@@ -548,6 +581,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         await checkActiveAccountAndChainId({
           hostname,
           address: req.params[0],
@@ -588,6 +622,7 @@ export const getRpcMethodMiddleware = ({
         };
 
         checkTabActive();
+        await requestPromiseLock();
         await checkActiveAccountAndChainId({
           hostname,
           address: req.params[0],
@@ -780,7 +815,8 @@ export const getRpcMethodMiddleware = ({
        * the page, and we implement it as a no-op.
        */
       metamask_logWeb3ShimUsage: () => (res.result = null),
-      wallet_addEthereumChain: () => {
+      wallet_addEthereumChain: async () => {
+        await requestPromiseLock();
         checkTabActive();
         return RPCMethods.wallet_addEthereumChain({
           req,
@@ -795,7 +831,8 @@ export const getRpcMethodMiddleware = ({
         });
       },
 
-      wallet_switchEthereumChain: () => {
+      wallet_switchEthereumChain: async () => {
+        await requestPromiseLock();
         checkTabActive();
         return RPCMethods.wallet_switchEthereumChain({
           req,

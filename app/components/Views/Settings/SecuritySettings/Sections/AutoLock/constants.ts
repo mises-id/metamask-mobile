@@ -32,9 +32,9 @@ const AUTO_LOCK_OPTIONS = [
     key: '300000',
   },
   {
-    value: '600000',
-    label: strings('app_settings.autolock_after_minutes', { time: 10 }),
-    key: '600000',
+    value: '3600000',
+    label: strings('app_settings.autolock_after_minutes', { time: 60 }),
+    key: '3600000',
   },
   {
     value: '-1',

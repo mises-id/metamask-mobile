@@ -73,7 +73,10 @@
     "update-changelog": "./scripts/auto-changelog.sh",
     "prestorybook": "rnstl",
     "create-release": "./scripts/set-versions.sh && yarn update-changelog",
-    "add-release-label-to-pr-and-linked-issues": "ts-node ./.github/scripts/add-release-label-to-pr-and-linked-issues.ts"
+    "add-release-label-to-pr-and-linked-issues": "ts-node ./.github/scripts/add-release-label-to-pr-and-linked-issues.ts",
+    "jsbundle:ios": "METAMASK_ENVIRONMENT='production' ./scripts/build.sh ios bundle",
+    "release:ios:device": "METAMASK_ENVIRONMENT='production' ./scripts/build.sh ios release --device",
+    "patch-reactnative": "yarn patch-package  react-native --include 'ReactAndroid/.*|React/.*' --case-sensitive-path-filtering"
   },
   "husky": {
     "hooks": {
@@ -174,7 +177,7 @@
     "@metamask/transaction-controller": "4.0.0",
     "@ngraveio/bc-ur": "^1.1.6",
     "@react-native-async-storage/async-storage": "1.17.10",
-    "@react-native-clipboard/clipboard": "1.8.4",
+    "@react-native-clipboard/clipboard": "1.10.0",
     "@react-native-community/blur": "4.3.2",
     "@react-native-community/checkbox": "^0.5.12",
     "@react-native-community/netinfo": "6.0.0",

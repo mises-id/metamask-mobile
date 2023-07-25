@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-import { StyleSheet, Alert, InteractionManager } from 'react-native';
+import {
+  StyleSheet,
+  Alert,
+  InteractionManager,
+  NativeModules,
+} from 'react-native';
 import PropTypes from 'prop-types';
 import { connect, useSelector } from 'react-redux';
 import { ethers } from 'ethers';
@@ -62,6 +67,8 @@ import { selectAccountsLength } from '../../../selectors/accountTrackerControlle
 import { createAccountConnectNavDetails } from '../../Views/AccountConnect';
 import { ApprovalResult } from '../../UI/Approval/ApprovalResult';
 import { ApprovalResultType } from '../../UI/Approval/ApprovalResult/ApprovalResult';
+import NativeBridge from '../../../core/BackgroundBridge/NativeBridge';
+const { MisesModule } = NativeModules;
 
 const APPROVAL_TYPES_WITH_DISABLED_CLOSE_ON_APPROVE = [
   ApprovalTypes.TRANSACTION,
@@ -269,7 +276,10 @@ const RootRPCMethodsUI = (props) => {
             }
           },
         );
-        await KeyringController.resetQRKeyringState();
+        const qrKeyringState = await KeyringController.getQRKeyringState();
+        if (!!qrKeyringState.sign?.request || !!qrKeyringState.sync?.reading) {
+          await KeyringController.resetQRKeyringState();
+        }
         acceptPendingApproval(transactionMeta.id);
       } catch (error) {
         if (!error?.message.startsWith(KEYSTONE_TX_CANCELED)) {
@@ -476,6 +486,7 @@ const RootRPCMethodsUI = (props) => {
       walletConnectRequestInfo.data,
     );
     setWalletConnectRequestInfo(undefined);
+    MisesModule.dismiss();
   };
 
   const onWalletConnectSessionRejected = () => {
@@ -485,6 +496,7 @@ const RootRPCMethodsUI = (props) => {
       ethErrors.provider.userRejectedRequest(),
     );
     setWalletConnectRequestInfo(undefined);
+    MisesModule.dismiss();
   };
 
   const renderWalletConnectSessionRequestModal = () => {
@@ -760,98 +772,109 @@ const RootRPCMethodsUI = (props) => {
 
   const handlePendingApprovals = async (approvalState) => {
     //TODO: IF WE RECEIVE AN APPROVAL REQUEST, AND WE HAVE ONE ACTIVE, SHOULD WE HIDE THE CURRENT ONE OR NOT?
-
     if (approvalState.pendingApprovalCount > 0) {
-      const key = Object.keys(approvalState.pendingApprovals)[0];
-      const request = approvalState.pendingApprovals[key];
-      const requestData = { ...request.requestData };
-      if (requestData.pageMeta) {
-        setCurrentPageMeta(requestData.pageMeta);
-      }
-
-      switch (request.type) {
-        case ApprovalTypes.REQUEST_PERMISSIONS:
-          if (requestData?.permissions?.eth_accounts) {
-            const {
-              metadata: { id },
-            } = requestData;
-
-            const totalAccounts = props.accountsLength;
-
-            AnalyticsV2.trackEvent(MetaMetricsEvents.CONNECT_REQUEST_STARTED, {
-              number_of_accounts: totalAccounts,
-              source: 'PERMISSION SYSTEM',
-            });
-
-            props.navigation.navigate(
-              ...createAccountConnectNavDetails({
-                hostInfo: requestData,
-                permissionRequestId: id,
-              }),
-            );
+      InteractionManager.runAfterInteractions(() => {
+        setTimeout(() => {
+          // show metamask popup
+          MisesModule.popup();
+          const key = Object.keys(approvalState.pendingApprovals)[0];
+          const request = approvalState.pendingApprovals[key];
+          const requestData = { ...request.requestData };
+          if (requestData.pageMeta) {
+            setCurrentPageMeta(requestData.pageMeta);
           }
-          break;
-        case ApprovalTypes.CONNECT_ACCOUNTS:
-          setHostToApprove({ data: requestData, id: request.id });
-          showPendingApprovalModal({
-            type: ApprovalTypes.CONNECT_ACCOUNTS,
-            origin: request.origin,
-          });
-          break;
-        case ApprovalTypes.SWITCH_ETHEREUM_CHAIN:
-          setCustomNetworkToSwitch({ data: requestData, id: request.id });
-          showPendingApprovalModal({
-            type: ApprovalTypes.SWITCH_ETHEREUM_CHAIN,
-            origin: request.origin,
-          });
-          break;
-        case ApprovalTypes.ADD_ETHEREUM_CHAIN:
-          setCustomNetworkToAdd({ data: requestData, id: request.id });
-          showPendingApprovalModal({
-            type: ApprovalTypes.ADD_ETHEREUM_CHAIN,
-            origin: request.origin,
-          });
-          break;
-        case ApprovalTypes.WALLET_CONNECT:
-          setWalletConnectRequestInfo({ data: requestData, id: request.id });
-          showPendingApprovalModal({
-            type: ApprovalTypes.WALLET_CONNECT,
-            origin: request.origin,
-          });
-          break;
-        case ApprovalTypes.ETH_SIGN:
-        case ApprovalTypes.PERSONAL_SIGN:
-        case ApprovalTypes.ETH_SIGN_TYPED_DATA:
-          setSignMessageParams(requestData);
-          showPendingApprovalModal({
-            type: request.type,
-            origin: request.origin,
-          });
-          break;
-        case ApprovalTypes.WATCH_ASSET:
-          setWatchAsset({ data: requestData, id: request.id });
-          showPendingApprovalModal({
-            type: ApprovalTypes.WATCH_ASSET,
-            origin: request.origin,
-          });
-          break;
-        case ApprovalTypes.TRANSACTION:
-          showPendingApprovalModal({
-            type: ApprovalTypes.TRANSACTION,
-            origin: request.origin,
-          });
-          break;
-        case ApprovalTypes.RESULT_SUCCESS:
-        case ApprovalTypes.RESULT_ERROR:
-          setApprovalResultRequest({ data: requestData, id: request.id });
-          showPendingApprovalModal({
-            type: request.type,
-            origin: request.origin,
-          });
-          break;
-        default:
-          break;
-      }
+
+          switch (request.type) {
+            case ApprovalTypes.REQUEST_PERMISSIONS:
+              if (requestData?.permissions?.eth_accounts) {
+                const {
+                  metadata: { id },
+                } = requestData;
+
+                const totalAccounts = props.accountsLength;
+
+                AnalyticsV2.trackEvent(
+                  MetaMetricsEvents.CONNECT_REQUEST_STARTED,
+                  {
+                    number_of_accounts: totalAccounts,
+                    source: 'PERMISSION SYSTEM',
+                  },
+                );
+
+                props.navigation.navigate(
+                  ...createAccountConnectNavDetails({
+                    hostInfo: requestData,
+                    permissionRequestId: id,
+                  }),
+                );
+              }
+              break;
+            case ApprovalTypes.CONNECT_ACCOUNTS:
+              setHostToApprove({ data: requestData, id: request.id });
+              showPendingApprovalModal({
+                type: ApprovalTypes.CONNECT_ACCOUNTS,
+                origin: request.origin,
+              });
+              break;
+            case ApprovalTypes.SWITCH_ETHEREUM_CHAIN:
+              setCustomNetworkToSwitch({ data: requestData, id: request.id });
+              showPendingApprovalModal({
+                type: ApprovalTypes.SWITCH_ETHEREUM_CHAIN,
+                origin: request.origin,
+              });
+              break;
+            case ApprovalTypes.ADD_ETHEREUM_CHAIN:
+              setCustomNetworkToAdd({ data: requestData, id: request.id });
+              showPendingApprovalModal({
+                type: ApprovalTypes.ADD_ETHEREUM_CHAIN,
+                origin: request.origin,
+              });
+              break;
+            case ApprovalTypes.WALLET_CONNECT:
+              setWalletConnectRequestInfo({
+                data: requestData,
+                id: request.id,
+              });
+              showPendingApprovalModal({
+                type: ApprovalTypes.WALLET_CONNECT,
+                origin: request.origin,
+              });
+              break;
+            case ApprovalTypes.ETH_SIGN:
+            case ApprovalTypes.PERSONAL_SIGN:
+            case ApprovalTypes.ETH_SIGN_TYPED_DATA:
+              setSignMessageParams(requestData);
+              showPendingApprovalModal({
+                type: request.type,
+                origin: request.origin,
+              });
+              break;
+            case ApprovalTypes.WATCH_ASSET:
+              setWatchAsset({ data: requestData, id: request.id });
+              showPendingApprovalModal({
+                type: ApprovalTypes.WATCH_ASSET,
+                origin: request.origin,
+              });
+              break;
+            case ApprovalTypes.TRANSACTION:
+              showPendingApprovalModal({
+                type: ApprovalTypes.TRANSACTION,
+                origin: request.origin,
+              });
+              break;
+            case ApprovalTypes.RESULT_SUCCESS:
+            case ApprovalTypes.RESULT_ERROR:
+              setApprovalResultRequest({ data: requestData, id: request.id });
+              showPendingApprovalModal({
+                type: request.type,
+                origin: request.origin,
+              });
+              break;
+            default:
+              break;
+          }
+        }, 300);
+      });
     } else {
       setShowPendingApproval((showPendingApproval) => {
         const currentApprovalType = showPendingApproval?.type;
@@ -876,6 +899,8 @@ const RootRPCMethodsUI = (props) => {
     } else {
       setShowPendingApprovalFlow(false);
       setApprovalFlowLoadingText(null);
+      // hidden metamask popup
+      MisesModule.dismiss();
     }
   };
 
@@ -887,6 +912,13 @@ const RootRPCMethodsUI = (props) => {
       handlePendingApprovals,
     );
 
+    // init ApprovalController state
+    const { ApprovalController } = Engine.context;
+    const approval = ApprovalController.state;
+    if (approval.pendingApprovalCount > 0) {
+      handlePendingApprovals(approval);
+    }
+
     return function cleanup() {
       Engine.context.TokensController.hub.removeAllListeners();
       Engine.controllerMessenger.unsubscribe(
@@ -897,6 +929,20 @@ const RootRPCMethodsUI = (props) => {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [isPopVisible, setIsPopVisible] = useState(
+    NativeBridge.isWindowVisible(),
+  );
+  useEffect(() => {
+    NativeBridge.onWindowShow(() => {
+      setIsPopVisible(true);
+    }, false);
+    NativeBridge.onWindowHide(() => {
+      setIsPopVisible(false);
+    }, false);
+  }, []);
+
+  if (!isPopVisible) return <></>;
 
   return (
     <React.Fragment>

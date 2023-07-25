@@ -34,6 +34,7 @@ import {
 import generateTestId from '../../../../wdio/utils/generateTestId';
 import { trackEventV2 as trackEvent } from '../../../util/analyticsV2';
 import { MetaMetricsEvents } from '../../../core/Analytics';
+import NativeBridge from '../../../core/BackgroundBridge/NativeBridge';
 
 const DELETE_KEYWORD = 'delete';
 
@@ -96,6 +97,7 @@ const DeleteWalletModal = () => {
     triggerClose();
     await resetWalletState();
     await deleteUser();
+    NativeBridge.clear();
     trackEvent(MetaMetricsEvents.DELETE_WALLET_MODAL_WALLET_DELETED, {});
     InteractionManager.runAfterInteractions(() => {
       navigateOnboardingRoot();

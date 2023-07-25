@@ -21,6 +21,7 @@ import {
   ThemeContext,
 } from '../../../util/theme';
 import Routes from '../../../constants/navigation/Routes';
+import NativeBridge from '../../../core/BackgroundBridge/NativeBridge';
 
 const LOGO_SIZE = 175;
 const createStyles = (colors) =>
@@ -103,6 +104,8 @@ class LockScreen extends PureComponent {
       'change',
       this.handleAppStateChange,
     );
+    NativeBridge.onAppStateChange(this.handleAppStateChange);
+    NativeBridge.onWindowShow(this.handleWindowShow, false);
     this.mounted = true;
   }
 
@@ -111,7 +114,8 @@ class LockScreen extends PureComponent {
     if (
       this.locked &&
       this.appState !== 'active' &&
-      nextAppState === 'active'
+      nextAppState === 'active' &&
+      NativeBridge.isWindowVisible()
     ) {
       this.firstAnimation?.play();
       this.appState = nextAppState;
@@ -120,9 +124,19 @@ class LockScreen extends PureComponent {
     }
   };
 
+  handleWindowShow = () => {
+    Logger.log('Lockscreen::handleWindowShow');
+    if (this.locked) {
+      this.firstAnimation.play();
+      this.unlockKeychain();
+    }
+  };
+
   componentWillUnmount() {
     this.mounted = false;
     this.appStateListener?.remove();
+    NativeBridge.removeOnAppStateChangeListener(this.handleAppStateChange);
+    NativeBridge.removeWindowShowListener(this.handleWindowShow);
   }
 
   lock = async () => {

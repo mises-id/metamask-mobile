@@ -224,7 +224,11 @@ buildIosRelease(){
 		if [ ! -f "ios/release.xcconfig" ] ; then
 			echo "$IOS_ENV" | tr "|" "\n" > ios/release.xcconfig
 		fi
-		./node_modules/.bin/react-native run-ios  --configuration Release --simulator "iPhone 12 Pro"
+				if [ "$RUN_DEVICE" = true ] ; then
+		./node_modules/.bin/react-native run-ios  --configuration Release --device
+		else
+			./node_modules/.bin/react-native run-ios  --configuration Release --simulator "iPhone 12 Pro"
+		fi
 	fi
 }
 

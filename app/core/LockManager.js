@@ -1,8 +1,8 @@
-import { AppState } from 'react-native';
 import SecureKeychain from './SecureKeychain';
 import BackgroundTimer from 'react-native-background-timer';
 import Engine from '../core/Engine';
 import Logger from '../util/Logger';
+import NativeBridge from './BackgroundBridge/NativeBridge';
 
 export default class LockManager {
   appStateListener;
@@ -11,15 +11,25 @@ export default class LockManager {
     this.navigation = navigation;
     this.lockTime = lockTime;
     this.appState = 'active';
-    this.appStateListener = AppState.addEventListener(
-      'change',
-      this.handleAppStateChange,
-    );
+    // this.appStateListener = AppState.addEventListener(
+    //   'change',
+    //   this.handleAppStateChange,
+    // );
+    NativeBridge.onAppStateChange(this.handleAppStateChange);
+    NativeBridge.onWindowShow(this.handleWindowShow, false);
+    NativeBridge.onWindowHide(this.handleWindowHide, false);
   }
 
   updateLockTime(lockTime) {
     this.lockTime = lockTime;
   }
+
+  handleWindowShow = () => {
+    this.handleAppStateChange('active');
+  };
+  handleWindowHide = () => {
+    this.handleAppStateChange('inactive');
+  };
 
   handleAppStateChange = async (nextAppState) => {
     // Don't auto-lock
@@ -27,11 +37,21 @@ export default class LockManager {
       return;
     }
 
+    if (nextAppState === 'active' && !NativeBridge.isWindowVisible()) {
+      return;
+    }
+
+    Logger.log('LockManager::handleAppStateChange', nextAppState);
+
     if (nextAppState !== 'active') {
       // Auto-lock immediately
       if (this.lockTime === 0) {
         this.lockApp();
       } else {
+        if (this.lockTimer) {
+          BackgroundTimer.clearTimeout(this.lockTimer);
+          this.lockTimer = null;
+        }
         // Autolock after some time
         this.lockTimer = BackgroundTimer.setTimeout(() => {
           if (this.lockTimer) {
@@ -74,6 +94,9 @@ export default class LockManager {
   };
 
   stopListening() {
-    this.appStateListener?.remove();
+    // this.appStateListener?.remove();
+    NativeBridge.removeOnAppStateChangeListener(this.handleAppStateChange);
+    NativeBridge.removeWindowShowListener(this.handleWindowShow);
+    NativeBridge.removeWindowHideListener(this.handleWindowHide);
   }
 }

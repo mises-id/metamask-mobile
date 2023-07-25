@@ -15,7 +15,7 @@ import Logger from '../util/Logger';
 import EngineService from '../core/EngineService';
 import { Authentication } from '../core';
 import Device from '../util/device';
-
+import NativeBridge from '../core/BackgroundBridge/NativeBridge';
 const TIMEOUT = 40000;
 
 const MigratedStorage = {
@@ -132,6 +132,7 @@ export const store = createStore(pReducer, undefined, applyMiddleware(thunk));
 const onPersistComplete = () => {
   EngineService.initalizeEngine(store);
   Authentication.init(store);
+  NativeBridge.onEngineReady();
 };
 
 export const persistor = persistStore(store, null, onPersistComplete);

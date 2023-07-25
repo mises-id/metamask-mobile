@@ -184,3 +184,7 @@ export function setupSentry() {
 
 // eslint-disable-next-line no-empty-function
 export function deleteSentryData() {}
+
+export function wrap(app) {
+  return Sentry.wrap(app);
+}

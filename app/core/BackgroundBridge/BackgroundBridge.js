@@ -153,9 +153,15 @@ export class BackgroundBridge extends EventEmitter {
       return;
     }
 
+    const memState = this.getState();
+    const selectedAddress = memState.selectedAddress;
+
     this.sendNotification({
       method: NOTIFICATION_NAMES.unlockStateChanged,
-      params: true,
+      params: {
+        isUnlocked: true,
+        accounts: [selectedAddress],
+      },
     });
   }
 
@@ -177,7 +183,9 @@ export class BackgroundBridge extends EventEmitter {
 
     this.sendNotification({
       method: NOTIFICATION_NAMES.unlockStateChanged,
-      params: false,
+      params: {
+        isunlocked: false,
+      },
     });
   }
 
@@ -280,6 +288,7 @@ export class BackgroundBridge extends EventEmitter {
     );
     Engine.context.PreferencesController.unsubscribe(this.sendStateUpdate);
     this.port.emit('disconnect', { name: this.port.name, data: null });
+    this.off('update', this.onStateUpdate);
   };
 
   /**

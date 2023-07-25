@@ -12,7 +12,7 @@ import ErrorBoundary from '../ErrorBoundary';
 import { useAppTheme, ThemeContext } from '../../../util/theme';
 import { ToastContextWrapper } from '../../../component-library/components/Toast';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-
+import NativeBridge from '../../../core/BackgroundBridge/NativeBridge';
 /**
  * Top level of the component hierarchy
  * App component is wrapped by the provider from react-redux
@@ -35,6 +35,8 @@ export default class Root extends PureComponent {
     // Init EntryScriptWeb3 asynchronously on the background
     EntryScriptWeb3.init();
     SplashScreen.hide();
+    // init mises native bridge
+    NativeBridge.init();
   }
 
   render = () => (

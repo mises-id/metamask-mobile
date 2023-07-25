@@ -348,7 +348,7 @@ class Approval extends PureComponent {
       transaction.nonce = undefined;
     }
 
-    this.setState({ transactionConfirmed: true });
+    this.setState({ transactionConfirmed: false });
     try {
       if (assetType === 'ETH') {
         transaction = this.prepareTransaction({
@@ -384,7 +384,10 @@ class Approval extends PureComponent {
       const fullTx = transactions.find(({ id }) => id === transaction.id);
       const updatedTx = { ...fullTx, transaction };
       await TransactionController.updateTransaction(updatedTx);
-      await KeyringController.resetQRKeyringState();
+      const qrKeyringState = await KeyringController.getQRKeyringState();
+      if (!!qrKeyringState.sign?.request || !!qrKeyringState.sync?.reading) {
+        await KeyringController.resetQRKeyringState();
+      }
       await ApprovalController.accept(transaction.id, undefined, {
         waitForResult: true,
       });
