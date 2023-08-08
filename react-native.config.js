@@ -1,6 +1,7 @@
 // react-native.config.js
 // eslint-disable-next-line import/no-commonjs
 module.exports = {
+  commands: require('@callstack/repack/commands'),
   dependencies: {
     'react-native-aes-crypto-forked': {
       platforms: {

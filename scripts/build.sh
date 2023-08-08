@@ -369,6 +369,11 @@ buildAndroidRunE2E(){
 	cd android && ./gradlew assembleProdDebug app:assembleAndroidTest -DtestBuildType=debug && cd ..
 }
 
+buildIosBundle(){
+	prebuild_ios
+	react-native bundle --platform ios --entry-file index.js --dev false --reset-cache --bundle-output ios/main.jsbundle --assets-dest ios --sourcemap-output sourcemaps/ios/index.js.map
+}
+
 buildIos() {
 	echo "Build iOS $MODE started..."
 	if [ "$MODE" == "release" ] ; then
@@ -377,6 +382,8 @@ buildIos() {
 		buildIosReleaseE2E
   elif [ "$MODE" == "debugE2E" ] ; then
 		buildIosSimulatorE2E
+	elif [ "$MODE" == "bundle" ] ; then
+		buildIosBundle
 	elif [ "$MODE" == "QA" ] ; then
 		buildIosQA
 	elif [ "$MODE" == "qaDebug" ] ; then
